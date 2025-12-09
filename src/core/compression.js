@@ -1,5 +1,6 @@
 // ======================================================================
 // compression.js – Compression/décompression avec pako (DEFLATE)
+// Version corrigée : Support de l'ancien format {"z":"p1","d":"..."}
 // ======================================================================
 
 /**
@@ -29,13 +30,30 @@ export function encodeFiche(fiche) {
 
 /**
  * Décode une chaîne Base64 compressée en objet fiche
+ * Supporte à la fois l'ancien format ({"z":"p1","d":"..."}) et le nouveau (base64 direct)
  * @param {string} base64String - Chaîne Base64 à décoder
  * @returns {Object} Objet fiche décodé
  */
 export function decodeFiche(base64String) {
   try {
+    let dataToDecompress = base64String;
+
+    // ✅ CORRECTION : Détection de l'ancien format wrapper {"z":"p1","d":"..."}
+    if (base64String.trim().startsWith('{')) {
+      console.log("🔄 Ancien format détecté, extraction des données...");
+      try {
+        const wrapper = JSON.parse(base64String);
+        if (wrapper.z === "p1" && wrapper.d) {
+          dataToDecompress = wrapper.d;
+          console.log("✅ Données extraites du wrapper ancien format");
+        }
+      } catch (e) {
+        console.warn("⚠️ Erreur parsing wrapper, tentative décodage direct");
+      }
+    }
+
     // Décoder Base64
-    const binaryString = atob(base64String);
+    const binaryString = atob(dataToDecompress);
     const bytes = new Uint8Array(binaryString.length);
     
     for (let i = 0; i < binaryString.length; i++) {
@@ -54,6 +72,7 @@ export function decodeFiche(base64String) {
 
   } catch (error) {
     console.error("❌ Erreur décodage fiche :", error);
+    console.error("❌ Données reçues :", base64String.substring(0, 100) + "...");
     throw new Error("Impossible de décoder la fiche. Le QR Code est peut-être corrompu.");
   }
 }
