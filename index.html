@@ -2,64 +2,105 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <title>Mémento IA RCH – ENSOSP</title>
-  <meta name="viewport" content="width=device-width, initial-case=1.0" />
-  <link rel="stylesheet" href="style.css">
+  <title>Mémento IA – ENSOSP | Accueil</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Police -->
+  <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+
+  <!-- Style ENSOSP -->
+  <style>
+    body {
+      font-family: "Inter", sans-serif;
+      background: #f5f7fb;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      color: #001F8F;
+    }
+
+    header {
+      background: #001F8F;
+      padding: 20px;
+      text-align: center;
+      color: white;
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 30px;
+      gap: 30px;
+      text-align: center;
+    }
+
+    .btn {
+      display: block;
+      width: 260px;
+      padding: 18px;
+      font-size: 18px;
+      font-weight: 600;
+      border-radius: 12px;
+      text-decoration: none;
+      text-align: center;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .btn-create {
+      background: #001F8F;
+      color: white;
+    }
+    .btn-create:hover {
+      background: #002bbf;
+    }
+
+    .btn-scan {
+      background: #e7ecff;
+      color: #001F8F;
+      border: 2px solid #001F8F;
+    }
+    .btn-scan:hover {
+      background: #dbe3ff;
+    }
+
+    footer {
+      padding: 14px;
+      text-align: center;
+      font-size: 13px;
+      color: #444;
+    }
+  </style>
 </head>
 
 <body>
 
-  <!-- Bandeau supérieur -->
-  <header style="background:#001F8F;color:white;text-align:center;padding:20px 15px;font-size:22px;font-weight:700;">
-    Mémento Opérationnel IA – ENSOSP
-  </header>
+  <header>Mémento Opérationnel IA – ENSOSP</header>
 
   <main>
-    <h1 class="page-title">Bienvenue</h1>
-    
-    <p style="text-align:center;margin-bottom:30px;color:#001F8F;line-height:1.6;font-size:16px;">
-      Sélectionnez une action pour commencer. Vous pouvez créer une fiche opérationnelle IA<br>
-      ou lire une fiche existante au moyen du scan.
+
+    <h1>Bienvenue</h1>
+    <p style="max-width:600px;">
+      Sélectionnez une action pour commencer.  
+      Vous pouvez créer une fiche opérationnelle IA ou lire une fiche existante grâce au QR code.
     </p>
-
-    <!-- Avertissement -->
-    <div style="background:#fff3e6;border-left:4px solid #ff9f1c;padding:15px 20px;margin-bottom:30px;border-radius:8px;max-width:700px;margin-left:auto;margin-right:auto;">
-      <div style="display:flex;align-items:center;margin-bottom:8px;">
-        <span style="font-size:20px;margin-right:8px;">⚠️</span>
-        <strong style="color:#001F8F;font-size:16px;">Avertissement</strong>
-      </div>
-      <p style="margin:0;color:#856404;font-size:14px;line-height:1.5;">
-        L'IA peut faire des erreurs. Veuillez vérifier les réponses et exercer votre jugement professionnel avant toute action opérationnelle.
-      </p>
-    </div>
-
-    <!-- Boutons d'action -->
-    <div style="display:flex;flex-direction:column;align-items:center;gap:15px;max-width:500px;margin:0 auto;">
-      
-      <!-- Bouton 1 : Lire une fiche -->
-      <a href="scan.html" class="btn" style="width:100%;max-width:400px;display:flex;align-items:center;justify-content:center;background:#4a69bd;border:2px solid #001F8F;color:white;text-decoration:none;">
-        <span style="font-size:20px;margin-right:10px;">📷</span>
-        Lire une fiche (Scan QR Code)
-      </a>
-
-      <!-- Bouton 2 : Créer une fiche -->
-      <a href="create.html" class="btn" style="width:100%;max-width:400px;display:flex;align-items:center;justify-content:center;background:#001F8F;color:white;text-decoration:none;">
-        <span style="font-size:20px;margin-right:10px;">📝</span>
-        Créer une fiche IA
-      </a>
-
-      <!-- Bouton 3 : QR Code → URL -->
-      <a href="qr-to-url.html" class="btn" style="width:100%;max-width:400px;display:flex;align-items:center;justify-content:center;background:#001F8F;color:white;text-decoration:none;">
-        <span style="font-size:20px;margin-right:10px;">🔗</span>
-        QR Code → URL (pour PDF)
-      </a>
-
-    </div>
+    
+    <a href="scan.html" class="btn btn-scan">📷 Lire une fiche (Scan QR Code)</a>
+    
+    <a href="create.html" class="btn btn-create">📝 Créer une fiche IA</a>
 
   </main>
 
-  <footer style="background:#fff;color:#666;text-align:center;padding:20px;font-size:14px;margin-top:60px;border-top:1px solid #ddd;">
-    © ENSOSP – Cne Eddy Fischer – Cdt Anne Tirelle – V0.11
+  <footer>
+    © ENSOSP — Cne Eddy Fischer – Cdt Anne Tirelle — V0.8
   </footer>
 
 </body>

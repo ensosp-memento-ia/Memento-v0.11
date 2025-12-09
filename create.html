@@ -2,204 +2,147 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <title>Création – Mémento IA RCH</title>
+  <title>Mémento IA – ENSOSP | Création de fiche</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <link rel="stylesheet" href="style.css">
+  <!-- Police Inter -->
+  <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
 
-  <!-- Libs compression + QR -->
+  <!-- Styles ENSOSP -->
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- Lib compression / QR code -->
   <script src="https://unpkg.com/pako@2.1.0/dist/pako.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 
 <body>
 
+  <!-- ========================================================= -->
+  <!-- BARRE D'ONGLETS + Retour Accueil -->
+  <!-- ========================================================= -->
   <nav class="tabs">
     <a href="index.html" class="tab">🏠 Accueil</a>
     <a href="scan.html" class="tab">📷 Lecture QR</a>
-    <a class="tab active">📝 Création</a>
+    <a class="tab active">📝 Création de fiche</a>
   </nav>
 
   <main>
-    <h1 class="page-title">Créer une fiche IA</h1>
 
-    <!-- Bouton reset en haut -->
-    <div style="text-align:center;margin-bottom:15px;">
-      <button id="btnResetCreate" class="btn-reset" style="display:none;">
-        🔄 Créer une nouvelle fiche
-      </button>
-    </div>
+    <h1 class="page-title">Création de fiche opérationnelle IA</h1>
 
-    <!-- ⚠️ AVERTISSEMENT IA -->
-    <div style="background:#fff3cd;border-left:4px solid #ff9f1c;padding:10px 12px;margin-bottom:15px;border-radius:8px;color:#856404;font-size:13px;">
-      <strong style="display:block;margin-bottom:4px;color:#001F8F;font-size:14px;">⚠️ Avertissement</strong>
-      L'IA peut faire des erreurs. Veuillez vérifier les réponses et exercer votre jugement professionnel avant toute action opérationnelle.
-    </div>
+    <!-- Bouton réinitialiser -->
+    <button id="btnReset" class="btn-reset">🔄 Réinitialiser tout</button>
 
-    <!-- SECTION MÉTADONNÉES -->
-    <section id="sectionMeta" class="card">
-      <h2 style="margin-bottom:15px;color:#001F8F;">Métadonnées de la fiche</h2>
-      
-      <div class="form-group">
-        <label>Titre de la fiche *</label>
-        <input type="text" id="meta_title" placeholder="Ex : Identification produit chimique" required>
-      </div>
+    <!-- ========================================================= -->
+    <!-- SECTION METADONNÉES -->
+    <!-- ========================================================= -->
+    <section class="card">
+      <h2>1. Métadonnées de la fiche</h2>
 
-      <div class="form-group">
-        <label>Catégorie *</label>
-        <select id="meta_category" required>
-          <option value="">-- Sélectionner --</option>
-          <option value="Analyse de situation">Analyse de situation</option>
-          <option value="Conduite des opérations">Conduite des opérations</option>
-          <option value="Appui opérationnel">Appui opérationnel</option>
+      <label>Catégorie
+        <input id="meta_categorie" type="text" placeholder="Ex : Risque chimique / opérationnel">
+      </label>
+
+      <label>Titre de la fiche
+        <input id="meta_titre" type="text" placeholder="Ex : Analyse initiale d'un site RCH">
+      </label>
+
+      <label>Objectif
+        <input id="meta_objectif" type="text" placeholder="Ex : Aider le RCH3/RCH4 dans l'analyse rapide">
+      </label>
+
+      <label>Concepteur
+        <input id="meta_concepteur" type="text" placeholder="Ex : Cdt Tirelle">
+      </label>
+
+      <label>Version
+        <input id="meta_version" type="text" placeholder="Ex : 1.0" value="1.0">
+      </label>
+
+      <label>Date de mise à jour
+        <input id="meta_date" type="date">
+      </label>
+    </section>
+
+    <!-- ========================================================= -->
+    <!-- INDICES DE CONFIANCE IA -->
+    <!-- ========================================================= -->
+    <section class="card">
+      <h2>2. Indices de confiance IA</h2>
+
+      <label>ChatGPT
+        <select id="aiChatGPT" class="indice-confiance">
+          <option value="3">3 - Recommandée</option>
+          <option value="2">2 - Acceptable</option>
+          <option value="1">1 - Non recommandée</option>
         </select>
-      </div>
+      </label>
 
-      <div class="form-group">
-        <label>Contexte opérationnel *</label>
-        <textarea id="meta_context" rows="3" placeholder="Décrivez le contexte d'utilisation de cette fiche..." required></textarea>
-      </div>
+      <label>Perplexity
+        <select id="aiPerplexity" class="indice-confiance">
+          <option value="3">3 - Recommandée</option>
+          <option value="2">2 - Acceptable</option>
+          <option value="1">1 - Non recommandée</option>
+        </select>
+      </label>
 
-      <div class="form-group">
-        <label>Version</label>
-        <input type="text" id="meta_version" placeholder="1.0">
-      </div>
-
-      <div class="form-group">
-        <label>Date de création</label>
-        <input type="date" id="meta_date">
-      </div>
-
-      <div class="form-group">
-        <label>Auteur</label>
-        <input type="text" id="meta_author" placeholder="Nom de l'auteur">
-      </div>
-
-      <!-- IA Recommandées -->
-      <div style="margin-top:20px;padding:15px;background:#f8f9fa;border-radius:8px;border:1px solid #dee2e6;">
-        <h3 style="margin:0 0 10px 0;font-size:16px;color:#001F8F;">IA recommandées pour cette fiche</h3>
-        <p style="font-size:13px;color:#666;margin-bottom:15px;">
-          Indiquez le niveau de pertinence de chaque IA (1=Non recommandée, 2=Acceptable, 3=Recommandée)
-        </p>
-        
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:15px;">
-          <div>
-            <label style="display:block;margin-bottom:5px;font-weight:600;">ChatGPT</label>
-            <select id="ai_chatgpt" style="width:100%;padding:8px;border:1px solid #ccc;border-radius:6px;">
-              <option value="3">3 - Recommandée</option>
-              <option value="2">2 - Acceptable</option>
-              <option value="1">1 - Non recommandée</option>
-            </select>
-          </div>
-          
-          <div>
-            <label style="display:block;margin-bottom:5px;font-weight:600;">Perplexity</label>
-            <select id="ai_perplexity" style="width:100%;padding:8px;border:1px solid #ccc;border-radius:6px;">
-              <option value="3">3 - Recommandée</option>
-              <option value="2">2 - Acceptable</option>
-              <option value="1">1 - Non recommandée</option>
-            </select>
-          </div>
-          
-          <div>
-            <label style="display:block;margin-bottom:5px;font-weight:600;">Mistral</label>
-            <select id="ai_mistral" style="width:100%;padding:8px;border:1px solid #ccc;border-radius:6px;">
-              <option value="3">3 - Recommandée</option>
-              <option value="2">2 - Acceptable</option>
-              <option value="1">1 - Non recommandée</option>
-            </select>
-          </div>
-        </div>
-      </div>
+      <label>Mistral
+        <select id="aiMistral" class="indice-confiance">
+          <option value="3">3 - Recommandée</option>
+          <option value="2">2 - Acceptable</option>
+          <option value="1">1 - Non recommandée</option>
+        </select>
+      </label>
     </section>
 
-    <!-- SECTION PROMPT DE BASE -->
-    <section id="sectionPrompt" class="card">
-      <h2 style="margin-bottom:15px;color:#001F8F;">Prompt de base</h2>
-      
-      <div style="background:#e7f3ff;border-left:4px solid #0066cc;padding:10px 12px;margin-bottom:15px;border-radius:8px;font-size:13px;">
-        <strong style="display:block;margin-bottom:4px;color:#0066cc;">💡 Astuce</strong>
-        Utilisez <code>{{nom_variable}}</code> pour insérer une variable dans votre prompt.
-      </div>
+    <!-- ========================================================= -->
+    <!-- VARIABLES -->
+    <!-- ========================================================= -->
+    <section class="card">
+      <h2>3. Variables utilisables dans le prompt (max 10)</h2>
 
-      <textarea 
-        id="base_prompt" 
-        rows="8" 
-        placeholder="Rédigez le prompt de base que l'IA devra suivre. Utilisez {{variable}} pour les éléments dynamiques.&#10;&#10;Exemple :&#10;Tu es un assistant spécialisé en risques chimiques. Analyse le produit {{produit}} et indique les dangers principaux."
-        style="width:100%;padding:12px;border:1px solid #ccc;border-radius:8px;font-family:'Courier New',monospace;font-size:13px;"></textarea>
+      <p class="helper">
+        Exemple : variable ID <b>code_onu</b> → utilisable dans le prompt avec <code>{{code_onu}}</code>
+      </p>
+
+      <div id="variablesContainer"></div>
+
+      <button id="btnAddVariable" class="btn-add-var">➕ Ajouter une variable</button>
     </section>
 
-    <!-- SECTION VARIABLES -->
-    <section id="sectionVariables" class="card">
-      <h2 style="margin-bottom:15px;color:#001F8F;">Variables dynamiques</h2>
-      
-      <div style="background:#fff3e6;border-left:4px solid #ff9f1c;padding:10px 12px;margin-bottom:15px;border-radius:8px;font-size:13px;">
-        <strong style="display:block;margin-bottom:4px;color:#ff9f1c;">📌 Information</strong>
-        Les variables permettent de personnaliser le prompt lors de l'utilisation de la fiche.
-      </div>
 
-      <div id="variablesList"></div>
+    <!-- ========================================================= -->
+    <!-- PROMPT -->
+    <!-- ========================================================= -->
+    <section class="card">
+      <h2>4. Rédaction du prompt</h2>
+      <p class="helper">
+        Limite : <strong>4000 caractères</strong> après compactage.<br>
+        Utilisez les variables avec <code>{{identifiant}}</code>.
+      </p>
 
-      <button id="btnAddVariable" class="btn btn-secondary" style="margin-top:10px;">
-        ➕ Ajouter une variable
-      </button>
+      <textarea id="prompt_input" rows="10" placeholder="Rédigez le prompt ici…"></textarea>
+      <div id="prompt_count" class="counter">0 / 4000</div>
     </section>
 
-    <!-- SECTION GÉNÉRATION -->
-    <section id="sectionGenerate" class="card">
-      <h2 style="margin-bottom:15px;color:#001F8F;">Génération du QR Code</h2>
+    <!-- ========================================================= -->
+    <!-- GENERATION DU QR CODE -->
+    <!-- ========================================================= -->
+    <section class="card">
+      <h2>5. Génération du QR Code</h2>
 
-      <button id="btnGenerate" class="btn" style="font-size:16px;">
-        ⚡ Générer JSON + QR Code + URL
-      </button>
+      <button id="btnGenerate" class="btn-generate">🚀 Générer JSON + QR code</button>
 
-      <!-- Zone de résultat -->
-      <div id="resultZone" style="display:none;margin-top:20px;">
-        
-        <!-- JSON -->
-        <div style="margin-bottom:20px;">
-          <h3 style="margin-bottom:10px;color:#001F8F;font-size:16px;">JSON généré</h3>
-          <div style="background:#f8f9fa;padding:12px;border-radius:8px;border:1px solid #dee2e6;">
-            <pre id="jsonOutput" style="white-space:pre-wrap;margin:0;font-size:12px;max-height:200px;overflow:auto;"></pre>
-          </div>
-          <button id="btnCopyJson" class="btn btn-secondary" style="margin-top:10px;">
-            📋 Copier le JSON
-          </button>
-        </div>
-
-        <!-- QR Code -->
-        <div style="margin-bottom:20px;">
-          <h3 style="margin-bottom:10px;color:#001F8F;font-size:16px;">QR Code</h3>
-          <div id="qrContainer" style="text-align:center;padding:20px;background:white;border:2px solid #001F8F;border-radius:8px;margin-bottom:10px;"></div>
-          <button id="btnDownloadQR" class="btn" style="display:none;">
-            💾 Télécharger le QR Code
-          </button>
-        </div>
-
-        <!-- URL Cliquable -->
-        <div>
-          <h3 style="margin-bottom:10px;color:#001F8F;font-size:16px;">Lien cliquable (pour PDF)</h3>
-          <div style="background:#f8f9fa;padding:12px;border-radius:8px;border:1px solid #dee2e6;margin-bottom:10px;">
-            <input 
-              type="text" 
-              id="urlOutput" 
-              readonly 
-              style="width:100%;padding:8px;border:1px solid #ccc;border-radius:6px;font-size:12px;font-family:monospace;background:white;">
-          </div>
-          <button id="btnCopyUrl" class="btn btn-secondary">
-            🔗 Copier le lien
-          </button>
-        </div>
-
-      </div>
+      <div id="qrContainer" class="qr-box"></div>
     </section>
 
   </main>
 
-  <footer>
-    © ENSOSP – Cne E. Fischer – Cdt A. Tirelle – V0.11
-  </footer>
 
+  <!-- ========================================================= -->
+  <!-- SCRIPTS UI -->
+  <!-- ========================================================= -->
   <script type="module" src="./src/ui/createFiche.js"></script>
 
 </body>
