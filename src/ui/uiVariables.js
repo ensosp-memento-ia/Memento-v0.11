@@ -1,113 +1,94 @@
 // ===============================================================
-// uiVariables.js — Gestion UI des variables pour CREATE MODE
+// uiVariables.js – Gestion UI des variables pour CREATE MODE
 // ===============================================================
 
 let varCount = 0;
 const MAX_VARS = 10;
 
 export function initVariablesUI() {
-  document.getElementById("btnAddVariable").addEventListener("click", addVariableUI);
-  document.getElementById("variablesContainer").innerHTML = "";
+  const btnAdd = document.getElementById("btnAddVariable");
+  if (btnAdd) {
+    btnAdd.addEventListener("click", addVariableUI);
+  }
+  
+  const container = document.getElementById("variablesContainer");
+  if (container) {
+    container.innerHTML = "";
+  }
+  
   varCount = 0;
   addVariableUI(); // ajoute une variable vide par défaut
 }
 
 export function addVariableUI() {
-  if (varCount >= MAX_VARS) return alert("Maximum 10 variables.");
+  if (varCount >= MAX_VARS) {
+    alert("Maximum 10 variables.");
+    return;
+  }
 
   varCount++;
 
   const container = document.getElementById("variablesContainer");
+  if (!container) return;
 
   const div = document.createElement("div");
-  div.className = "variableBlock";
+  div.className = "variable-item";
   div.dataset.index = varCount;
 
   div.innerHTML = `
-    <input class="input" placeholder="Label (ex : Code ONU)" id="var_label_${varCount}">
-    <input class="input" placeholder="Identifiant (ex : code_onu)" id="var_id_${varCount}">
-
-    <select class="input varTypeSelect" id="var_type_${varCount}">
-      <option value="text">text</option>
-      <option value="number">number</option>
-      <option value="choice">choice</option>
-      <option value="geoloc">geoloc</option>
+    <label>Identifiant de la variable *</label>
+    <input type="text" class="var-id" placeholder="Ex: produit" data-index="${varCount}">
+    
+    <label>Libellé affiché *</label>
+    <input type="text" class="var-label" placeholder="Ex: Nom du produit chimique" data-index="${varCount}">
+    
+    <label>Type</label>
+    <select class="var-type" data-index="${varCount}">
+      <option value="text">Texte</option>
+      <option value="number">Nombre</option>
+      <option value="textarea">Texte long</option>
     </select>
-
-    <div id="var_choice_options_${varCount}" class="choiceOptions hidden">
-      <input class="input" placeholder="Choix séparés par ;" id="var_opts_${varCount}">
-      <p class="helper-small">Exemple : rouge ; vert ; bleu</p>
-    </div>
-
-    <label class="checkbox">
-      <input type="checkbox" id="var_req_${varCount}">
-      Obligatoire
-    </label>
-
-    <button class="btnSmall" data-del="${varCount}">Supprimer</button>
+    
+    <label>Placeholder</label>
+    <input type="text" class="var-placeholder" placeholder="Texte d'aide" data-index="${varCount}">
+    
+    <button class="btn-remove" data-index="${varCount}">🗑️ Supprimer</button>
   `;
 
-  // Suppression du bloc
-  div.querySelector("button").addEventListener("click", () => {
-    div.remove();
-    varCount--;
-  });
-
-  // Détection du type pour afficher les options
-  const typeSelect = div.querySelector(".varTypeSelect");
-  typeSelect.addEventListener("change", () => {
-    const optBox = document.getElementById(`var_choice_options_${varCount}`);
-    if (typeSelect.value === "choice") {
-      optBox.classList.remove("hidden");
-    } else {
-      optBox.classList.add("hidden");
-    }
-  });
-
   container.appendChild(div);
+
+  // Événement suppression
+  const btnRemove = div.querySelector(".btn-remove");
+  if (btnRemove) {
+    btnRemove.addEventListener("click", () => {
+      div.remove();
+      varCount--;
+    });
+  }
 }
 
-
-// ===============================================================
-// EXTRACTION DU JSON FINAL
-// ===============================================================
 export function getVariablesFromUI() {
-  const blocks = [...document.querySelectorAll(".variableBlock")];
-  const vars = [];
+  const variables = [];
+  const blocks = document.querySelectorAll(".variable-item");
 
-  const ids = new Set();
+  blocks.forEach((block) => {
+    const idx = block.dataset.index;
+    
+    const id = block.querySelector(".var-id")?.value.trim() || "";
+    const label = block.querySelector(".var-label")?.value.trim() || "";
+    const type = block.querySelector(".var-type")?.value || "text";
+    const placeholder = block.querySelector(".var-placeholder")?.value.trim() || "";
 
-  for (const b of blocks) {
-    const idx = b.dataset.index;
-
-    const label = document.getElementById(`var_label_${idx}`).value.trim();
-    const id = document.getElementById(`var_id_${idx}`).value.trim();
-    const type = document.getElementById(`var_type_${idx}`).value;
-    const req = document.getElementById(`var_req_${idx}`).checked;
-
-    if (!label || !id) continue;
-
-    if (ids.has(id)) {
-      throw new Error(`Identifiant '${id}' dupliqué.`);
+    if (id && label) {
+      variables.push({
+        id,
+        label,
+        type,
+        placeholder,
+        required: true
+      });
     }
-    ids.add(id);
+  });
 
-    let entry = { id, label, type, required: req };
-
-    // Gestion du type CHOICE
-    if (type === "choice") {
-      const raw = document.getElementById(`var_opts_${idx}`).value.trim();
-      const opts = raw.split(";").map(s => s.trim()).filter(s => s.length > 0);
-
-      if (opts.length < 2) {
-        throw new Error(`La variable '${label}' doit avoir au moins deux choix.`);
-      }
-
-      entry.options = opts;
-    }
-
-    vars.push(entry);
-  }
-
-  return vars;
+  return variables;
 }

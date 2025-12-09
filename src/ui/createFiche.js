@@ -1,225 +1,217 @@
 // ======================================================================
-// createFiche.js — Module principal de l'onglet création de fiche IA RCH
-// Version corrigée : ajout des indices IA + validation renforcée
+// createFiche.js – Interface de création de fiches IA RCH
 // ======================================================================
 
-import { initVariablesUI, getVariablesFromUI } from "./uiVariables.js";
-import { getMetaFromUI, resetMetaUI } from "./uiMeta.js";
-import { getPromptFromUI, resetPromptUI } from "./uiPrompt.js";
-import { resetConfidenceIndexes } from "./uiReset.js";
+import { validateFiche } from "../core/jsonSchema.js";
 import { encodeFiche } from "../core/compression.js";
-import { generateQrForFiche } from "../core/qrWriter.js";
+import { generateQRCode, downloadQRCode } from "../core/qrWriter.js";
 import { generateFicheUrl } from "../core/urlEncoder.js";
 
-// ================================================================
-// INITIALISATION DE LA PAGE
-// ================================================================
-document.addEventListener("DOMContentLoaded", () => {
+// Import des sous-modules UI
+import { initVariablesUI, getVariablesFromUI } from "./uiVariables.js";
+import { getMetaFromUI, resetMetaUI } from "./uiMeta.js";
+import { getPromptFromUI, resetPromptUI, initPromptUI } from "./uiPrompt.js";
+import { resetCreateUI } from "./uiReset.js";
 
-    console.log("🔧 createFiche.js chargé");
+// État global
+let variables = [];
 
-    // Pré-remplit la date du jour
-    const dateField = document.getElementById("meta_date");
-    if (dateField) {
-        const today = new Date().toISOString().slice(0, 10);
-        dateField.value = today;
-    }
+// Éléments DOM
+const btnAddVariable = document.getElementById("btnAddVariable");
+const variablesList = document.getElementById("variablesList");
+const btnGenerate = document.getElementById("btnGenerate");
+const resultZone = document.getElementById("resultZone");
+const jsonOutput = document.getElementById("jsonOutput");
+const btnCopyJson = document.getElementById("btnCopyJson");
+const btnDownloadQR = document.getElementById("btnDownloadQR");
+const btnCopyUrl = document.getElementById("btnCopyUrl");
+const urlOutput = document.getElementById("urlOutput");
+const btnResetCreate = document.getElementById("btnResetCreate");
 
-    // Initialise l'UI Variables
-    initVariablesUI();
+// ========== GESTION DES VARIABLES ==========
 
-    // Bouton principal : Générer JSON + QR
-    const btnGenerate = document.getElementById("btnGenerate");
-    if (btnGenerate) {
-        btnGenerate.addEventListener("click", onGenerate);
-    }
+function renderVariables() {
+  variablesList.innerHTML = "";
 
-    // Bouton RESET
-    const btnReset = document.getElementById("btnReset");
-    if (btnReset) {
-        btnReset.addEventListener("click", onReset);
-    }
+  if (variables.length === 0) {
+    variablesList.innerHTML = '<p style="color:#999;font-style:italic;">Aucune variable ajoutée.</p>';
+    return;
+  }
 
+  variables.forEach((v, index) => {
+    const div = document.createElement("div");
+    div.className = "variable-item";
+    div.innerHTML = `
+      <label>Identifiant de la variable *</label>
+      <input type="text" class="var-id" value="${v.id}" placeholder="Ex: produit" data-index="${index}">
+      
+      <label>Libellé affiché *</label>
+      <input type="text" class="var-label" value="${v.label}" placeholder="Ex: Nom du produit chimique" data-index="${index}">
+      
+      <label>Type</label>
+      <select class="var-type" data-index="${index}">
+        <option value="text" ${v.type === "text" ? "selected" : ""}>Texte</option>
+        <option value="number" ${v.type === "number" ? "selected" : ""}>Nombre</option>
+        <option value="textarea" ${v.type === "textarea" ? "selected" : ""}>Texte long</option>
+      </select>
+      
+      <label>Placeholder</label>
+      <input type="text" class="var-placeholder" value="${v.placeholder}" placeholder="Texte d'aide" data-index="${index}">
+      
+      <button class="btn-remove" data-index="${index}">🗑️ Supprimer</button>
+    `;
+    variablesList.appendChild(div);
+  });
+
+  // Événements de modification
+  document.querySelectorAll(".var-id").forEach((input) => {
+    input.addEventListener("input", (e) => {
+      const index = parseInt(e.target.dataset.index);
+      variables[index].id = e.target.value;
+    });
+  });
+
+  document.querySelectorAll(".var-label").forEach((input) => {
+    input.addEventListener("input", (e) => {
+      const index = parseInt(e.target.dataset.index);
+      variables[index].label = e.target.value;
+    });
+  });
+
+  document.querySelectorAll(".var-type").forEach((select) => {
+    select.addEventListener("change", (e) => {
+      const index = parseInt(e.target.dataset.index);
+      variables[index].type = e.target.value;
+    });
+  });
+
+  document.querySelectorAll(".var-placeholder").forEach((input) => {
+    input.addEventListener("input", (e) => {
+      const index = parseInt(e.target.dataset.index);
+      variables[index].placeholder = e.target.value;
+    });
+  });
+
+  document.querySelectorAll(".btn-remove").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      const index = parseInt(e.target.dataset.index);
+      variables.splice(index, 1);
+      renderVariables();
+    });
+  });
+}
+
+btnAddVariable.addEventListener("click", () => {
+  variables.push(createEmptyVariable());
+  renderVariables();
 });
 
+// ========== GÉNÉRATION ==========
 
-// ================================================================
-// NOUVELLE FONCTION : Récupérer les indices IA
-// ================================================================
-function getAIIndicesFromUI() {
-    const chatgpt = document.getElementById("aiChatGPT");
-    const perplexity = document.getElementById("aiPerplexity");
-    const mistral = document.getElementById("aiMistral");
+btnGenerate.addEventListener("click", () => {
+  try {
+    // Récupérer les données via les modules UI
+    const meta = getMetaFromUI();
+    const prompt = getPromptFromUI();
+    const variables = getVariablesFromUI();
 
-    return {
-        chatgpt: chatgpt ? parseInt(chatgpt.value) : 3,
-        perplexity: perplexity ? parseInt(perplexity.value) : 3,
-        mistral: mistral ? parseInt(mistral.value) : 3
-    };
-}
-
-
-// ================================================================
-// GÉNÉRATION JSON + QR CODE
-// ================================================================
-async function onGenerate() {
-    console.log("🟦 Génération de la fiche demandée…");
-
-    let meta, vars, prompt, aiIndices;
-
-    try {
-        meta = getMetaFromUI();
-        vars = getVariablesFromUI();
-        prompt = getPromptFromUI();
-        aiIndices = getAIIndicesFromUI();
-    }
-    catch (e) {
-        alert("❌ Erreur dans la saisie : " + e.message);
-        console.error("Erreur saisie :", e);
-        return;
-    }
-
-    // Vérification prompt
-    if (!prompt) {
-        alert("⚠️ Le prompt ne peut pas être vide !");
-        return;
-    }
-
-    if (prompt.length > 4000) {
-        alert("❌ Le prompt dépasse 4000 caractères !");
-        return;
-    }
-
-    // Construction JSON final (AVEC indices IA)
     const fiche = {
-        meta,
-        ai: aiIndices,  // ✅ CORRECTION : ajout des indices
-        prompt: {
-            base: prompt,
-            variables: vars
-        }
+      ...meta,
+      prompt: prompt,
+      variables: variables,
+      ai: {
+        chatgpt: parseInt(document.getElementById("ai_chatgpt")?.value || "3"),
+        perplexity: parseInt(document.getElementById("ai_perplexity")?.value || "3"),
+        mistral: parseInt(document.getElementById("ai_mistral")?.value || "3"),
+      },
     };
 
-    console.log("📦 Fiche JSON construite :", fiche);
+    // Valider
+    validateFiche(fiche);
 
-    // Compression + wrapper
-    let encoded;
-    try {
-        encoded = encodeFiche(fiche);
-        console.log("📊 Stats compression :", encoded.stats);
+    // Afficher le JSON
+    jsonOutput.textContent = JSON.stringify(fiche, null, 2);
 
-        // ⚠️ Vérification taille finale
-        if (encoded.stats.base64 > 2900) {
-            const confirm = window.confirm(
-                `⚠️ Attention : QR volumineux (${encoded.stats.base64} caractères).\n` +
-                `Il pourrait être difficile à scanner.\n\n` +
-                `Voulez-vous continuer ?`
-            );
-            if (!confirm) return;
-        }
-    }
-    catch (err) {
-        alert("❌ Erreur compression : " + err.message);
-        console.error("Erreur compression :", err);
-        return;
-    }
+    // Encoder et compresser
+    const encoded = encodeFiche(fiche);
 
-    // Génération QR
-    const qrContainer = document.getElementById("qrContainer");
-    if (qrContainer) {
-        qrContainer.innerHTML = "<p>⏳ Génération du QR Code...</p>";
+    // Générer QR Code
+    generateQRCode("qrContainer", encoded.wrapperString, 300);
 
-        try {
-            const result = generateQrForFiche(fiche, "qrContainer");
-            console.log("🎉 QR généré ! Taille :", result.qrSize, "px");
-            
-            // Ajout d'un message de succès
-            const successMsg = document.createElement("p");
-            successMsg.style.color = "#1dbf65";
-            successMsg.style.fontWeight = "600";
-            successMsg.style.marginTop = "15px";
-            successMsg.textContent = "✅ QR Code généré avec succès !";
-            qrContainer.appendChild(successMsg);
+    // Générer URL
+    const baseUrl = window.location.origin + window.location.pathname.replace('create.html', '');
+    const ficheUrl = generateFicheUrl(fiche, baseUrl);
+    urlOutput.value = ficheUrl;
 
-            // Générer l'URL cliquable
-            const baseUrl = window.location.origin + window.location.pathname.replace('create.html', '');
-            const ficheUrl = generateFicheUrl(fiche, baseUrl);
-            
-            // Afficher l'URL
-            const urlSection = document.createElement("div");
-            urlSection.style.marginTop = "20px";
-            urlSection.innerHTML = `
-                <h3 style="margin-bottom:10px;color:#001F8F;font-size:16px;">Lien cliquable (pour PDF)</h3>
-                <div style="background:#f8f9fa;padding:12px;border-radius:8px;border:1px solid #dee2e6;margin-bottom:10px;">
-                    <input 
-                        type="text" 
-                        id="urlOutput" 
-                        readonly 
-                        value="${ficheUrl}"
-                        style="width:100%;padding:8px;border:1px solid #ccc;border-radius:6px;font-size:12px;font-family:monospace;background:white;">
-                </div>
-                <button id="btnCopyUrl" class="btn btn-secondary">
-                    🔗 Copier le lien
-                </button>
-            `;
-            qrContainer.appendChild(urlSection);
-            
-            // Bouton copier URL
-            document.getElementById("btnCopyUrl").addEventListener("click", async () => {
-                try {
-                    await navigator.clipboard.writeText(ficheUrl);
-                    const btn = document.getElementById("btnCopyUrl");
-                    btn.textContent = "✅ Lien copié !";
-                    btn.style.background = "#28a745";
-                    setTimeout(() => {
-                        btn.textContent = "🔗 Copier le lien";
-                        btn.style.background = "";
-                    }, 2000);
-                } catch (err) {
-                    alert("❌ Impossible de copier. Veuillez copier manuellement.");
-                }
-            });
-        }
-        catch (err) {
-            alert("❌ Erreur génération QR : " + err.message);
-            console.error("Erreur QR :", err);
-            qrContainer.innerHTML = "<p style='color:#ff4d4d;'>❌ Erreur lors de la génération</p>";
-        }
-    }
-}
+    // Afficher résultats
+    resultZone.style.display = "block";
+    btnDownloadQR.style.display = "inline-block";
+    btnResetCreate.style.display = "inline-block";
 
+    // Scroller vers les résultats
+    resultZone.scrollIntoView({ behavior: "smooth" });
 
-// ================================================================
-// RESET COMPLET
-// ================================================================
-function onReset() {
-    const confirm = window.confirm("⚠️ Voulez-vous vraiment tout réinitialiser ?");
-    if (!confirm) return;
+  } catch (error) {
+    console.error("❌ Erreur génération :", error);
+    alert("⚠️ Erreur : " + error.message);
+  }
+});
 
-    console.log("🔄 Réinitialisation complète demandée");
+// ========== COPIER JSON ==========
 
-    // 1. Métadonnées
-    resetMetaUI();
+btnCopyJson.addEventListener("click", async () => {
+  try {
+    await navigator.clipboard.writeText(jsonOutput.textContent);
+    btnCopyJson.textContent = "✅ JSON copié !";
+    btnCopyJson.style.background = "#28a745";
 
-    // 2. Variables
-    initVariablesUI();
+    setTimeout(() => {
+      btnCopyJson.textContent = "📋 Copier le JSON";
+      btnCopyJson.style.background = "";
+    }, 2000);
+  } catch (err) {
+    console.error("❌ Erreur copie :", err);
+    alert("❌ Impossible de copier. Veuillez copier manuellement.");
+  }
+});
 
-    // 3. Prompt
-    resetPromptUI();
+// ========== TÉLÉCHARGER QR ==========
 
-    // 4. Indices IA → remise à 3
-    resetConfidenceIndexes();
+btnDownloadQR.addEventListener("click", () => {
+  const title = document.getElementById("meta_title").value.trim() || "fiche";
+  const filename = `QR_${title.replace(/\s+/g, "_")}.png`;
+  downloadQRCode("qrContainer", filename);
+});
 
-    // 5. Nettoyer QR
-    const qrContainer = document.getElementById("qrContainer");
-    if (qrContainer) qrContainer.innerHTML = "";
+// ========== COPIER URL ==========
 
-    // 6. Remettre la date du jour
-    const dateField = document.getElementById("meta_date");
-    if (dateField) {
-        const today = new Date().toISOString().slice(0, 10);
-        dateField.value = today;
-    }
+btnCopyUrl.addEventListener("click", async () => {
+  try {
+    await navigator.clipboard.writeText(urlOutput.value);
+    btnCopyUrl.textContent = "✅ Lien copié !";
+    btnCopyUrl.style.background = "#28a745";
 
-    console.log("♻️ Réinitialisation terminée");
-}
+    setTimeout(() => {
+      btnCopyUrl.textContent = "🔗 Copier le lien";
+      btnCopyUrl.style.background = "";
+    }, 2000);
+  } catch (err) {
+    console.error("❌ Erreur copie :", err);
+    alert("❌ Impossible de copier. Veuillez copier manuellement.");
+  }
+});
+
+// ========== RESET ==========
+
+btnResetCreate.addEventListener("click", () => {
+  if (confirm("⚠️ Êtes-vous sûr de vouloir tout réinitialiser ?")) {
+    location.reload();
+  }
+});
+
+// ========== INITIALISATION ==========
+
+renderVariables();
+
+// Initialiser la date du jour
+document.getElementById("meta_date").valueAsDate = new Date();

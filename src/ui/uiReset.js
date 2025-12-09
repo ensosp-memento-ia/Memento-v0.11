@@ -1,14 +1,11 @@
 // ===============================================================
-// uiReset.js — Réinitialisation complète du module création
-// Version corrigée : fusion des deux définitions
+// uiReset.js – Réinitialisation complète de l'interface de création
 // ===============================================================
 
 import { resetMetaUI } from "./uiMeta.js";
 import { initVariablesUI } from "./uiVariables.js";
+import { resetPromptUI } from "./uiPrompt.js";
 
-/**
- * Réinitialise complètement l'interface de création
- */
 export function resetCreateUI() {
   console.log("🔄 Réinitialisation complète de l'interface");
 
@@ -19,32 +16,57 @@ export function resetCreateUI() {
   initVariablesUI();
 
   // 3. Prompt
-  const promptInput = document.getElementById("prompt_input");
-  const promptCounter = document.getElementById("prompt_count");
-  if (promptInput) promptInput.value = "";
-  if (promptCounter) promptCounter.textContent = "0 / 4000";
+  resetPromptUI();
 
   // 4. QR Container
   const qrContainer = document.getElementById("qrContainer");
-  if (qrContainer) qrContainer.innerHTML = "";
+  if (qrContainer) {
+    qrContainer.innerHTML = "";
+  }
 
-  // 5. Indices de confiance
+  // 5. Zone de résultat
+  const resultZone = document.getElementById("resultZone");
+  if (resultZone) {
+    resultZone.style.display = "none";
+  }
+
+  // 6. JSON Output
+  const jsonOutput = document.getElementById("jsonOutput");
+  if (jsonOutput) {
+    jsonOutput.textContent = "";
+  }
+
+  // 7. URL Output
+  const urlOutput = document.getElementById("urlOutput");
+  if (urlOutput) {
+    urlOutput.value = "";
+  }
+
+  // 8. Bouton download QR
+  const btnDownloadQR = document.getElementById("btnDownloadQR");
+  if (btnDownloadQR) {
+    btnDownloadQR.style.display = "none";
+  }
+
+  // 9. Bouton reset
+  const btnResetCreate = document.getElementById("btnResetCreate");
+  if (btnResetCreate) {
+    btnResetCreate.style.display = "none";
+  }
+
+  // 10. IA recommandées (reset à valeurs par défaut)
   resetConfidenceIndexes();
 
-  console.log("✅ Réinitialisation terminée");
+  console.log("✅ Interface réinitialisée");
 }
 
-/**
- * Remet tous les indices de confiance IA à 3 (recommandée)
- */
 export function resetConfidenceIndexes() {
-  const chatGPT = document.getElementById("aiChatGPT");
-  const perplexity = document.getElementById("aiPerplexity");
-  const mistral = document.getElementById("aiMistral");
-
-  if (chatGPT) chatGPT.value = "3";
-  if (perplexity) perplexity.value = "3";
-  if (mistral) mistral.value = "3";
-
-  console.log("🔄 Indices IA réinitialisés à 3");
+  const aiFields = ["ai_chatgpt", "ai_perplexity", "ai_mistral"];
+  
+  aiFields.forEach(id => {
+    const select = document.getElementById(id);
+    if (select) {
+      select.value = "3"; // Valeur par défaut : Recommandée
+    }
+  });
 }
