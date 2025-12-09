@@ -5,6 +5,45 @@ Toutes les modifications notables de ce projet seront documentées dans ce fichi
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/),
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
+## [V0.11.4] - 2024-12-09
+
+### 🆕 Ajouté
+- **Bouton Beta Test sur la page scan.html** :
+  - Bouton bleu "📝 Donner mon avis" à côté du bouton de réinitialisation
+  - Ouvre le formulaire Microsoft Forms pour les beta testeurs dans un nouvel onglet
+  - Visible uniquement quand une fiche est chargée (comme le bouton reset)
+  - Lien : https://forms.office.com/Pages/ResponsePage.aspx?id=8fedXl6ZuESKAGhF_Bb8M5J2aSnQSghAnRmJ9DwIhUxUOFA1Q0lOT0FCSUU4TDU3WklSTTVGRzlMMy4u
+
+### 🔧 Modifié
+- Page `scan.html` :
+  - Création d'un conteneur flex `#actionButtons` pour les deux boutons
+  - Ajout du bouton "📝 Donner mon avis" avec style bleu (#001F8F)
+  - Les deux boutons s'affichent côte à côte (responsive : wrap sur mobile)
+- Module `src/ui/uiScan.js` :
+  - Modification de `onFicheDecoded()` : affiche le conteneur `actionButtons` au lieu du bouton seul
+  - Modification de `executeReset()` : masque le conteneur `actionButtons`
+  - Nouvel événement pour le bouton Beta Test : ouverture du formulaire dans nouvel onglet
+  - Logs console pour le suivi
+- Version mise à jour : V0.11.3 → V0.11.4
+
+### ✅ Tests requis
+- ✅ Charger une fiche (scan/upload/URL)
+- ✅ Vérifier que les deux boutons apparaissent côte à côte
+- ✅ Bouton orange "🔄 Scanner une nouvelle fiche" à gauche
+- ✅ Bouton bleu "📝 Donner mon avis" à droite
+- ✅ Cliquer sur "Donner mon avis" → Formulaire s'ouvre dans nouvel onglet
+- ✅ Vérifier que les deux boutons disparaissent après reset
+- ✅ Responsive : Sur mobile, les boutons passent en colonne si nécessaire
+
+### 📝 Notes techniques
+- Style bleu identique au bouton "Compiler le prompt" (#001F8F)
+- Conteneur flex pour alignement horizontal avec wrap responsive
+- Événement simple : `window.open(url, "_blank")`
+- Logs console pour débogage
+- Aucun impact sur les fonctionnalités existantes
+
+---
+
 ## [V0.11.3] - 2024-12-09
 
 ### 🆕 Ajouté
