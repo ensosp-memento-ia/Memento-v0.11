@@ -5,6 +5,58 @@ Toutes les modifications notables de ce projet seront documentées dans ce fichi
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/),
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
+## [V0.11.5] - 2024-12-09
+
+### 🆕 Ajouté
+- **Message d'avertissement sur index.html et scan.html** :
+  - Encadré jaune avec bordure orange
+  - Icône ⚠️ + Titre "Avertissement"
+  - Message : "L'IA peut faire des erreurs. Veuillez vérifier les réponses et exercer votre jugement professionnel avant toute action opérationnelle."
+  - Visible en permanence pour rappeler l'importance de la vérification humaine
+
+### 🔧 Modifié
+- Page `index.html` :
+  - Ajout du message d'avertissement après le titre
+  - Modification des boutons : `btn-scan` et `btn-create` → `btn-primary`
+  - Harmonisation du style des 3 boutons (bleu ENSOSP #001F8F)
+  - Texte modifié : "grâce au QR code" → "au moyen du scan"
+- Page `scan.html` :
+  - Ajout du message d'avertissement après le titre
+  - Positionnement cohérent avec index.html
+- Fichier `style.css` :
+  - Nouvelle classe `.btn` : Style de base pour tous les boutons
+  - Nouvelle classe `.btn-primary` : Boutons bleu ENSOSP avec hover et animations
+  - Shadow et transitions pour améliorer l'UX
+- Version mise à jour : V0.11.4 → V0.11.5
+
+### 🎨 Design
+- Encadré d'avertissement :
+  - Background : #fff3cd (jaune clair)
+  - Bordure gauche : 4px #ff9f1c (orange)
+  - Texte : #856404 (marron foncé)
+  - Border-radius : 8px
+- Boutons primaires :
+  - Background : #001F8F (bleu ENSOSP)
+  - Hover : #002bbf (bleu plus clair)
+  - Shadow : rgba(0, 31, 143, 0.3)
+  - Transform sur hover : translateY(-2px)
+
+### ✅ Tests requis
+- ✅ Page index.html : Message d'avertissement visible
+- ✅ Page scan.html : Message d'avertissement visible
+- ✅ Les 3 boutons de l'index sont bleus et identiques
+- ✅ Hover sur les boutons : élévation + changement de couleur
+- ✅ Message lisible sur mobile et desktop
+- ✅ Style cohérent sur toutes les pages
+
+### 📝 Notes techniques
+- Message d'avertissement placé stratégiquement pour être visible sans surcharger
+- Couleurs conformes à l'identité visuelle ENSOSP
+- Accessibilité : contraste suffisant pour la lisibilité
+- Responsive : adaptation automatique sur mobile
+
+---
+
 ## [V0.11.4] - 2024-12-09
 
 ### 🆕 Ajouté
