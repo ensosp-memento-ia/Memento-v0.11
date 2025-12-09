@@ -74,9 +74,9 @@ function onFicheDecoded(fiche) {
   if (sectionExtra)  sectionExtra.style.display  = "block";
   if (sectionPrompt) sectionPrompt.style.display = "block";
 
-  // 1.1) ✅ NOUVEAU : Afficher le bouton reset
-  const btnResetScan = document.getElementById("btnResetScan");
-  if (btnResetScan) btnResetScan.style.display = "inline-flex";
+  // 1.1) ✅ NOUVEAU : Afficher les boutons d'action (reset + beta test)
+  const actionButtons = document.getElementById("actionButtons");
+  if (actionButtons) actionButtons.style.display = "flex";
 
   // 2) Remplir les métadonnées
   if (metaHeader) {
@@ -564,9 +564,9 @@ function executeReset() {
   if (sectionExtra)  sectionExtra.style.display  = "none";
   if (sectionPrompt) sectionPrompt.style.display = "none";
   
-  // 5. Masquer le bouton reset
-  const btnResetScan = document.getElementById("btnResetScan");
-  if (btnResetScan) btnResetScan.style.display = "none";
+  // 5. Masquer les boutons d'action (reset + beta test)
+  const actionButtons = document.getElementById("actionButtons");
+  if (actionButtons) actionButtons.style.display = "none";
   
   // 6. Réinitialiser les champs
   if (scanVariables) scanVariables.innerHTML = "";
@@ -642,3 +642,17 @@ if (confirmResetModal) {
 }
 
 console.log("🔄 Fonctionnalité de réinitialisation activée");
+
+// ========================================================================
+// ✅ BOUTON BETA TEST - Ouverture du formulaire Google Forms
+// ========================================================================
+
+const btnBetaTest = document.getElementById("btnBetaTest");
+if (btnBetaTest) {
+  btnBetaTest.addEventListener("click", () => {
+    console.log("🧪 Ouverture du formulaire Beta Test");
+    const betaFormUrl = "https://forms.office.com/Pages/ResponsePage.aspx?id=8fedXl6ZuESKAGhF_Bb8M5J2aSnQSghAnRmJ9DwIhUxUOFA1Q0lOT0FCSUU4TDU3WklSTTVGRzlMMy4u";
+    window.open(betaFormUrl, "_blank");
+  });
+  console.log("✅ Bouton Beta Test initialisé");
+}
