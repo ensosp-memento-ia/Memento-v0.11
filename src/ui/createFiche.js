@@ -1,6 +1,6 @@
 // ======================================================================
 // createFiche.js — Module principal de l'onglet création de fiche IA RCH
-// Version corrigée : ajout des indices IA + validation renforcée
+// Version corrigée : ajout des indices IA + validation renforcée + génération URL
 // ======================================================================
 
 import { initVariablesUI, getVariablesFromUI } from "./uiVariables.js";
@@ -9,6 +9,7 @@ import { getPromptFromUI, resetPromptUI } from "./uiPrompt.js";
 import { resetConfidenceIndexes } from "./uiReset.js";
 import { encodeFiche } from "../core/compression.js";
 import { generateQrForFiche } from "../core/qrWriter.js";
+import { generateFicheUrl } from "../core/urlEncoder.js";
 
 // ================================================================
 // INITIALISATION DE LA PAGE
@@ -144,8 +145,84 @@ async function onGenerate() {
             alert("❌ Erreur génération QR : " + err.message);
             console.error("Erreur QR :", err);
             qrContainer.innerHTML = "<p style='color:#ff4d4d;'>❌ Erreur lors de la génération</p>";
+            return; // Arrêter si le QR a échoué
         }
     }
+
+    // ================================================================
+    // ✅ NOUVELLE FONCTIONNALITÉ : GÉNÉRATION DE L'URL
+    // ================================================================
+    const urlContainer = document.getElementById("urlContainer");
+    const generatedUrlInput = document.getElementById("generatedUrlCreate");
+    
+    if (urlContainer && generatedUrlInput) {
+        console.log("🔗 Génération de l'URL cliquable...");
+        
+        try {
+            // Générer l'URL
+            const ficheUrl = generateFicheUrl(fiche);
+            
+            // Afficher l'URL
+            generatedUrlInput.value = ficheUrl;
+            urlContainer.style.display = "block";
+            
+            console.log("✅ URL générée avec succès");
+            console.log("  - Longueur:", ficheUrl.length, "caractères");
+            
+        } catch (err) {
+            console.error("❌ Erreur génération URL :", err);
+            // Ne pas bloquer si l'URL échoue, le QR est déjà généré
+        }
+    }
+}
+
+// ================================================================
+// GESTION DU BOUTON COPIER L'URL
+// ================================================================
+const btnCopyUrlCreate = document.getElementById("btnCopyUrlCreate");
+if (btnCopyUrlCreate) {
+    btnCopyUrlCreate.addEventListener("click", async () => {
+        const urlInput = document.getElementById("generatedUrlCreate");
+        const url = urlInput?.value;
+        
+        if (!url) {
+            alert("⚠️ Aucune URL à copier");
+            return;
+        }
+
+        try {
+            await navigator.clipboard.writeText(url);
+            
+            // Feedback visuel animé
+            const originalText = btnCopyUrlCreate.textContent;
+            const originalBg = btnCopyUrlCreate.style.background;
+            
+            btnCopyUrlCreate.textContent = "✅ URL copiée !";
+            btnCopyUrlCreate.style.background = "#1dbf65";
+            btnCopyUrlCreate.style.transition = "all 0.3s ease";
+            
+            setTimeout(() => {
+                btnCopyUrlCreate.textContent = originalText;
+                btnCopyUrlCreate.style.background = originalBg;
+            }, 2000);
+
+            console.log("✅ URL copiée dans le presse-papiers");
+
+        } catch (e) {
+            console.error("❌ Erreur lors de la copie :", e);
+            
+            // Fallback : sélectionner le texte
+            urlInput.select();
+            urlInput.setSelectionRange(0, 99999);
+            
+            try {
+                document.execCommand('copy');
+                alert("✅ URL copiée !");
+            } catch (err) {
+                alert("❌ Impossible de copier automatiquement. Veuillez copier manuellement.");
+            }
+        }
+    });
 }
 
 
@@ -174,7 +251,13 @@ function onReset() {
     const qrContainer = document.getElementById("qrContainer");
     if (qrContainer) qrContainer.innerHTML = "";
 
-    // 6. Remettre la date du jour
+    // 6. Nettoyer URL
+    const urlContainer = document.getElementById("urlContainer");
+    const generatedUrlInput = document.getElementById("generatedUrlCreate");
+    if (urlContainer) urlContainer.style.display = "none";
+    if (generatedUrlInput) generatedUrlInput.value = "";
+
+    // 7. Remettre la date du jour
     const dateField = document.getElementById("meta_date");
     if (dateField) {
         const today = new Date().toISOString().slice(0, 10);
