@@ -13,6 +13,149 @@
     import QrScanner from "https://cdn.jsdelivr.net/npm/qr-scanner@1.4.2/qr-scanner.min.js";
     window.QrScanner = QrScanner;
   </script>
+
+  <!-- ===================================================================== -->
+  <!-- STYLES POUR LE BOUTON RESET ET LA POPUP DE CONFIRMATION -->
+  <!-- ===================================================================== -->
+  <style>
+    /* Bouton Scanner une nouvelle fiche - Style orange comme maquette */
+    .btn-reset-scan {
+      background: #ff9f1c;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      font-size: 16px;
+      font-weight: 600;
+      border-radius: 10px;
+      cursor: pointer;
+      margin: 20px 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(255, 159, 28, 0.3);
+    }
+
+    .btn-reset-scan:hover {
+      background: #e68a00;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(255, 159, 28, 0.4);
+    }
+
+    .btn-reset-scan:active {
+      transform: translateY(0);
+    }
+
+    /* Modal overlay - Fond semi-transparent */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      animation: fadeIn 0.2s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* Contenu de la modal */
+    .modal-content {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 400px;
+      width: 90%;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      animation: slideUp 0.3s ease;
+    }
+
+    @keyframes slideUp {
+      from { 
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to { 
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Header de la modal */
+    .modal-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .modal-icon {
+      font-size: 32px;
+    }
+
+    .modal-header h3 {
+      margin: 0;
+      font-size: 18px;
+      color: #001F8F;
+      font-weight: 600;
+    }
+
+    /* Message de la modal */
+    .modal-message {
+      color: #555;
+      font-size: 15px;
+      margin: 0 0 24px 0;
+      line-height: 1.5;
+    }
+
+    /* Actions de la modal */
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+    }
+
+    /* Bouton OK (bleu) */
+    .btn-modal-confirm {
+      background: #001F8F;
+      color: white;
+      border: none;
+      padding: 10px 24px;
+      font-size: 15px;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .btn-modal-confirm:hover {
+      background: #002bbf;
+    }
+
+    /* Bouton Annuler (gris) */
+    .btn-modal-cancel {
+      background: #e0e0e0;
+      color: #333;
+      border: none;
+      padding: 10px 24px;
+      font-size: 15px;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .btn-modal-cancel:hover {
+      background: #d0d0d0;
+    }
+  </style>
 </head>
 
 <body>
@@ -24,7 +167,14 @@
   </nav>
 
   <main>
-    <h1 class="page-title">Lecture & exploitation d’une fiche IA – RCH</h1>
+    <h1 class="page-title">Lecture & exploitation d'une fiche IA – RCH</h1>
+
+    <!-- ===================================================================== -->
+    <!-- BOUTON RESET (masqué par défaut, visible quand fiche chargée) -->
+    <!-- ===================================================================== -->
+    <button id="btnResetScan" class="btn-reset-scan" style="display:none;">
+      🔄 Scanner une nouvelle fiche
+    </button>
 
     <!-- SCAN / IMPORT -->
     <section class="card" id="sectionScan">
@@ -58,7 +208,7 @@
     <!-- EXTRA -->
     <section class="card" id="sectionExtra" style="display:none;">
       <h2>Informations complémentaires</h2>
-      <textarea id="extra_input" rows="5" placeholder="Ajouter des précisions utiles à l’IA…"></textarea>
+      <textarea id="extra_input" rows="5" placeholder="Ajouter des précisions utiles à l'IA…"></textarea>
     </section>
 
     <!-- PROMPT -->
@@ -76,6 +226,23 @@
     </section>
 
   </main>
+
+  <!-- ===================================================================== -->
+  <!-- POPUP DE CONFIRMATION (masquée par défaut) -->
+  <!-- ===================================================================== -->
+  <div id="confirmResetModal" class="modal-overlay" style="display:none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <span class="modal-icon">⚠️</span>
+        <h3>Voulez-vous vraiment scanner une nouvelle fiche ?</h3>
+      </div>
+      <p class="modal-message">Les données actuelles seront perdues.</p>
+      <div class="modal-actions">
+        <button id="btnConfirmReset" class="btn-modal-confirm">OK</button>
+        <button id="btnCancelReset" class="btn-modal-cancel">Annuler</button>
+      </div>
+    </div>
+  </div>
 
   <script type="module" src="./src/ui/uiScan.js"></script>
 
