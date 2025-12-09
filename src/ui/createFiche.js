@@ -9,6 +9,7 @@ import { getPromptFromUI, resetPromptUI } from "./uiPrompt.js";
 import { resetConfidenceIndexes } from "./uiReset.js";
 import { encodeFiche } from "../core/compression.js";
 import { generateQrForFiche } from "../core/qrWriter.js";
+import { generateFicheUrl } from "../core/urlEncoder.js";
 
 // ================================================================
 // INITIALISATION DE LA PAGE
@@ -139,6 +140,45 @@ async function onGenerate() {
             successMsg.style.marginTop = "15px";
             successMsg.textContent = "✅ QR Code généré avec succès !";
             qrContainer.appendChild(successMsg);
+
+            // Générer l'URL cliquable
+            const baseUrl = window.location.origin + window.location.pathname.replace('create.html', '');
+            const ficheUrl = generateFicheUrl(fiche, baseUrl);
+            
+            // Afficher l'URL
+            const urlSection = document.createElement("div");
+            urlSection.style.marginTop = "20px";
+            urlSection.innerHTML = `
+                <h3 style="margin-bottom:10px;color:#001F8F;font-size:16px;">Lien cliquable (pour PDF)</h3>
+                <div style="background:#f8f9fa;padding:12px;border-radius:8px;border:1px solid #dee2e6;margin-bottom:10px;">
+                    <input 
+                        type="text" 
+                        id="urlOutput" 
+                        readonly 
+                        value="${ficheUrl}"
+                        style="width:100%;padding:8px;border:1px solid #ccc;border-radius:6px;font-size:12px;font-family:monospace;background:white;">
+                </div>
+                <button id="btnCopyUrl" class="btn btn-secondary">
+                    🔗 Copier le lien
+                </button>
+            `;
+            qrContainer.appendChild(urlSection);
+            
+            // Bouton copier URL
+            document.getElementById("btnCopyUrl").addEventListener("click", async () => {
+                try {
+                    await navigator.clipboard.writeText(ficheUrl);
+                    const btn = document.getElementById("btnCopyUrl");
+                    btn.textContent = "✅ Lien copié !";
+                    btn.style.background = "#28a745";
+                    setTimeout(() => {
+                        btn.textContent = "🔗 Copier le lien";
+                        btn.style.background = "";
+                    }, 2000);
+                } catch (err) {
+                    alert("❌ Impossible de copier. Veuillez copier manuellement.");
+                }
+            });
         }
         catch (err) {
             alert("❌ Erreur génération QR : " + err.message);
