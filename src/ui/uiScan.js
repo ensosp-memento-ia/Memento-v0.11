@@ -1,9 +1,10 @@
 // ========================================================================
 // uiScan.js — Lecture + exploitation de fiche IA RCH
-// Version corrigée : cleanup scanner + validation améliorée
+// Version corrigée : cleanup scanner + validation améliorée + chargement URL
 // ========================================================================
 
 import { decodeFiche } from "../core/compression.js";
+import { getFicheFromUrl } from "../core/urlEncoder.js";
 
 // ---------- Sections ----------
 const sectionScan   = document.getElementById("sectionScan");
@@ -421,3 +422,97 @@ function buildAIButtons(fiche, prompt) {
 window.addEventListener("beforeunload", () => {
   cleanupScanner();
 });
+
+// ========================================================================
+// ✅ NOUVELLE FONCTIONNALITÉ : CHARGEMENT AUTOMATIQUE DEPUIS URL
+// ========================================================================
+
+/**
+ * Vérifie si un paramètre 'fiche' est présent dans l'URL
+ * Si oui, charge automatiquement la fiche sans scan
+ */
+function checkAndLoadFromUrl() {
+  console.log("🔍 Vérification paramètre URL...");
+  
+  // Extraire le paramètre fiche de l'URL
+  const ficheData = getFicheFromUrl();
+  
+  if (!ficheData) {
+    console.log("ℹ️ Aucun paramètre 'fiche' dans l'URL - mode scan normal");
+    return;
+  }
+  
+  console.log("🌐 Paramètre 'fiche' détecté - chargement automatique...");
+  console.log("  - Longueur des données:", ficheData.length, "caractères");
+  
+  try {
+    // Décoder la fiche depuis l'URL
+    const fiche = decodeFiche(ficheData);
+    
+    console.log("✅ Fiche chargée depuis l'URL avec succès");
+    console.log("  - Catégorie:", fiche.meta?.categorie);
+    console.log("  - Titre:", fiche.meta?.titre);
+    
+    // Afficher un message à l'utilisateur
+    showUrlLoadMessage(fiche.meta?.titre || "Fiche chargée");
+    
+    // Charger la fiche dans l'interface
+    onFicheDecoded(fiche);
+    
+  } catch (err) {
+    console.error("❌ Erreur lors du chargement depuis l'URL :", err);
+    
+    // Afficher une erreur claire à l'utilisateur
+    alert(
+      "❌ Impossible de charger la fiche depuis l'URL\n\n" +
+      "Détails : " + err.message + "\n\n" +
+      "Le lien est peut-être invalide ou corrompu.\n" +
+      "Vous pouvez scanner un QR Code manuellement."
+    );
+  }
+}
+
+/**
+ * Affiche un message indiquant que la fiche a été chargée depuis un lien
+ */
+function showUrlLoadMessage(titre) {
+  // Créer un message informatif en haut de la page
+  const messageBox = document.createElement("div");
+  messageBox.style.cssText = `
+    background: #e7f3ff;
+    border-left: 4px solid #001F8F;
+    padding: 12px 15px;
+    margin: 0 0 20px 0;
+    border-radius: 8px;
+    animation: slideDown 0.3s ease;
+  `;
+  messageBox.innerHTML = `
+    <strong style="color:#001F8F;">🔗 Fiche chargée depuis un lien</strong>
+    <p style="margin:5px 0 0 0;font-size:14px;">
+      "${titre}" a été chargée automatiquement. 
+      Complétez les variables ci-dessous puis compilez le prompt.
+    </p>
+  `;
+  
+  // Insérer le message avant la première section
+  const main = document.querySelector("main");
+  if (main && main.firstChild) {
+    main.insertBefore(messageBox, main.firstChild);
+  }
+  
+  console.log("📢 Message d'information affiché");
+}
+
+// ========================================================================
+// 🚀 INITIALISATION AU CHARGEMENT DE LA PAGE
+// ========================================================================
+
+// Attendre que le DOM soit complètement chargé
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', checkAndLoadFromUrl);
+} else {
+  // Le DOM est déjà chargé, exécuter immédiatement
+  checkAndLoadFromUrl();
+}
+
+console.log("🔧 Module uiScan.js chargé - Support chargement URL activé");
