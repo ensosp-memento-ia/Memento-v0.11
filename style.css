@@ -173,6 +173,38 @@ textarea {
    BOUTONS
 ============================================================ */
 
+/* Boutons génériques */
+.btn {
+  display: inline-block;
+  padding: 16px 32px;
+  font-size: 18px;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 14px;
+  margin: 10px 0;
+  transition: all 0.3s ease;
+  text-align: center;
+  border: none;
+  cursor: pointer;
+}
+
+/* Bouton primaire - Bleu ENSOSP (pour page d'accueil) */
+.btn-primary {
+  background: #001F8F;
+  color: white;
+  box-shadow: 0 4px 12px rgba(0, 31, 143, 0.3);
+}
+
+.btn-primary:hover {
+  background: #002bbf;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 31, 143, 0.4);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
 .btn-reset {
   background: #d9dff5;
   color: #001F8F;
