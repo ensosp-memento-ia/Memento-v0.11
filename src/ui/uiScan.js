@@ -3,8 +3,13 @@
 // Version corrigée : cleanup scanner + validation améliorée + chargement URL
 // ========================================================================
 
+// 🔍 LOG DE DÉBOGAGE IMMÉDIAT
+console.log("🚀 DÉBUT DU CHARGEMENT DE uiScan.js");
+
 import { decodeFiche } from "../core/compression.js";
 import { getFicheFromUrl } from "../core/urlEncoder.js";
+
+console.log("✅ Imports réussis (decodeFiche, getFicheFromUrl)");
 
 // ---------- Sections ----------
 const sectionScan   = document.getElementById("sectionScan");
@@ -507,12 +512,10 @@ function showUrlLoadMessage(titre) {
 // 🚀 INITIALISATION AU CHARGEMENT DE LA PAGE
 // ========================================================================
 
-// Attendre que le DOM soit complètement chargé
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', checkAndLoadFromUrl);
-} else {
-  // Le DOM est déjà chargé, exécuter immédiatement
-  checkAndLoadFromUrl();
-}
-
 console.log("🔧 Module uiScan.js chargé - Support chargement URL activé");
+
+// Attendre que le DOM et tous les modules soient complètement chargés
+window.addEventListener('load', () => {
+  console.log("📄 Page complètement chargée - vérification URL...");
+  checkAndLoadFromUrl();
+});
