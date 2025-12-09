@@ -18,6 +18,15 @@
   <!-- STYLES POUR LE BOUTON RESET ET LA POPUP DE CONFIRMATION -->
   <!-- ===================================================================== -->
   <style>
+    /* Conteneur des boutons d'action */
+    #actionButtons {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 20px 0;
+      flex-wrap: wrap;
+    }
+
     /* Bouton Scanner une nouvelle fiche - Style orange comme maquette */
     .btn-reset-scan {
       background: #ff9f1c;
@@ -28,7 +37,6 @@
       font-weight: 600;
       border-radius: 10px;
       cursor: pointer;
-      margin: 20px 0;
       display: inline-flex;
       align-items: center;
       gap: 8px;
@@ -43,6 +51,33 @@
     }
 
     .btn-reset-scan:active {
+      transform: translateY(0);
+    }
+
+    /* Bouton Beta Test - Style bleu comme bouton Compiler */
+    .btn-beta-test {
+      background: #001F8F;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      font-size: 16px;
+      font-weight: 600;
+      border-radius: 10px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(0, 31, 143, 0.3);
+    }
+
+    .btn-beta-test:hover {
+      background: #002bbf;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 31, 143, 0.4);
+    }
+
+    .btn-beta-test:active {
       transform: translateY(0);
     }
 
@@ -170,11 +205,16 @@
     <h1 class="page-title">Lecture & exploitation d'une fiche IA – RCH</h1>
 
     <!-- ===================================================================== -->
-    <!-- BOUTON RESET (masqué par défaut, visible quand fiche chargée) -->
+    <!-- BOUTONS ACTIONS (masqués par défaut, visibles quand fiche chargée) -->
     <!-- ===================================================================== -->
-    <button id="btnResetScan" class="btn-reset-scan" style="display:none;">
-      🔄 Scanner une nouvelle fiche
-    </button>
+    <div id="actionButtons" style="display:none;gap:12px;margin:20px 0;flex-wrap:wrap;">
+      <button id="btnResetScan" class="btn-reset-scan">
+        🔄 Scanner une nouvelle fiche
+      </button>
+      <button id="btnBetaTest" class="btn-beta-test">
+        📝 Donner mon avis
+      </button>
+    </div>
 
     <!-- SCAN / IMPORT -->
     <section class="card" id="sectionScan">
