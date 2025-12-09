@@ -5,6 +5,65 @@ Toutes les modifications notables de ce projet seront documentées dans ce fichi
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/),
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
+## [V0.11.3] - 2024-12-09
+
+### 🆕 Ajouté
+- **Bouton de réinitialisation sur la page scan.html** :
+  - Bouton "🔄 Scanner une nouvelle fiche" (orange, masqué par défaut)
+  - Visible uniquement quand une fiche est chargée
+  - Popup de confirmation moderne avec animations
+  - Message d'avertissement : "Voulez-vous vraiment scanner une nouvelle fiche ?"
+  - Boutons "OK" (bleu) et "Annuler" (gris)
+  - Design conforme aux maquettes fournies
+
+### 🔧 Modifié
+- Page `scan.html` :
+  - Ajout du bouton reset après le titre principal (ligne 173)
+  - Ajout de la popup de confirmation (lignes 241-251)
+  - Styles CSS intégrés pour le bouton et la modal (lignes 18-158)
+- Module `src/ui/uiScan.js` :
+  - Nouvelle fonction `resetScanPage()` : Affiche la popup de confirmation
+  - Nouvelle fonction `executeReset()` : Réinitialisation complète
+  - Nouvelle fonction `cancelReset()` : Fermeture de la popup
+  - Affichage du bouton reset dans `onFicheDecoded()`
+  - Gestion des événements (click boutons + fermeture overlay)
+  - Nettoyage de l'URL : suppression du paramètre ?fiche= de la barre d'adresse
+
+### ✅ Fonctionnalités de réinitialisation
+- ✅ Réaffiche la section de scan (caméra + upload)
+- ✅ Masque toutes les sections (métadonnées, variables, prompt)
+- ✅ Nettoie tous les champs et données saisies
+- ✅ Supprime le message "Fiche chargée depuis un lien"
+- ✅ Nettoie l'URL de la barre d'adresse (Option A)
+- ✅ Arrête la caméra si elle est active
+- ✅ Réinitialise l'input fichier
+- ✅ Masque le bouton reset après réinitialisation
+
+### 🎨 Design
+- Bouton orange (#ff9f1c) avec effet hover et shadow
+- Popup moderne avec animations (fadeIn + slideUp)
+- Responsive et accessible sur tous les appareils
+- Fermeture possible en cliquant sur le fond de la popup
+
+### ✅ Tests requis
+- ✅ Charger une fiche (scan/upload/URL)
+- ✅ Vérifier que le bouton orange apparaît
+- ✅ Cliquer sur "Scanner une nouvelle fiche"
+- ✅ Vérifier l'affichage de la popup
+- ✅ Tester le bouton "Annuler" (ferme la popup)
+- ✅ Tester le bouton "OK" (réinitialise tout)
+- ✅ Vérifier que l'URL est nettoyée
+- ✅ Vérifier que la section scan réapparaît
+- ✅ Scanner une nouvelle fiche pour vérifier que tout fonctionne
+
+### 📝 Notes techniques
+- Amélioration de l'UX : plus besoin de recharger la page (F5)
+- Workflow simplifié pour scanner plusieurs fiches successivement
+- Confirmation demandée pour éviter les pertes de données accidentelles
+- Compatible avec toutes les méthodes de chargement (caméra, fichier, URL)
+
+---
+
 ## [V0.11.2] - 2024-12-09
 
 ### 🆕 Ajouté
