@@ -74,6 +74,10 @@ function onFicheDecoded(fiche) {
   if (sectionExtra)  sectionExtra.style.display  = "block";
   if (sectionPrompt) sectionPrompt.style.display = "block";
 
+  // 1.1) ✅ NOUVEAU : Afficher le bouton reset
+  const btnResetScan = document.getElementById("btnResetScan");
+  if (btnResetScan) btnResetScan.style.display = "inline-flex";
+
   // 2) Remplir les métadonnées
   if (metaHeader) {
     metaHeader.style.display = "block"; // ✅ CORRECTION : Afficher le bloc
@@ -519,3 +523,122 @@ window.addEventListener('load', () => {
   console.log("📄 Page complètement chargée - vérification URL...");
   checkAndLoadFromUrl();
 });
+
+// ========================================================================
+// ✅ NOUVELLE FONCTIONNALITÉ : BOUTON DE RÉINITIALISATION
+// ========================================================================
+
+/**
+ * Fonction de réinitialisation complète de la page scan
+ * Affiche une popup de confirmation avant de réinitialiser
+ */
+function resetScanPage() {
+  console.log("🔄 Demande de réinitialisation de la page scan");
+  
+  // Afficher la popup de confirmation
+  const modal = document.getElementById("confirmResetModal");
+  if (modal) {
+    modal.style.display = "flex";
+  }
+}
+
+/**
+ * Exécute la réinitialisation après confirmation
+ */
+function executeReset() {
+  console.log("♻️ Exécution de la réinitialisation...");
+  
+  // 1. Masquer la popup
+  const modal = document.getElementById("confirmResetModal");
+  if (modal) modal.style.display = "none";
+  
+  // 2. Arrêter la caméra si active
+  cleanupScanner();
+  
+  // 3. Réafficher la section scan
+  if (sectionScan) sectionScan.style.display = "block";
+  
+  // 4. Masquer toutes les autres sections
+  if (sectionMeta)   sectionMeta.style.display   = "none";
+  if (sectionVars)   sectionVars.style.display   = "none";
+  if (sectionExtra)  sectionExtra.style.display  = "none";
+  if (sectionPrompt) sectionPrompt.style.display = "none";
+  
+  // 5. Masquer le bouton reset
+  const btnResetScan = document.getElementById("btnResetScan");
+  if (btnResetScan) btnResetScan.style.display = "none";
+  
+  // 6. Réinitialiser les champs
+  if (scanVariables) scanVariables.innerHTML = "";
+  if (extraInput) extraInput.value = "";
+  if (promptResult) promptResult.textContent = "";
+  if (aiButtons) aiButtons.innerHTML = "";
+  if (metaHeader) metaHeader.innerHTML = "";
+  
+  // 7. Réinitialiser l'input fichier
+  const fileInput = document.getElementById("qrFileInput");
+  if (fileInput) fileInput.value = "";
+  
+  // 8. Supprimer le message "Fiche chargée depuis un lien" si présent
+  const urlLoadMessage = document.querySelector('div[style*="e7f3ff"]');
+  if (urlLoadMessage && urlLoadMessage.textContent.includes("Fiche chargée depuis un lien")) {
+    urlLoadMessage.remove();
+  }
+  
+  // 9. Nettoyer l'URL de la barre d'adresse (enlever le paramètre ?fiche=)
+  if (window.location.search.includes('fiche=')) {
+    const newUrl = window.location.origin + window.location.pathname;
+    window.history.replaceState({}, document.title, newUrl);
+    console.log("🔗 URL nettoyée : paramètre 'fiche' supprimé");
+  }
+  
+  // 10. Réinitialiser la variable globale
+  window.currentFiche = null;
+  
+  console.log("✅ Réinitialisation terminée - Page prête pour un nouveau scan");
+}
+
+/**
+ * Annule la réinitialisation (ferme la popup)
+ */
+function cancelReset() {
+  console.log("❌ Réinitialisation annulée");
+  const modal = document.getElementById("confirmResetModal");
+  if (modal) modal.style.display = "none";
+}
+
+// ========================================================================
+// GESTION DES ÉVÉNEMENTS DU BOUTON RESET ET DE LA POPUP
+// ========================================================================
+
+// Bouton "Scanner une nouvelle fiche"
+const btnResetScan = document.getElementById("btnResetScan");
+if (btnResetScan) {
+  btnResetScan.addEventListener("click", resetScanPage);
+  console.log("✅ Bouton reset initialisé");
+}
+
+// Bouton "OK" dans la popup
+const btnConfirmReset = document.getElementById("btnConfirmReset");
+if (btnConfirmReset) {
+  btnConfirmReset.addEventListener("click", executeReset);
+}
+
+// Bouton "Annuler" dans la popup
+const btnCancelReset = document.getElementById("btnCancelReset");
+if (btnCancelReset) {
+  btnCancelReset.addEventListener("click", cancelReset);
+}
+
+// Fermer la popup si on clique sur le fond
+const confirmResetModal = document.getElementById("confirmResetModal");
+if (confirmResetModal) {
+  confirmResetModal.addEventListener("click", (e) => {
+    // Si on clique sur l'overlay (pas sur le contenu), fermer
+    if (e.target === confirmResetModal) {
+      cancelReset();
+    }
+  });
+}
+
+console.log("🔄 Fonctionnalité de réinitialisation activée");
