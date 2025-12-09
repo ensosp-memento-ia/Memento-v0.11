@@ -190,19 +190,31 @@ textarea {
 
 /* Bouton primaire - Bleu ENSOSP (pour page d'accueil) */
 .btn-primary {
-  background: #001F8F;
-  color: white;
+  background: #001F8F !important;
+  color: white !important;
   box-shadow: 0 4px 12px rgba(0, 31, 143, 0.3);
 }
 
 .btn-primary:hover {
-  background: #002bbf;
+  background: #002bbf !important;
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(0, 31, 143, 0.4);
 }
 
 .btn-primary:active {
   transform: translateY(0);
+}
+
+/* Spécificité renforcée pour les liens avec classe btn-primary */
+a.btn-primary {
+  background: #001F8F !important;
+  color: white !important;
+  text-decoration: none !important;
+}
+
+a.btn-primary:hover {
+  background: #002bbf !important;
+  color: white !important;
 }
 
 .btn-reset {
