@@ -90,19 +90,30 @@
     <h1>Bienvenue</h1>
     <p style="max-width:600px;">
       Sélectionnez une action pour commencer.  
-      Vous pouvez créer une fiche opérationnelle IA ou lire une fiche existante grâce au QR code.
+      Vous pouvez créer une fiche opérationnelle IA ou lire une fiche existante au moyen du scan.
     </p>
+
+    <!-- Message d'avertissement -->
+    <div style="background:#fff3cd;border-left:4px solid #ff9f1c;padding:15px;border-radius:8px;margin:20px 0;max-width:800px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+        <span style="font-size:24px;">⚠️</span>
+        <strong style="color:#856404;">Avertissement</strong>
+      </div>
+      <p style="margin:0;color:#856404;line-height:1.6;">
+        L'IA peut faire des erreurs. Veuillez vérifier les réponses et exercer votre jugement professionnel avant toute action opérationnelle.
+      </p>
+    </div>
     
-    <a href="scan.html" class="btn btn-scan">📷 Lire une fiche (Scan QR Code)</a>
+    <a href="scan.html" class="btn btn-primary">📷 Lire une fiche (Scan QR Code)</a>
     
-    <a href="create.html" class="btn btn-create">📝 Créer une fiche IA</a>
+    <a href="create.html" class="btn btn-primary">📝 Créer une fiche IA</a>
     
-    <a href="qr-to-url.html" class="btn btn-scan">🔗 QR Code → URL (pour PDF)</a>
+    <a href="qr-to-url.html" class="btn btn-primary">🔗 QR Code → URL (pour PDF)</a>
 
   </main>
 
   <footer>
-    © ENSOSP — Cne Eddy Fischer – Cdt Anne Tirelle — V0.11.4
+    © ENSOSP — Cne Eddy Fischer – Cdt Anne Tirelle — V0.11.5
   </footer>
 
 </body>
