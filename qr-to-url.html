@@ -5,6 +5,7 @@
   <title>QR → URL | Mémento IA ENSOSP</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+  <!-- Style principal -->
   <link rel="stylesheet" href="style.css">
 
   <!-- Libs QR + Compression -->
@@ -17,6 +18,9 @@
 
 <body>
 
+  <!-- ========================================================= -->
+  <!-- BARRE DE NAVIGATION -->
+  <!-- ========================================================= -->
   <nav class="tabs">
     <a href="index.html" class="tab">🏠 Accueil</a>
     <a href="scan.html" class="tab">📷 Lecture QR</a>
@@ -25,15 +29,22 @@
   </nav>
 
   <main>
+    
+    <!-- ========================================================= -->
+    <!-- TITRE ET EXPLICATION -->
+    <!-- ========================================================= -->
     <h1 class="page-title">Convertir QR Code → URL cliquable</h1>
 
+    <!-- Encadré d'information -->
     <div style="background:#e7f3ff;border-left:4px solid #001F8F;padding:12px 15px;margin-bottom:20px;border-radius:8px;">
       <strong style="display:block;margin-bottom:5px;color:#001F8F;">💡 À quoi ça sert ?</strong>
       Cette page vous permet de transformer un QR Code déjà créé en lien cliquable pour vos PDF.
       Importez simplement l'image du QR Code et vous obtiendrez l'URL correspondante.
     </div>
 
-    <!-- IMPORT QR -->
+    <!-- ========================================================= -->
+    <!-- SECTION 1 : IMPORT DU QR CODE -->
+    <!-- ========================================================= -->
     <section class="card">
       <h2>1. Importer votre QR Code existant</h2>
 
@@ -41,120 +52,82 @@
         <label style="display:block;margin-bottom:10px;font-weight:600;">
           📁 Sélectionner l'image du QR Code
         </label>
-        <input type="file" id="qrFileInput" accept="image/*" style="width:100%;">
+        <input 
+          type="file" 
+          id="qrFileInput" 
+          accept="image/*" 
+          style="width:100%;padding:10px;border:2px solid #ddd;border-radius:8px;cursor:pointer;"
+        >
       </div>
 
+      <!-- Aperçu de l'image (masqué par défaut) -->
       <div id="previewContainer" style="display:none;margin-top:15px;text-align:center;">
         <p style="font-weight:600;margin-bottom:10px;">Aperçu :</p>
-        <img id="qrPreview" style="max-width:300px;border:2px solid #ccc;border-radius:8px;">
+        <img 
+          id="qrPreview" 
+          alt="Aperçu du QR Code"
+          style="max-width:300px;border:2px solid #ccc;border-radius:8px;"
+        >
       </div>
     </section>
 
-    <!-- RÉSULTAT -->
+    <!-- ========================================================= -->
+    <!-- SECTION 2 : URL GÉNÉRÉE (masquée par défaut) -->
+    <!-- ========================================================= -->
     <section class="card" id="resultSection" style="display:none;">
-      <h2>2. URL générée</h2>
+      <h2>2. URL cliquable générée ✅</h2>
 
-      <div style="background:#d4edda;border-left:4px solid #28a745;padding:12px 15px;margin-bottom:15px;border-radius:8px;">
-        <strong style="display:block;margin-bottom:5px;color:#155724;">✅ QR Code décodé avec succès !</strong>
-        Utilisez l'URL ci-dessous comme lien hypertexte dans votre PDF.
-      </div>
-
-      <div style="background:#f8f9fa;padding:12px;border-radius:8px;border:1px solid #dee2e6;margin-bottom:15px;">
+      <!-- Zone de l'URL -->
+      <div style="background:#eef2ff;padding:15px;border-radius:10px;margin-bottom:15px;">
+        <label style="display:block;margin-bottom:8px;font-weight:600;color:#001F8F;">
+          🔗 Lien à utiliser dans votre PDF :
+        </label>
         <input 
+          id="generatedUrl" 
           type="text" 
-          id="urlResult" 
           readonly 
-          style="width:100%;padding:10px;border:1px solid #ccc;border-radius:6px;font-size:13px;font-family:monospace;background:white;">
+          style="width:100%;padding:12px;border:2px solid #001F8F;border-radius:8px;font-size:14px;background:white;font-family:monospace;word-break:break-all;"
+        >
+        <button id="btnCopyUrl" class="btn-add-var" style="margin-top:10px;">
+          📋 Copier le lien
+        </button>
       </div>
 
-      <button id="btnCopyUrl" class="btn">
-        🔗 Copier le lien
-      </button>
-
-      <div style="margin-top:20px;padding:12px;background:#fff3e6;border-left:4px solid #ff9f1c;border-radius:8px;">
-        <strong style="display:block;margin-bottom:8px;color:#856404;">📖 Comment l'utiliser dans Word/PDF ?</strong>
-        <ol style="margin:0;padding-left:20px;font-size:13px;color:#856404;line-height:1.6;">
-          <li>Insérez l'image du QR Code dans votre document</li>
-          <li>Sélectionnez l'image → Clic droit → Lien hypertexte</li>
-          <li>Collez l'URL copiée</li>
-          <li>Exportez en PDF → Le QR devient cliquable !</li>
+      <!-- Instructions d'utilisation -->
+      <div style="background:#f9f9f9;padding:15px;border-radius:10px;">
+        <h3 style="margin-top:0;color:#001F8F;font-size:15px;">📄 Comment l'utiliser dans un PDF :</h3>
+        <ol style="margin:10px 0;padding-left:20px;line-height:1.8;">
+          <li><strong>Word :</strong> Insérez votre image QR → Clic droit → Lien hypertexte → Collez l'URL</li>
+          <li><strong>Adobe Acrobat :</strong> Outils → Modifier PDF → Ajouter lien → Collez l'URL</li>
+          <li><strong>PowerPoint :</strong> Insérez le QR → Clic droit → Lien → Collez l'URL</li>
         </ol>
+        <p style="margin:10px 0;padding:10px;background:#fff3cd;border-radius:6px;font-size:13px;">
+          <strong>💡 Résultat :</strong> Quand on clique sur le QR dans le PDF, la fiche s'ouvre directement dans l'application !
+        </p>
       </div>
+
+      <!-- Bouton de test -->
+      <div style="margin-top:15px;text-align:center;">
+        <button id="btnTestUrl" class="btn-generate" style="width:auto;padding:12px 24px;">
+          🔬 Tester le lien
+        </button>
+      </div>
+    </section>
+
+    <!-- ========================================================= -->
+    <!-- SECTION 3 : INFORMATIONS DE LA FICHE (masquée par défaut) -->
+    <!-- ========================================================= -->
+    <section class="card" id="infoSection" style="display:none;">
+      <h2>📋 Informations de la fiche</h2>
+      <div id="ficheInfo" style="background:#f5f7fb;padding:15px;border-radius:8px;font-size:14px;line-height:1.8;"></div>
     </section>
 
   </main>
 
-  <footer>
-    © ENSOSP – Cne E. Fischer – Cdt A. Tirelle – V0.11
-  </footer>
-
-  <script type="module">
-    import { generateFicheUrl } from "./src/core/urlEncoder.js";
-
-    const fileInput = document.getElementById("qrFileInput");
-    const previewContainer = document.getElementById("previewContainer");
-    const qrPreview = document.getElementById("qrPreview");
-    const resultSection = document.getElementById("resultSection");
-    const urlResult = document.getElementById("urlResult");
-    const btnCopyUrl = document.getElementById("btnCopyUrl");
-
-    fileInput.addEventListener("change", async (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-
-      try {
-        // Afficher aperçu
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-          qrPreview.src = ev.target.result;
-          previewContainer.style.display = "block";
-        };
-        reader.readAsDataURL(file);
-
-        // Scanner le QR
-        const QrScanner = window.QrScanner;
-        const result = await QrScanner.scanImage(file, { returnDetailedScanResult: true });
-        
-        console.log("📷 QR décodé :", result.data);
-
-        // Le QR contient déjà le JSON compressé
-        const compressedData = result.data;
-
-        // Générer l'URL
-        const baseUrl = window.location.origin + window.location.pathname.replace('qr-to-url.html', '');
-        const ficheUrl = `${baseUrl}scan.html?fiche=${encodeURIComponent(compressedData)}`;
-
-        // Afficher
-        urlResult.value = ficheUrl;
-        resultSection.style.display = "block";
-
-        console.log("🔗 URL générée :", ficheUrl);
-
-      } catch (error) {
-        console.error("❌ Erreur lecture QR :", error);
-        alert("⚠️ Impossible de lire ce QR Code. Vérifiez que l'image est nette et complète.");
-        previewContainer.style.display = "none";
-        resultSection.style.display = "none";
-      }
-    });
-
-    // Copier URL
-    btnCopyUrl.addEventListener("click", async () => {
-      try {
-        await navigator.clipboard.writeText(urlResult.value);
-        btnCopyUrl.textContent = "✅ Lien copié !";
-        btnCopyUrl.style.background = "#28a745";
-        
-        setTimeout(() => {
-          btnCopyUrl.textContent = "🔗 Copier le lien";
-          btnCopyUrl.style.background = "";
-        }, 2000);
-      } catch (err) {
-        console.error("❌ Erreur copie :", err);
-        alert("❌ Impossible de copier. Veuillez copier manuellement.");
-      }
-    });
-  </script>
+  <!-- ========================================================= -->
+  <!-- SCRIPT UI -->
+  <!-- ========================================================= -->
+  <script type="module" src="./src/ui/uiQrToUrl.js"></script>
 
 </body>
 </html>
