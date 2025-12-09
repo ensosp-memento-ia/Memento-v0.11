@@ -129,11 +129,16 @@
       if (ficheParam) {
         console.log("🔗 Fiche détectée dans l'URL, chargement automatique...");
         
-        try {
-          // Décoder Base64 URL-safe
-          const normalizedData = ficheParam
-            .replace(/-/g, '+')
-            .replace(/_/g, '/');
+        // ✅ CORRECTION : Décoder Base64 URL-safe ET restaurer le padding
+let normalizedData = ficheParam
+  .replace(/-/g, '+')
+  .replace(/_/g, '/');
+
+// Restaurer le padding Base64 manquant
+const paddingNeeded = (4 - (normalizedData.length % 4)) % 4;
+normalizedData += '='.repeat(paddingNeeded);
+
+console.log("🔍 Données normalisées, longueur:", normalizedData.length);
           
           // Décoder la fiche
           const fiche = decodeFiche(normalizedData);
