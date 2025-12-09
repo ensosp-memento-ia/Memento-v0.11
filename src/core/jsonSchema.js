@@ -1,62 +1,87 @@
-// ======================================================================
-// jsonSchema.js – Validation et structure des fiches IA RCH
-// ======================================================================
+// ======================================================
+// jsonSchema.js — Compactage JSON complet et cohérent
+// ======================================================
 
-/**
- * Valide qu'une fiche contient les champs obligatoires
- * @param {Object} fiche - Objet fiche à valider
- * @returns {boolean} true si valide
- * @throws {Error} si invalide
- */
+// Table de compactage
+const MAP = {
+  // META
+  meta: "m",
+  categorie: "c",
+  titre: "T",
+  objectif: "o",
+  concepteur: "C",
+  date: "d",
+
+  // PROMPT
+  prompt: "p",
+  base: "b",
+  variables: "V",
+
+  // VARIABLES
+  id: "i",
+  label: "l",
+  type: "t",
+  required: "r",
+  options: "O",
+
+  // AI confidence levels
+  ai: "A",
+
+  // Versionning optional
+  version: "v"
+};
+
+// Table inverse
+const REVERSE = Object.fromEntries(
+  Object.entries(MAP).map(([k, v]) => [v, k])
+);
+
+// ------------------------------------------------------
+// Compactage récursif
+// ------------------------------------------------------
+export function toCompact(obj) {
+  if (Array.isArray(obj)) {
+    return obj.map(toCompact);
+  }
+
+  if (obj && typeof obj === "object") {
+    const result = {};
+    for (const key in obj) {
+      const compactKey = MAP[key] || key;  // compatibilité ascendante
+      result[compactKey] = toCompact(obj[key]);
+    }
+    return result;
+  }
+
+  return obj;
+}
+
+// ------------------------------------------------------
+// Décompactage récursif
+// ------------------------------------------------------
+export function fromCompact(obj) {
+  if (Array.isArray(obj)) {
+    return obj.map(fromCompact);
+  }
+
+  if (obj && typeof obj === "object") {
+    const result = {};
+    for (const key in obj) {
+      const fullKey = REVERSE[key] || key; // compatibilité anciens QR
+      result[fullKey] = fromCompact(obj[key]);
+    }
+    return result;
+  }
+
+  return obj;
+}
+
+// ------------------------------------------------------
+// Validation minimale (extensible)
+// ------------------------------------------------------
 export function validateFiche(fiche) {
-  const required = ['title', 'category', 'context', 'prompt'];
-
-  for (const field of required) {
-    if (!fiche[field] || fiche[field].trim() === '') {
-      throw new Error(`Le champ "${field}" est obligatoire.`);
-    }
-  }
-
-  if (!Array.isArray(fiche.variables)) {
-    throw new Error('Le champ "variables" doit être un tableau.');
-  }
-
-  console.log("✅ Fiche valide");
+  if (!fiche.meta) throw new Error("Meta manquant");
+  if (!fiche.prompt) throw new Error("Prompt manquant");
+  if (!fiche.prompt.variables) throw new Error("Variables manquantes");
   return true;
-}
-
-/**
- * Crée une structure de fiche vide
- * @returns {Object} Fiche vide avec structure par défaut
- */
-export function createEmptyFiche() {
-  return {
-    title: "",
-    category: "",
-    context: "",
-    version: "1.0",
-    date: new Date().toISOString().split('T')[0],
-    author: "",
-    prompt: "",
-    variables: [],
-    ai: {
-      chatgpt: 3,
-      perplexity: 3,
-      mistral: 3
-    }
-  };
-}
-
-/**
- * Crée une variable vide
- * @returns {Object} Variable avec structure par défaut
- */
-export function createEmptyVariable() {
-  return {
-    id: `var_${Date.now()}`,
-    label: "",
-    type: "text",
-    placeholder: "",
-    required: true
-  };
 }

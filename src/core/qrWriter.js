@@ -1,105 +1,149 @@
-// ======================================================================
-// qrWriter.js – Génération de QR Code avec QRCode.js
-// ======================================================================
+// ======================================================
+// qrWriter.js — Générateur de QR Codes pour fiches compressées
+// Version corrigée : QR responsive + adaptation dynamique
+// ======================================================
 
-/**
- * Génère un QR Code dans un conteneur DOM
- * @param {string} containerId - ID du conteneur DOM
- * @param {string} data - Données à encoder dans le QR
- * @param {number} size - Taille du QR en pixels (défaut: 256)
- */
-export function generateQRCode(containerId, data, size = 256) {
-  const container = document.getElementById(containerId);
+import { encodeFiche } from "./compression.js";
+
+// Tailles adaptées mobile/desktop
+const MIN_QR_SIZE_MOBILE = 300;
+const MIN_QR_SIZE_DESKTOP = 600;
+
+// Détection mobile
+function isMobileDevice() {
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+    || window.innerWidth < 768;
+}
+
+// ✅ CORRECTION : Taille dynamique adaptée au device
+function computeQrSize(payloadLength) {
+  const isMobile = isMobileDevice();
   
-  if (!container) {
-    console.error(`❌ Conteneur #${containerId} introuvable`);
-    return;
+  // Base selon device
+  let size = isMobile ? MIN_QR_SIZE_MOBILE : MIN_QR_SIZE_DESKTOP;
+
+  // Ajustement selon complexité (desktop uniquement)
+  if (!isMobile) {
+    if (payloadLength > 3500) size = 700;
+    if (payloadLength > 4500) size = 800;
+  } else {
+    // Mobile : on reste sur 300px même si QR complexe
+    // (la lib QRCode.js gère la densité automatiquement)
+    size = MIN_QR_SIZE_MOBILE;
   }
 
-  // Nettoyer le conteneur
+  console.log(`📐 QR Size: ${size}px (${isMobile ? 'mobile' : 'desktop'}, payload: ${payloadLength})`);
+
+  return size;
+}
+
+// ------------------------------------------------------
+// Génération QR
+// ------------------------------------------------------
+export function generateQrForFiche(fiche, containerId) {
+  const container = document.getElementById(containerId);
+  if (!container) {
+    throw new Error("❌ Container QR introuvable : " + containerId);
+  }
+
+  // Encodage + compression
+  const enc = encodeFiche(fiche);
+  const wrapperString = enc.wrapperString;
+
+  console.log("📊 Stats encodage :", enc.stats);
+
+  // Nettoyage précédent
   container.innerHTML = "";
 
+  // Taille adaptée
+  const qrSize = computeQrSize(wrapperString.length);
+
+  // Conteneur responsive
+  const qrWrapper = document.createElement("div");
+  qrWrapper.style.maxWidth = "100%";
+  qrWrapper.style.display = "flex";
+  qrWrapper.style.justifyContent = "center";
+  qrWrapper.style.marginTop = "20px";
+
+  const qrInner = document.createElement("div");
+  qrInner.id = "qrCodeCanvas";
+  qrInner.style.width = qrSize + "px";
+  qrInner.style.height = qrSize + "px";
+  qrInner.style.maxWidth = "100%";
+  qrInner.style.maxHeight = "100%";
+
+  qrWrapper.appendChild(qrInner);
+  container.appendChild(qrWrapper);
+
+  // Création du QR Code haute définition
   try {
-    // Générer le QR Code avec QRCode.js
-    new QRCode(container, {
-      text: data,
-      width: size,
-      height: size,
+    new QRCode(qrInner, {
+      text: wrapperString,
+      width: qrSize,
+      height: qrSize,
+      correctLevel: QRCode.CorrectLevel.M,  // M = meilleur équilibre
       colorDark: "#000000",
-      colorLight: "#ffffff",
-      correctLevel: QRCode.CorrectLevel.M
+      colorLight: "#ffffff"
     });
 
     console.log("✅ QR Code généré avec succès");
 
-    // Attendre que le QR soit rendu, puis supprimer l'image vide générée par défaut
-    setTimeout(() => {
-      const imgs = container.querySelectorAll('img');
-      imgs.forEach(img => {
-        if (img.width === 1 || img.height === 1 || !img.src || img.src.includes('data:image/gif')) {
-          console.log("🧹 Suppression de l'image vide générée par QRCode.js");
-          img.remove();
-        }
-      });
-
-      // S'assurer que le canvas est visible
-      const canvas = container.querySelector('canvas');
-      if (canvas) {
-        canvas.style.display = 'block';
-        console.log("✅ Canvas QR visible");
-      }
-    }, 200);
-
-  } catch (error) {
-    console.error("❌ Erreur génération QR :", error);
-    container.innerHTML = `<p style="color:red;">Erreur lors de la génération du QR Code.</p>`;
+  } catch (e) {
+    console.error("❌ Erreur génération QR :", e);
+    throw new Error("Impossible de générer le QR Code : " + e.message);
   }
+
+  // Ajout bouton téléchargement
+  addDownloadButton(container, fiche);
+
+  return {
+    encoded: enc,
+    qrSize,
+    isMobile: isMobileDevice()
+  };
 }
 
-/**
- * Télécharge le QR Code généré en PNG
- * @param {string} containerId - ID du conteneur contenant le QR
- * @param {string} filename - Nom du fichier (défaut: qrcode.png)
- */
-export function downloadQRCode(containerId, filename = "qrcode.png") {
-  const container = document.getElementById(containerId);
-  
-  if (!container) {
-    console.error(`❌ Conteneur #${containerId} introuvable`);
-    return;
-  }
+// ------------------------------------------------------
+// Bouton de téléchargement du QR
+// ------------------------------------------------------
+function addDownloadButton(container, fiche) {
+  const btn = document.createElement("button");
+  btn.textContent = "💾 Télécharger le QR Code";
+  btn.className = "btn-add-var";
+  btn.style.marginTop = "15px";
 
-  const canvas = container.querySelector('canvas');
-  
-  if (!canvas) {
-    console.error("❌ Canvas introuvable dans le conteneur");
-    alert("⚠️ Impossible de télécharger le QR Code");
-    return;
-  }
-
-  try {
-    // Convertir le canvas en Blob
-    canvas.toBlob((blob) => {
-      if (!blob) {
-        alert("⚠️ Erreur lors de la création du fichier");
+  btn.onclick = () => {
+    try {
+      // Récupération du canvas généré par QRCode.js
+      const canvas = container.querySelector("canvas");
+      if (!canvas) {
+        alert("❌ QR Code non trouvé");
         return;
       }
 
-      // Créer un lien de téléchargement
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      a.click();
-      
-      // Libérer la mémoire
-      URL.revokeObjectURL(url);
-      
-      console.log("✅ QR Code téléchargé :", filename);
-    }, 'image/png');
+      // Conversion en image
+      canvas.toBlob((blob) => {
+        if (!blob) {
+          alert("❌ Erreur conversion image");
+          return;
+        }
 
-  } catch (error) {
-    console.error("❌ Erreur téléchargement QR :", error);
-    alert("⚠️ Impossible de télécharger le QR Code");
-  }
+        // Téléchargement
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `qr_${fiche.meta?.titre || 'fiche'}_${Date.now()}.png`;
+        a.click();
+        URL.revokeObjectURL(url);
+
+        console.log("✅ QR Code téléchargé");
+      });
+
+    } catch (e) {
+      console.error("❌ Erreur téléchargement :", e);
+      alert("Erreur lors du téléchargement : " + e.message);
+    }
+  };
+
+  container.appendChild(btn);
 }
