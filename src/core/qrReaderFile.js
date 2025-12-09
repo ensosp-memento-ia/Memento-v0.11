@@ -1,55 +1,51 @@
-// ======================================================
-// qrReaderFile.js — Lecture d'un QR Code depuis un fichier image
-// ------------------------------------------------------
-// - Utilise QrScanner (global) pour lire l'image
-// - Récupère toujours une STRING pour le texte du QR
-// - Passe cette string brute à decodeFiche
-// ======================================================
+// ======================================================================
+// qrReaderFile.js – Lecture de QR Code depuis un fichier image
+// ======================================================================
 
 import { decodeFiche } from "./compression.js";
 
-export async function readQrFromFile(file) {
+/**
+ * Lit un QR Code depuis un fichier image
+ * @param {File} file - Fichier image à analyser
+ * @param {Function} onSuccess - Callback appelé avec la fiche décodée
+ * @param {Function} onError - Callback appelé en cas d'erreur
+ */
+export async function readQRFromFile(file, onSuccess, onError) {
   if (!file) {
-    throw new Error("Aucun fichier fourni.");
+    if (onError) onError(new Error("Aucun fichier fourni"));
+    return;
   }
-
-  if (!window.QrScanner) {
-    throw new Error("QrScanner n'est pas chargé. Vérifie l'import dans index.html.");
-  }
-
-  const imgUrl = URL.createObjectURL(file);
-  console.log("[QR FILE] URL image temporaire :", imgUrl);
 
   try {
-    // On demande le résultat détaillé pour voir ce que renvoie réellement QrScanner
-    const scanResult = await window.QrScanner.scanImage(imgUrl, {
+    // Vérifier que QrScanner est chargé
+    if (!window.QrScanner) {
+      throw new Error("QrScanner non chargé");
+    }
+
+    console.log("📷 Lecture du fichier QR...");
+
+    // Scanner le fichier avec QrScanner
+    const result = await window.QrScanner.scanImage(file, {
       returnDetailedScanResult: true
     });
 
-    console.log("[QR FILE] Résultat brut QrScanner :", scanResult);
+    console.log("✅ QR décodé :", result.data);
 
-    // Selon les versions, QrScanner peut renvoyer soit une string, soit un objet { data: "..." }
-    const text =
-      typeof scanResult === "string"
-        ? scanResult
-        : (scanResult && scanResult.data) || "";
+    // Décoder la fiche
+    const fiche = decodeFiche(result.data);
 
-    console.log("[QR FILE] Texte extrait du QR :", text);
-
-    if (!text) {
-      throw new Error("Aucune donnée texte trouvée dans le QR.");
+    // Appeler le callback de succès
+    if (onSuccess) {
+      onSuccess(fiche);
     }
 
-    // Très important : on passe BIEN une STRING à decodeFiche,
-    // surtout PAS un objet JSON.parse(text)
-    const fiche = decodeFiche(text);
-    console.log("[QR FILE] Fiche décodée :", fiche);
-
-    return fiche;
-  } catch (e) {
-    console.error("[QR FILE] Erreur lors de la lecture du fichier :", e);
-    throw new Error("Impossible de lire le QR : " + (e.message || e));
-  } finally {
-    URL.revokeObjectURL(imgUrl);
+  } catch (error) {
+    console.error("❌ Erreur lecture QR fichier :", error);
+    
+    if (onError) {
+      onError(error);
+    } else {
+      alert("⚠️ Impossible de lire ce QR Code. Vérifiez que l'image est nette et complète.");
+    }
   }
 }
