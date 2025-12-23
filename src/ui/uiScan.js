@@ -84,6 +84,7 @@ function onFicheDecoded(fiche) {
     metaHeader.innerHTML = `
       <h3>${fiche.meta?.titre || "Titre inconnu"}</h3>
       <div class="meta-line"><b>Catégorie :</b> ${fiche.meta?.categorie || "-"}</div>
+      <div class="meta-line"><b>Titre :</b> ${fiche.meta?.titre || "-"}</div>
       <div class="meta-line"><b>Objectif :</b> ${fiche.meta?.objectif || "-"}</div>
       <div class="meta-line"><b>Concepteur :</b> ${fiche.meta?.concepteur || "-"}</div>
       <div class="meta-line"><b>Version :</b> ${fiche.meta?.version || "1.0"}</div>
