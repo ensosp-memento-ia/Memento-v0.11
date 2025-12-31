@@ -10,6 +10,7 @@ import { resetConfidenceIndexes } from "./uiReset.js";
 import { encodeFiche } from "../core/compression.js";
 import { generateQrForFiche } from "../core/qrWriter.js";
 import { generateFicheUrl } from "../core/urlEncoder.js";
+import { loadFicheFromUrl } from "./loadFicheFromUrl.js";
 
 // ================================================================
 // INITIALISATION DE LA PAGE
@@ -39,7 +40,11 @@ document.addEventListener("DOMContentLoaded", () => {
     if (btnReset) {
         btnReset.addEventListener("click", onReset);
     }
-
+    // Bouton CHARGER FICHE
+    const btnLoadFiche = document.getElementById("btnLoadFiche");
+    if (btnLoadFiche) {
+        btnLoadFiche.addEventListener("click", loadFicheFromUrl);
+    }
 });
 
 
