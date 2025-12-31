@@ -314,7 +314,7 @@ if (btnStartCam && btnStopCam && videoEl) {
 // ------------------------------------------------------------------------
 
 // Bouton compiler prompt
-const btnCompile = document.getElementById("btnCompile");
+const btnCompile = document.getElementById("btnBuildPrompt");
 if (btnCompile) {
   btnCompile.onclick = () => {
     if (!window.currentFiche) {
