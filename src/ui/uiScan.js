@@ -1,10 +1,10 @@
 // ========================================================================
 // uiScan.js — Lecture + exploitation de fiche IA RCH
-// Version corrigée : cleanup scanner + validation améliorée + chargement URL
+// Version simplifiée : Lecture QR avec URL uniquement
 // ========================================================================
 
 // 🔍 LOG DE DÉBOGAGE IMMÉDIAT
-console.log("🚀 DÉBUT DU CHARGEMENT DE uiScan.js");
+console.log("🚀 DÉBUT DU CHARGEMENT DE uiScan.js - Version URL uniquement");
 
 import { decodeFiche } from "../core/compression.js";
 import { getFicheFromUrl } from "../core/urlEncoder.js";
@@ -37,7 +37,7 @@ window.currentFiche = null;
 let scanner = null;
 
 // ------------------------------------------------------------------------
-// ✅ CORRECTION : Cleanup systématique du scanner
+// ✅ Cleanup systématique du scanner
 // ------------------------------------------------------------------------
 async function cleanupScanner() {
   if (!scanner) return;
@@ -60,53 +60,52 @@ async function cleanupScanner() {
 }
 
 // ------------------------------------------------------------------------
-// ✅ NOUVELLE FONCTION : Détection et décodage QR (URL ou données)
+// ✅ FONCTION SIMPLIFIÉE : Extraction fiche depuis URL du QR
 // ------------------------------------------------------------------------
-function decodeQRData(qrText) {
-  console.log("🔍 Analyse du contenu du QR Code...");
-  console.log("  - Type:", typeof qrText);
+function extractFicheFromQR(qrText) {
+  console.log("🔍 Analyse du QR Code...");
+  console.log("  - Contenu:", qrText.substring(0, 150) + "...");
   console.log("  - Longueur:", qrText.length, "caractères");
-  console.log("  - Début:", qrText.substring(0, 100));
 
-  // CAS 1 : Le QR contient une URL
-  if (qrText.startsWith('http://') || qrText.startsWith('https://')) {
-    console.log("🔗 QR contient une URL, extraction du paramètre 'fiche'...");
-    
-    try {
-      const url = new URL(qrText);
-      const ficheParam = url.searchParams.get('fiche');
-      
-      if (!ficheParam) {
-        throw new Error("Paramètre 'fiche' introuvable dans l'URL");
-      }
-      
-      console.log("✅ Paramètre 'fiche' extrait de l'URL");
-      console.log("  - Longueur:", ficheParam.length, "caractères");
-      
-      // Décoder Base64 URL-safe et restaurer padding
-      let normalizedData = ficheParam
-        .replace(/-/g, '+')
-        .replace(/_/g, '/');
-      
-      // Restaurer le padding Base64 manquant
-      const paddingNeeded = (4 - (normalizedData.length % 4)) % 4;
-      normalizedData += '='.repeat(paddingNeeded);
-      
-      console.log("🔄 Données normalisées pour décodage");
-      
-      // Décoder la fiche
-      return decodeFiche(normalizedData);
-      
-    } catch (error) {
-      console.error("❌ Erreur extraction URL:", error);
-      throw new Error("Impossible d'extraire la fiche de l'URL : " + error.message);
-    }
+  // Vérifier que c'est bien une URL
+  if (!qrText.startsWith('http://') && !qrText.startsWith('https://')) {
+    throw new Error("Le QR Code ne contient pas une URL valide. Format attendu : https://...");
   }
+
+  console.log("🔗 URL détectée, extraction du paramètre 'fiche'...");
   
-  // CAS 2 : Le QR contient des données compressées directement
-  else {
-    console.log("📦 QR contient des données compressées directement");
-    return decodeFiche(qrText);
+  try {
+    const url = new URL(qrText);
+    const ficheParam = url.searchParams.get('fiche');
+    
+    if (!ficheParam) {
+      throw new Error("Paramètre 'fiche' introuvable dans l'URL");
+    }
+    
+    console.log("✅ Paramètre 'fiche' extrait");
+    console.log("  - Longueur:", ficheParam.length, "caractères");
+    
+    // Décoder Base64 URL-safe et restaurer padding
+    let normalizedData = ficheParam
+      .replace(/-/g, '+')
+      .replace(/_/g, '/');
+    
+    // Restaurer le padding Base64 manquant
+    const paddingNeeded = (4 - (normalizedData.length % 4)) % 4;
+    normalizedData += '='.repeat(paddingNeeded);
+    
+    console.log("🔄 Décodage Base64...");
+    
+    // Décoder la fiche
+    const fiche = decodeFiche(normalizedData);
+    
+    console.log("✅ Fiche décodée avec succès");
+    
+    return fiche;
+    
+  } catch (error) {
+    console.error("❌ Erreur extraction fiche:", error);
+    throw new Error("Impossible d'extraire la fiche de l'URL : " + error.message);
   }
 }
 
@@ -125,13 +124,13 @@ function onFicheDecoded(fiche) {
   if (sectionExtra)  sectionExtra.style.display  = "block";
   if (sectionPrompt) sectionPrompt.style.display = "block";
 
-  // 1.1) ✅ NOUVEAU : Afficher les boutons d'action (reset + beta test)
+  // 1.1) Afficher les boutons d'action (reset + beta test)
   const actionButtons = document.getElementById("actionButtons");
   if (actionButtons) actionButtons.style.display = "flex";
 
   // 2) Remplir les métadonnées
   if (metaHeader) {
-    metaHeader.style.display = "block"; // ✅ CORRECTION : Afficher le bloc
+    metaHeader.style.display = "block";
     metaHeader.innerHTML = `
       <h3>${fiche.meta?.titre || "Titre inconnu"}</h3>
       <div class="meta-line"><b>Catégorie :</b> ${fiche.meta?.categorie || "-"}</div>
@@ -260,17 +259,17 @@ if (fileInput) {
 
     try {
       const result = await window.QrScanner.scanImage(file);
-      const text = (typeof result === "string") ? result : result.data;
+      const qrText = (typeof result === "string") ? result : result.data;
       
-      console.log("📄 Texte brut QR :", text.substring(0, 100) + "...");
+      console.log("📄 QR scanné depuis fichier");
       
-      // ✅ Utiliser la fonction de détection URL/données
-      const fiche = decodeQRData(text);
+      // ✅ Extraire la fiche depuis l'URL
+      const fiche = extractFicheFromQR(qrText);
       onFicheDecoded(fiche);
       
     } catch (err) {
       console.error("❌ Erreur lecture fichier :", err);
-      alert("❌ Erreur lecture QR : " + err.message);
+      alert("❌ Impossible de lire le QR Code\n\n" + err.message);
     }
   });
 }
@@ -283,7 +282,7 @@ if (btnStartCam && btnStopCam && videoEl) {
   btnStartCam.onclick = async () => {
     console.log("🎥 Démarrage caméra...");
 
-    // ✅ CORRECTION : Cleanup avant de créer nouveau scanner
+    // Cleanup avant de créer nouveau scanner
     await cleanupScanner();
 
     videoContainer.style.display = "block";
@@ -294,12 +293,12 @@ if (btnStartCam && btnStopCam && videoEl) {
       scanner = new window.QrScanner(
         videoEl, 
         result => {
-          const text = result.data || result;
-          console.log("📷 QR scanné :", text.substring(0, 100) + "...");
+          const qrText = result.data || result;
+          console.log("📷 QR scanné par caméra");
           
           try {
-            // ✅ Utiliser la fonction de détection URL/données
-            const fiche = decodeQRData(text);
+            // ✅ Extraire la fiche depuis l'URL
+            const fiche = extractFicheFromQR(qrText);
             
             // On stoppe dès qu'un QR valide est lu
             cleanupScanner().then(() => {
@@ -311,6 +310,7 @@ if (btnStartCam && btnStopCam && videoEl) {
             
           } catch (e) {
             console.warn("⚠️ QR non compatible :", e.message);
+            alert("⚠️ " + e.message);
             // On continue le scan
           }
         },
@@ -335,7 +335,7 @@ if (btnStartCam && btnStopCam && videoEl) {
   };
 
   btnStopCam.onclick = async () => {
-    console.log("🛑 Arrêt caméra manuel");
+    console.log("⏹️ Arrêt caméra manuel");
     await cleanupScanner();
     videoContainer.style.display = "none";
     btnStartCam.disabled = false;
@@ -344,159 +344,118 @@ if (btnStartCam && btnStopCam && videoEl) {
 }
 
 // ------------------------------------------------------------------------
-// Compiler le PROMPT final
+// RESTE DU CODE (compilation prompt, boutons IA, etc.)
 // ------------------------------------------------------------------------
-const btnBuildPrompt = document.getElementById("btnBuildPrompt");
-const btnCopyPrompt  = document.getElementById("btnCopy");
 
-if (btnBuildPrompt) {
-  btnBuildPrompt.onclick = () => {
+// Bouton compiler prompt
+const btnCompile = document.getElementById("btnCompile");
+if (btnCompile) {
+  btnCompile.onclick = () => {
+    if (!window.currentFiche) {
+      alert("⚠️ Aucune fiche chargée");
+      return;
+    }
+
+    console.log("🔄 Compilation du prompt...");
+
     const fiche = window.currentFiche;
-    if (!fiche) {
-      alert("❌ Aucune fiche chargée.");
-      return;
-    }
+    let prompt = fiche.prompt.base;
+    const extra = extraInput?.value.trim() || "";
 
-    // Vérification champs requis
-    let missingFields = [];
+    // Remplacer les variables
     (fiche.prompt?.variables || []).forEach(v => {
-      if (!v.required) return;
-      
-      if (v.type === "geoloc") {
-        const lat = document.getElementById(`${v.id}_lat`);
-        const lon = document.getElementById(`${v.id}_lon`);
-        if (!lat?.value || !lon?.value) {
-          missingFields.push(v.label || v.id);
-        }
-      } else {
-        const el = document.querySelector(`[data-id="${v.id}"]`);
-        if (!el?.value) {
-          missingFields.push(v.label || v.id);
-        }
-      }
-    });
-
-    if (missingFields.length > 0) {
-      alert("⚠️ Champs requis manquants :\n- " + missingFields.join("\n- "));
-      return;
-    }
-
-    // Génération prompt
-    let prompt = fiche.prompt?.base || "";
-
-    (fiche.prompt?.variables || []).forEach(v => {
-      let replacement = "";
+      const field = scanVariables.querySelector(`[data-id="${v.id}"]`);
+      let value = "";
 
       if (v.type === "geoloc") {
         const lat = document.getElementById(`${v.id}_lat`)?.value || "";
         const lon = document.getElementById(`${v.id}_lon`)?.value || "";
-        replacement = `${lat},${lon}`;
+        value = lat && lon ? `${lat}, ${lon}` : "";
       } else {
-        const el = document.querySelector(`[data-id="${v.id}"]`);
-        replacement = el?.value || "";
+        value = field?.value || "";
       }
 
-      prompt = prompt.replaceAll(`{{${v.id}}}`, replacement);
+      // Vérification requis
+      if (v.required && !value) {
+        alert(`⚠️ Le champ "${v.label || v.id}" est requis`);
+        throw new Error("Champ requis manquant");
+      }
+
+      const placeholder = `{{${v.id}}}`;
+      prompt = prompt.replace(new RegExp(placeholder, "g"), value);
     });
 
-    const extra = extraInput?.value.trim() || "";
+    // Ajouter infos supplémentaires
     if (extra) {
       prompt += `\n\nInformations complémentaires :\n${extra}`;
     }
 
-    if (promptResult) promptResult.textContent = prompt;
-    buildAIButtons(fiche, prompt);
+    // Afficher
+    if (promptResult) {
+      promptResult.textContent = prompt;
+    }
+
+    // Générer boutons IA
+    generateAIButtons(fiche);
+
+    console.log("✅ Prompt compilé");
   };
 }
 
-// Copier le prompt
+// Génération boutons IA
+function generateAIButtons(fiche) {
+  if (!aiButtons) return;
+
+  aiButtons.innerHTML = "";
+
+  const aiPlatforms = [
+    { name: "ChatGPT", url: "https://chat.openai.com/", color: "#10a37f", index: fiche.ai?.chatgpt || 3 },
+    { name: "Perplexity", url: "https://www.perplexity.ai/", color: "#20808d", index: fiche.ai?.perplexity || 3 },
+    { name: "Mistral AI", url: "https://chat.mistral.ai/", color: "#ff7000", index: fiche.ai?.mistral || 3 }
+  ];
+
+  aiPlatforms.forEach(platform => {
+    const btn = document.createElement("a");
+    btn.href = platform.url;
+    btn.target = "_blank";
+    btn.className = "btn";
+    btn.style.background = platform.color;
+    btn.style.color = "#fff";
+    btn.style.textDecoration = "none";
+    btn.style.display = "inline-block";
+    btn.innerHTML = `🤖 Ouvrir ${platform.name} <span style="background:rgba(255,255,255,0.3);padding:2px 8px;border-radius:12px;margin-left:8px;font-size:12px;">Indice: ${platform.index}</span>`;
+    
+    aiButtons.appendChild(btn);
+  });
+}
+
+// Bouton copier prompt
+const btnCopyPrompt = document.getElementById("btnCopyPrompt");
 if (btnCopyPrompt) {
   btnCopyPrompt.onclick = async () => {
-    const txt = promptResult?.textContent.trim();
-    if (!txt) {
+    const text = promptResult?.textContent;
+    if (!text) {
       alert("⚠️ Aucun prompt à copier");
       return;
     }
-    
+
     try {
-      await navigator.clipboard.writeText(txt);
-      alert("✅ Prompt copié dans le presse-papiers.");
-    } catch (err) {
-      console.error("❌ Erreur copie :", err);
-      alert("❌ Impossible de copier le prompt.");
+      await navigator.clipboard.writeText(text);
+      btnCopyPrompt.textContent = "✅ Copié !";
+      setTimeout(() => { btnCopyPrompt.textContent = "📋 Copier le prompt"; }, 2000);
+    } catch (e) {
+      alert("❌ Erreur copie : " + e.message);
     }
   };
 }
 
-// ------------------------------------------------------------------------
-// Boutons d'envoi vers les IA
-// ------------------------------------------------------------------------
-function buildAIButtons(fiche, prompt) {
-  if (!aiButtons) return;
-  
-  aiButtons.innerHTML = "";
-  aiButtons.style.display = "flex";
-  
-  if (!prompt.trim()) return;
-
-  const levels = fiche.ai || {
-    chatgpt: 3,
-    perplexity: 3,
-    mistral: 3,
-  };
-
-  const styleForLevel = (lvl) => {
-    switch (Number(lvl)) {
-      case 3: return "background:#1dbf65;color:white;";
-      case 2: return "background:#ff9f1c;color:white;";
-      default: return "background:#cccccc;color:#777;";
-    }
-  };
-
-  const mkBtn = (label, lvl, baseUrl) => {
-    const btn = document.createElement("button");
-    btn.textContent = label;
-    btn.style = styleForLevel(lvl)
-      + "padding:10px 16px;margin-right:10px;border:none;border-radius:10px;font-weight:600;cursor:pointer;";
-
-    if (Number(lvl) === 1) {
-      btn.disabled = true;
-      btn.style.cursor = "not-allowed";
-      btn.title = "Non recommandée pour cette fiche";
-    } else {
-      btn.onclick = () => {
-        const encoded = encodeURIComponent(prompt);
-        window.open(baseUrl + encoded, "_blank");
-      };
-    }
-
-    aiButtons.appendChild(btn);
-  };
-
-  mkBtn("ChatGPT",   levels.chatgpt,   "https://chat.openai.com/?q=");
-  mkBtn("Perplexity",levels.perplexity,"https://www.perplexity.ai/search?q=");
-  mkBtn("Mistral",   levels.mistral,   "https://chat.mistral.ai/chat?q=");
-}
-
-// ------------------------------------------------------------------------
-// Cleanup au déchargement de la page
-// ------------------------------------------------------------------------
-window.addEventListener("beforeunload", () => {
-  cleanupScanner();
-});
-
 // ========================================================================
-// ✅ NOUVELLE FONCTIONNALITÉ : CHARGEMENT AUTOMATIQUE DEPUIS URL
+// CHARGEMENT AUTOMATIQUE DEPUIS URL
 // ========================================================================
 
-/**
- * Vérifie si un paramètre 'fiche' est présent dans l'URL
- * Si oui, charge automatiquement la fiche sans scan
- */
 function checkAndLoadFromUrl() {
   console.log("🔍 Vérification paramètre URL...");
   
-  // Extraire le paramètre fiche de l'URL
   const ficheData = getFicheFromUrl();
   
   if (!ficheData) {
@@ -505,40 +464,21 @@ function checkAndLoadFromUrl() {
   }
   
   console.log("🌐 Paramètre 'fiche' détecté - chargement automatique...");
-  console.log("  - Longueur des données:", ficheData.length, "caractères");
   
   try {
-    // Décoder la fiche depuis l'URL
     const fiche = decodeFiche(ficheData);
+    console.log("✅ Fiche chargée depuis l'URL");
     
-    console.log("✅ Fiche chargée depuis l'URL avec succès");
-    console.log("  - Catégorie:", fiche.meta?.categorie);
-    console.log("  - Titre:", fiche.meta?.titre);
-    
-    // Afficher un message à l'utilisateur
     showUrlLoadMessage(fiche.meta?.titre || "Fiche chargée");
-    
-    // Charger la fiche dans l'interface
     onFicheDecoded(fiche);
     
   } catch (err) {
-    console.error("❌ Erreur lors du chargement depuis l'URL :", err);
-    
-    // Afficher une erreur claire à l'utilisateur
-    alert(
-      "❌ Impossible de charger la fiche depuis l'URL\n\n" +
-      "Détails : " + err.message + "\n\n" +
-      "Le lien est peut-être invalide ou corrompu.\n" +
-      "Vous pouvez scanner un QR Code manuellement."
-    );
+    console.error("❌ Erreur chargement URL :", err);
+    alert("❌ Impossible de charger la fiche depuis l'URL\n\n" + err.message);
   }
 }
 
-/**
- * Affiche un message indiquant que la fiche a été chargée depuis un lien
- */
 function showUrlLoadMessage(titre) {
-  // Créer un message informatif en haut de la page
   const messageBox = document.createElement("div");
   messageBox.style.cssText = `
     background: #e7f3ff;
@@ -546,166 +486,96 @@ function showUrlLoadMessage(titre) {
     padding: 12px 15px;
     margin: 0 0 20px 0;
     border-radius: 8px;
-    animation: slideDown 0.3s ease;
   `;
   messageBox.innerHTML = `
     <strong style="color:#001F8F;">🔗 Fiche chargée depuis un lien</strong>
     <p style="margin:5px 0 0 0;font-size:14px;">
-      "${titre}" a été chargée automatiquement. 
-      Complétez les variables ci-dessous puis compilez le prompt.
+      "${titre}" a été chargée automatiquement.
     </p>
   `;
   
-  // Insérer le message avant la première section
   const main = document.querySelector("main");
   if (main && main.firstChild) {
     main.insertBefore(messageBox, main.firstChild);
   }
-  
-  console.log("📢 Message d'information affiché");
 }
 
-// ========================================================================
-// 🚀 INITIALISATION AU CHARGEMENT DE LA PAGE
-// ========================================================================
-
-console.log("🔧 Module uiScan.js chargé - Support chargement URL activé");
-
-// Attendre que le DOM et tous les modules soient complètement chargés
+// Initialisation
 window.addEventListener('load', () => {
-  console.log("📄 Page complètement chargée - vérification URL...");
+  console.log("📄 Page chargée - vérification URL...");
   checkAndLoadFromUrl();
 });
 
 // ========================================================================
-// ✅ NOUVELLE FONCTIONNALITÉ : BOUTON DE RÉINITIALISATION
+// BOUTON RESET
 // ========================================================================
 
-/**
- * Fonction de réinitialisation complète de la page scan
- * Affiche une popup de confirmation avant de réinitialiser
- */
 function resetScanPage() {
-  console.log("🔄 Demande de réinitialisation de la page scan");
-  
-  // Afficher la popup de confirmation
   const modal = document.getElementById("confirmResetModal");
-  if (modal) {
-    modal.style.display = "flex";
-  }
+  if (modal) modal.style.display = "flex";
 }
 
-/**
- * Exécute la réinitialisation après confirmation
- */
 function executeReset() {
-  console.log("♻️ Exécution de la réinitialisation...");
-  
-  // 1. Masquer la popup
   const modal = document.getElementById("confirmResetModal");
   if (modal) modal.style.display = "none";
   
-  // 2. Arrêter la caméra si active
   cleanupScanner();
   
-  // 3. Réafficher la section scan
   if (sectionScan) sectionScan.style.display = "block";
-  
-  // 4. Masquer toutes les autres sections
-  if (sectionMeta)   sectionMeta.style.display   = "none";
-  if (sectionVars)   sectionVars.style.display   = "none";
-  if (sectionExtra)  sectionExtra.style.display  = "none";
+  if (sectionMeta) sectionMeta.style.display = "none";
+  if (sectionVars) sectionVars.style.display = "none";
+  if (sectionExtra) sectionExtra.style.display = "none";
   if (sectionPrompt) sectionPrompt.style.display = "none";
   
-  // 5. Masquer les boutons d'action (reset + beta test)
   const actionButtons = document.getElementById("actionButtons");
   if (actionButtons) actionButtons.style.display = "none";
   
-  // 6. Réinitialiser les champs
   if (scanVariables) scanVariables.innerHTML = "";
   if (extraInput) extraInput.value = "";
   if (promptResult) promptResult.textContent = "";
   if (aiButtons) aiButtons.innerHTML = "";
   if (metaHeader) metaHeader.innerHTML = "";
   
-  // 7. Réinitialiser l'input fichier
-  const fileInput = document.getElementById("qrFileInput");
-  if (fileInput) fileInput.value = "";
+  const fileInputEl = document.getElementById("qrFileInput");
+  if (fileInputEl) fileInputEl.value = "";
   
-  // 8. Supprimer le message "Fiche chargée depuis un lien" si présent
-  const urlLoadMessage = document.querySelector('div[style*="e7f3ff"]');
-  if (urlLoadMessage && urlLoadMessage.textContent.includes("Fiche chargée depuis un lien")) {
-    urlLoadMessage.remove();
-  }
-  
-  // 9. Nettoyer l'URL de la barre d'adresse (enlever le paramètre ?fiche=)
   if (window.location.search.includes('fiche=')) {
     const newUrl = window.location.origin + window.location.pathname;
     window.history.replaceState({}, document.title, newUrl);
-    console.log("🔗 URL nettoyée : paramètre 'fiche' supprimé");
   }
   
-  // 10. Réinitialiser la variable globale
   window.currentFiche = null;
-  
-  console.log("✅ Réinitialisation terminée - Page prête pour un nouveau scan");
+  console.log("✅ Réinitialisation terminée");
 }
 
-/**
- * Annule la réinitialisation (ferme la popup)
- */
 function cancelReset() {
-  console.log("❌ Réinitialisation annulée");
   const modal = document.getElementById("confirmResetModal");
   if (modal) modal.style.display = "none";
 }
 
-// ========================================================================
-// GESTION DES ÉVÉNEMENTS DU BOUTON RESET ET DE LA POPUP
-// ========================================================================
-
-// Bouton "Scanner une nouvelle fiche"
 const btnResetScan = document.getElementById("btnResetScan");
-if (btnResetScan) {
-  btnResetScan.addEventListener("click", resetScanPage);
-  console.log("✅ Bouton reset initialisé");
-}
+if (btnResetScan) btnResetScan.addEventListener("click", resetScanPage);
 
-// Bouton "OK" dans la popup
 const btnConfirmReset = document.getElementById("btnConfirmReset");
-if (btnConfirmReset) {
-  btnConfirmReset.addEventListener("click", executeReset);
-}
+if (btnConfirmReset) btnConfirmReset.addEventListener("click", executeReset);
 
-// Bouton "Annuler" dans la popup
 const btnCancelReset = document.getElementById("btnCancelReset");
-if (btnCancelReset) {
-  btnCancelReset.addEventListener("click", cancelReset);
-}
+if (btnCancelReset) btnCancelReset.addEventListener("click", cancelReset);
 
-// Fermer la popup si on clique sur le fond
 const confirmResetModal = document.getElementById("confirmResetModal");
 if (confirmResetModal) {
   confirmResetModal.addEventListener("click", (e) => {
-    // Si on clique sur l'overlay (pas sur le contenu), fermer
-    if (e.target === confirmResetModal) {
-      cancelReset();
-    }
+    if (e.target === confirmResetModal) cancelReset();
   });
 }
 
-console.log("🔄 Fonctionnalité de réinitialisation activée");
-
-// ========================================================================
-// ✅ BOUTON BETA TEST - Ouverture du formulaire Google Forms
-// ========================================================================
-
+// Bouton Beta Test
 const btnBetaTest = document.getElementById("btnBetaTest");
 if (btnBetaTest) {
   btnBetaTest.addEventListener("click", () => {
-    console.log("🧪 Ouverture du formulaire Beta Test");
-    const betaFormUrl = "https://forms.office.com/Pages/ResponsePage.aspx?id=8fedXl6ZuESKAGhF_Bb8M5J2aSnQSghAnRmJ9DwIhUxUOFA1Q0lOT0FCSUU4TDU3WklSTTVGRzlMMy4u";
-    window.open(betaFormUrl, "_blank");
+    const url = "https://forms.office.com/Pages/ResponsePage.aspx?id=8fedXl6ZuESKAGhF_Bb8M5J2aSnQSghAnRmJ9DwIhUxUOFA1Q0lOT0FCSUU4TDU3WklSTTVGRzlMMy4u";
+    window.open(url, "_blank");
   });
-  console.log("✅ Bouton Beta Test initialisé");
 }
+
+console.log("✅ Module uiScan.js chargé - Version URL uniquement");
