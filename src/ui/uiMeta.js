@@ -26,7 +26,21 @@ export function getMetaFromUI() {
         date
     };
 }
-
+export function setMetaToUI(meta) {
+    const categorieEl = document.getElementById("meta_categorie");
+    const titreEl = document.getElementById("meta_titre");
+    const objectifEl = document.getElementById("meta_objectif");
+    const concepteurEl = document.getElementById("meta_concepteur");
+    const versionEl = document.getElementById("meta_version");
+    const dateEl = document.getElementById("meta_date");
+    
+    if (categorieEl && meta.categorie) categorieEl.value = meta.categorie;
+    if (titreEl && meta.titre) titreEl.value = meta.titre;
+    if (objectifEl && meta.objectif) objectifEl.value = meta.objectif;
+    if (concepteurEl && meta.concepteur) concepteurEl.value = meta.concepteur;
+    if (versionEl && meta.version) versionEl.value = meta.version;
+    if (dateEl && meta.date) dateEl.value = meta.date;
+}
 // ======================================================================
 // Réinitialisation des métadonnées
 // ======================================================================
