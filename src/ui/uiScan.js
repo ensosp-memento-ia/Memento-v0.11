@@ -1,6 +1,6 @@
 // ========================================================================
 // uiScan.js — Lecture + exploitation de fiche IA RCH
-// Version simplifiée : Lecture QR avec URL uniquement
+// Version corrigée : Bouton compiler attaché après chargement fiche
 // ========================================================================
 
 // 🔍 LOG DE DÉBOGAGE IMMÉDIAT
@@ -21,17 +21,12 @@ const sectionPrompt = document.getElementById("sectionPrompt");
 
 // ---------- Éléments principaux ----------
 const metaHeader    = document.getElementById("metaHeader");
-const scanVariables = document.getElementById("scanVariables");
-const extraInput    = document.getElementById("extra_input");
-const promptResult  = document.getElementById("promptResult");
-const aiButtons     = document.getElementById("aiButtons");
 
-// Caméra / fichier
+// Caméra
 const btnStartCam   = document.getElementById("btnStartCam");
 const btnStopCam    = document.getElementById("btnStopCam");
 const videoContainer= document.getElementById("videoContainer");
 const videoEl       = document.getElementById("qrVideo");
-const fileInput     = document.getElementById("qrFileInput");
 
 // Stockage de la fiche courante
 window.currentFiche = null;
@@ -119,6 +114,7 @@ function onFicheDecoded(fiche) {
   }
 
   // 3) Générer les champs de variables
+  const scanVariables = document.getElementById("scanVariables");
   if (scanVariables) {
     scanVariables.innerHTML = "";
     
@@ -220,34 +216,125 @@ function onFicheDecoded(fiche) {
   }
 
   // Nettoyage de l'affichage prompt / boutons
+  const promptResult = document.getElementById("promptResult");
+  const aiButtons = document.getElementById("aiButtons");
+  
   if (promptResult) promptResult.textContent = "";
   if (aiButtons) aiButtons.innerHTML = "";
+
+  // ========================================================================
+  // ✅ CORRECTION : Attacher le bouton compiler APRÈS création des éléments
+  // ========================================================================
+  initializeCompileButton(fiche);
 }
 
 // ------------------------------------------------------------------------
-// Lecture via FICHIER
+// ✅ NOUVELLE FONCTION : Initialisation bouton compiler
 // ------------------------------------------------------------------------
-if (fileInput) {
-  fileInput.addEventListener("change", async (ev) => {
-    const file = ev.target.files[0];
-    if (!file) return;
-
-    console.log("📁 Lecture fichier QR...");
-
-    try {
-      const result = await window.QrScanner.scanImage(file);
-      const qrText = (typeof result === "string") ? result : result.data;
-      
-      console.log("📄 QR scanné depuis fichier");
-      
-      // ✅ Extraire la fiche depuis l'URL
-      const fiche = extractFicheFromQR(qrText);
-      onFicheDecoded(fiche);
-      
-    } catch (err) {
-      console.error("❌ Erreur lecture fichier :", err);
-      alert("❌ Impossible de lire le QR Code\n\n" + err.message);
+function initializeCompileButton(fiche) {
+  console.log("🔧 Initialisation bouton compiler...");
+  
+  const btnCompile = document.getElementById("btnBuildPrompt");
+  const scanVariables = document.getElementById("scanVariables");
+  const promptResult = document.getElementById("promptResult");
+  const extraInput = document.getElementById("extra_input");
+  const aiButtons = document.getElementById("aiButtons");
+  
+  console.log("  - Bouton:", btnCompile);
+  console.log("  - scanVariables:", scanVariables);
+  console.log("  - promptResult:", promptResult);
+  
+  if (!btnCompile) {
+    console.error("❌ Bouton btnBuildPrompt introuvable");
+    return;
+  }
+  
+  if (!scanVariables || !promptResult) {
+    console.error("❌ Éléments manquants pour compilation");
+    return;
+  }
+  
+  // Attacher l'événement
+  btnCompile.onclick = () => {
+    console.log("🎯 COMPILATION DÉCLENCHÉE !");
+    
+    if (!window.currentFiche) {
+      alert("⚠️ Aucune fiche chargée");
+      return;
     }
+
+    console.log("🔄 Compilation du prompt...");
+
+    const ficheData = window.currentFiche;
+    let prompt = ficheData.prompt.base;
+    const extra = extraInput?.value.trim() || "";
+
+    // Remplacer les variables
+    (ficheData.prompt?.variables || []).forEach(v => {
+      const field = scanVariables.querySelector(`[data-id="${v.id}"]`);
+      let value = "";
+
+      if (v.type === "geoloc") {
+        const lat = document.getElementById(`${v.id}_lat`)?.value || "";
+        const lon = document.getElementById(`${v.id}_lon`)?.value || "";
+        value = lat && lon ? `${lat}, ${lon}` : "";
+      } else {
+        value = field?.value || "";
+      }
+
+      // Vérification requis
+      if (v.required && !value) {
+        alert(`⚠️ Le champ "${v.label || v.id}" est requis`);
+        throw new Error("Champ requis manquant");
+      }
+
+      const placeholder = `{{${v.id}}}`;
+      prompt = prompt.replace(new RegExp(placeholder, "g"), value);
+    });
+
+    // Ajouter infos supplémentaires
+    if (extra) {
+      prompt += `\n\nInformations complémentaires :\n${extra}`;
+    }
+
+    // Afficher
+    promptResult.textContent = prompt;
+
+    // Générer boutons IA
+    generateAIButtons(ficheData, aiButtons);
+
+    console.log("✅ Prompt compilé avec succès");
+  };
+  
+  console.log("✅ Bouton compiler initialisé avec succès");
+}
+
+// ------------------------------------------------------------------------
+// Génération boutons IA
+// ------------------------------------------------------------------------
+function generateAIButtons(fiche, aiButtonsContainer) {
+  if (!aiButtonsContainer) return;
+
+  aiButtonsContainer.innerHTML = "";
+
+  const aiPlatforms = [
+    { name: "ChatGPT", url: "https://chat.openai.com/", color: "#10a37f", index: fiche.ai?.chatgpt || 3 },
+    { name: "Perplexity", url: "https://www.perplexity.ai/", color: "#20808d", index: fiche.ai?.perplexity || 3 },
+    { name: "Mistral AI", url: "https://chat.mistral.ai/", color: "#ff7000", index: fiche.ai?.mistral || 3 }
+  ];
+
+  aiPlatforms.forEach(platform => {
+    const btn = document.createElement("a");
+    btn.href = platform.url;
+    btn.target = "_blank";
+    btn.className = "btn";
+    btn.style.background = platform.color;
+    btn.style.color = "#fff";
+    btn.style.textDecoration = "none";
+    btn.style.display = "inline-block";
+    btn.innerHTML = `🤖 Ouvrir ${platform.name} <span style="background:rgba(255,255,255,0.3);padding:2px 8px;border-radius:12px;margin-left:8px;font-size:12px;">Indice: ${platform.index}</span>`;
+    
+    aiButtonsContainer.appendChild(btn);
   });
 }
 
@@ -310,96 +397,14 @@ if (btnStartCam && btnStopCam && videoEl) {
 }
 
 // ------------------------------------------------------------------------
-// RESTE DU CODE (compilation prompt, boutons IA, etc.)
-// ------------------------------------------------------------------------
-
-// Bouton compiler prompt
-const btnCompile = document.getElementById("btnBuildPrompt");
-if (btnCompile) {
-  btnCompile.onclick = () => {
-    if (!window.currentFiche) {
-      alert("⚠️ Aucune fiche chargée");
-      return;
-    }
-
-    console.log("🔄 Compilation du prompt...");
-
-    const fiche = window.currentFiche;
-    let prompt = fiche.prompt.base;
-    const extra = extraInput?.value.trim() || "";
-
-    // Remplacer les variables
-    (fiche.prompt?.variables || []).forEach(v => {
-      const field = scanVariables.querySelector(`[data-id="${v.id}"]`);
-      let value = "";
-
-      if (v.type === "geoloc") {
-        const lat = document.getElementById(`${v.id}_lat`)?.value || "";
-        const lon = document.getElementById(`${v.id}_lon`)?.value || "";
-        value = lat && lon ? `${lat}, ${lon}` : "";
-      } else {
-        value = field?.value || "";
-      }
-
-      // Vérification requis
-      if (v.required && !value) {
-        alert(`⚠️ Le champ "${v.label || v.id}" est requis`);
-        throw new Error("Champ requis manquant");
-      }
-
-      const placeholder = `{{${v.id}}}`;
-      prompt = prompt.replace(new RegExp(placeholder, "g"), value);
-    });
-
-    // Ajouter infos supplémentaires
-    if (extra) {
-      prompt += `\n\nInformations complémentaires :\n${extra}`;
-    }
-
-    // Afficher
-    if (promptResult) {
-      promptResult.textContent = prompt;
-    }
-
-    // Générer boutons IA
-    generateAIButtons(fiche);
-
-    console.log("✅ Prompt compilé");
-  };
-}
-
-// Génération boutons IA
-function generateAIButtons(fiche) {
-  if (!aiButtons) return;
-
-  aiButtons.innerHTML = "";
-
-  const aiPlatforms = [
-    { name: "ChatGPT", url: "https://chat.openai.com/", color: "#10a37f", index: fiche.ai?.chatgpt || 3 },
-    { name: "Perplexity", url: "https://www.perplexity.ai/", color: "#20808d", index: fiche.ai?.perplexity || 3 },
-    { name: "Mistral AI", url: "https://chat.mistral.ai/", color: "#ff7000", index: fiche.ai?.mistral || 3 }
-  ];
-
-  aiPlatforms.forEach(platform => {
-    const btn = document.createElement("a");
-    btn.href = platform.url;
-    btn.target = "_blank";
-    btn.className = "btn";
-    btn.style.background = platform.color;
-    btn.style.color = "#fff";
-    btn.style.textDecoration = "none";
-    btn.style.display = "inline-block";
-    btn.innerHTML = `🤖 Ouvrir ${platform.name} <span style="background:rgba(255,255,255,0.3);padding:2px 8px;border-radius:12px;margin-left:8px;font-size:12px;">Indice: ${platform.index}</span>`;
-    
-    aiButtons.appendChild(btn);
-  });
-}
-
 // Bouton copier prompt
-const btnCopyPrompt = document.getElementById("btnCopyPrompt");
+// ------------------------------------------------------------------------
+const btnCopyPrompt = document.getElementById("btnCopy");
 if (btnCopyPrompt) {
   btnCopyPrompt.onclick = async () => {
+    const promptResult = document.getElementById("promptResult");
     const text = promptResult?.textContent;
+    
     if (!text) {
       alert("⚠️ Aucun prompt à copier");
       return;
@@ -497,14 +502,16 @@ function executeReset() {
   const actionButtons = document.getElementById("actionButtons");
   if (actionButtons) actionButtons.style.display = "none";
   
+  const scanVariables = document.getElementById("scanVariables");
+  const extraInput = document.getElementById("extra_input");
+  const promptResult = document.getElementById("promptResult");
+  const aiButtons = document.getElementById("aiButtons");
+  
   if (scanVariables) scanVariables.innerHTML = "";
   if (extraInput) extraInput.value = "";
   if (promptResult) promptResult.textContent = "";
   if (aiButtons) aiButtons.innerHTML = "";
   if (metaHeader) metaHeader.innerHTML = "";
-  
-  const fileInputEl = document.getElementById("qrFileInput");
-  if (fileInputEl) fileInputEl.value = "";
   
   if (window.location.search.includes('fiche=')) {
     const newUrl = window.location.origin + window.location.pathname;
