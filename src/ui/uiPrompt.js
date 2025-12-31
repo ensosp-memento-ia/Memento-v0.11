@@ -109,3 +109,29 @@ if (document.readyState === "loading") {
   // DOM déjà chargé
   initPromptUI();
 }
+// ======================================================================
+// AJOUT À uiPrompt.js
+// Fonction pour charger le prompt depuis une fiche
+// ======================================================================
+
+/**
+ * Charge le prompt d'une fiche dans l'interface
+ * @param {string} promptText - Texte du prompt à charger
+ */
+export function setPromptToUI(promptText) {
+    const promptEl = document.getElementById("prompt_input");
+    
+    if (promptEl && promptText) {
+        promptEl.value = promptText;
+        
+        // Mettre à jour le compteur de caractères si présent
+        const counterEl = document.getElementById("prompt_count");
+        if (counterEl) {
+            counterEl.textContent = `${promptText.length} / 4000`;
+        }
+    }
+}
+
+// ======================================================================
+// FONCTION EXISTANTE getPromptFromUI() reste inchangée
+// ======================================================================
