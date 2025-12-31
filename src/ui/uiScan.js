@@ -317,25 +317,38 @@ function generateAIButtons(fiche, aiButtonsContainer) {
 
   aiButtonsContainer.innerHTML = "";
 
+  // Récupérer le prompt compilé
+  const promptResult = document.getElementById("promptResult");
+  const promptText = promptResult?.textContent || "";
+  
+  // Encoder le prompt pour l'URL
+  const encodedPrompt = encodeURIComponent(promptText);
+
   const aiPlatforms = [
     { 
       name: "ChatGPT", 
-      url: "https://chat.openai.com/?q=", 
+      baseUrl: "https://chat.openai.com/",
+      urlParam: "?q=",
       index: fiche.ai?.chatgpt !== undefined ? fiche.ai.chatgpt : 3 
     },
     { 
       name: "Perplexity", 
-      url: "https://www.perplexity.ai/search?q=", 
+      baseUrl: "https://www.perplexity.ai/",
+      urlParam: "search?q=",
       index: fiche.ai?.perplexity !== undefined ? fiche.ai.perplexity : 3 
     },
     { 
       name: "Mistral AI", 
-      url: "https://chat.mistral.ai/chat?q=", 
+      baseUrl: "https://chat.mistral.ai/",
+      urlParam: "chat?q=",
       index: fiche.ai?.mistral !== undefined ? fiche.ai.mistral : 3 
     }
   ];
 
   aiPlatforms.forEach(platform => {
+    // Construire l'URL complète avec le prompt
+    const fullUrl = platform.baseUrl + platform.urlParam + encodedPrompt;
+    
     // Déterminer couleur et état selon l'indice
     let bgColor, textColor, disabled, label, cursorStyle;
     
@@ -414,7 +427,7 @@ function generateAIButtons(fiche, aiButtonsContainer) {
     } else {
       // Bouton actif (indices 2, 3, NC)
       const btn = document.createElement("a");
-      btn.href = platform.url;
+      btn.href = fullUrl;  // ✅ URL avec le prompt
       btn.target = "_blank";
       btn.className = "btn";
       btn.style.background = bgColor;
@@ -438,7 +451,7 @@ function generateAIButtons(fiche, aiButtonsContainer) {
     }
   });
   
-  console.log("✅ Boutons IA générés avec codes couleur");
+  console.log("✅ Boutons IA générés avec codes couleur et prompt transmis");
 }
 
 // ------------------------------------------------------------------------
