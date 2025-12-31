@@ -310,7 +310,7 @@ function initializeCompileButton(fiche) {
 }
 
 // ------------------------------------------------------------------------
-// Génération boutons IA
+// Génération boutons IA avec codes couleur selon indices
 // ------------------------------------------------------------------------
 function generateAIButtons(fiche, aiButtonsContainer) {
   if (!aiButtonsContainer) return;
@@ -318,24 +318,127 @@ function generateAIButtons(fiche, aiButtonsContainer) {
   aiButtonsContainer.innerHTML = "";
 
   const aiPlatforms = [
-    { name: "ChatGPT", url: "https://chat.openai.com/", color: "#10a37f", index: fiche.ai?.chatgpt || 3 },
-    { name: "Perplexity", url: "https://www.perplexity.ai/", color: "#20808d", index: fiche.ai?.perplexity || 3 },
-    { name: "Mistral AI", url: "https://chat.mistral.ai/", color: "#ff7000", index: fiche.ai?.mistral || 3 }
+    { 
+      name: "ChatGPT", 
+      url: "https://chat.openai.com/?q=", 
+      index: fiche.ai?.chatgpt !== undefined ? fiche.ai.chatgpt : 3 
+    },
+    { 
+      name: "Perplexity", 
+      url: "https://www.perplexity.ai/search?q=", 
+      index: fiche.ai?.perplexity !== undefined ? fiche.ai.perplexity : 3 
+    },
+    { 
+      name: "Mistral AI", 
+      url: "https://chat.mistral.ai/chat?q=", 
+      index: fiche.ai?.mistral !== undefined ? fiche.ai.mistral : 3 
+    }
   ];
 
   aiPlatforms.forEach(platform => {
-    const btn = document.createElement("a");
-    btn.href = platform.url;
-    btn.target = "_blank";
-    btn.className = "btn";
-    btn.style.background = platform.color;
-    btn.style.color = "#fff";
-    btn.style.textDecoration = "none";
-    btn.style.display = "inline-block";
-    btn.innerHTML = `🤖 Ouvrir ${platform.name} <span style="background:rgba(255,255,255,0.3);padding:2px 8px;border-radius:12px;margin-left:8px;font-size:12px;">Indice: ${platform.index}</span>`;
+    // Déterminer couleur et état selon l'indice
+    let bgColor, textColor, disabled, label, cursorStyle;
     
-    aiButtonsContainer.appendChild(btn);
+    // Convertir en string pour gérer à la fois "NC" et les nombres
+    const indexStr = String(platform.index);
+    
+    switch(indexStr) {
+      case "3":
+        bgColor = "#1dbf65";  // Vert - Recommandée
+        textColor = "#fff";
+        disabled = false;
+        label = "3 - Recommandée";
+        cursorStyle = "pointer";
+        break;
+        
+      case "2":
+        bgColor = "#ff9f1c";  // Orange - Acceptable
+        textColor = "#fff";
+        disabled = false;
+        label = "2 - Acceptable";
+        cursorStyle = "pointer";
+        break;
+        
+      case "1":
+        bgColor = "#999";     // Gris - Non recommandée
+        textColor = "#ccc";
+        disabled = true;
+        label = "1 - Non recommandée";
+        cursorStyle = "not-allowed";
+        break;
+        
+      case "NC":
+        bgColor = "#001F8F";  // Bleu ENSOSP - Non classé
+        textColor = "#fff";
+        disabled = false;
+        label = "NC - Non classé";
+        cursorStyle = "pointer";
+        break;
+        
+      default:
+        // Fallback si valeur inattendue
+        bgColor = "#666";
+        textColor = "#fff";
+        disabled = false;
+        label = `Indice: ${platform.index}`;
+        cursorStyle = "pointer";
+    }
+    
+    // Créer le bouton
+    if (disabled) {
+      // Bouton désactivé (indice 1)
+      const btn = document.createElement("div");
+      btn.className = "btn";
+      btn.style.background = bgColor;
+      btn.style.color = textColor;
+      btn.style.cursor = cursorStyle;
+      btn.style.opacity = "0.6";
+      btn.style.display = "inline-block";
+      btn.style.padding = "12px 20px";
+      btn.style.borderRadius = "8px";
+      btn.style.marginRight = "10px";
+      btn.style.marginBottom = "10px";
+      btn.style.fontWeight = "600";
+      btn.innerHTML = `
+        🤖 ${platform.name} 
+        <span style="background:rgba(255,255,255,0.3);padding:2px 8px;border-radius:12px;margin-left:8px;font-size:12px;">
+          ${label}
+        </span>
+      `;
+      
+      // Tooltip au survol
+      btn.title = `Cette IA n'est pas recommandée pour cette fiche (indice: 1)`;
+      
+      aiButtonsContainer.appendChild(btn);
+      
+    } else {
+      // Bouton actif (indices 2, 3, NC)
+      const btn = document.createElement("a");
+      btn.href = platform.url;
+      btn.target = "_blank";
+      btn.className = "btn";
+      btn.style.background = bgColor;
+      btn.style.color = textColor;
+      btn.style.cursor = cursorStyle;
+      btn.style.textDecoration = "none";
+      btn.style.display = "inline-block";
+      btn.style.padding = "12px 20px";
+      btn.style.borderRadius = "8px";
+      btn.style.marginRight = "10px";
+      btn.style.marginBottom = "10px";
+      btn.style.fontWeight = "600";
+      btn.innerHTML = `
+        🤖 Ouvrir ${platform.name} 
+        <span style="background:rgba(255,255,255,0.3);padding:2px 8px;border-radius:12px;margin-left:8px;font-size:12px;">
+          ${label}
+        </span>
+      `;
+      
+      aiButtonsContainer.appendChild(btn);
+    }
   });
+  
+  console.log("✅ Boutons IA générés avec codes couleur");
 }
 
 // ------------------------------------------------------------------------
