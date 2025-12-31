@@ -60,6 +60,57 @@ async function cleanupScanner() {
 }
 
 // ------------------------------------------------------------------------
+// ✅ NOUVELLE FONCTION : Détection et décodage QR (URL ou données)
+// ------------------------------------------------------------------------
+function decodeQRData(qrText) {
+  console.log("🔍 Analyse du contenu du QR Code...");
+  console.log("  - Type:", typeof qrText);
+  console.log("  - Longueur:", qrText.length, "caractères");
+  console.log("  - Début:", qrText.substring(0, 100));
+
+  // CAS 1 : Le QR contient une URL
+  if (qrText.startsWith('http://') || qrText.startsWith('https://')) {
+    console.log("🔗 QR contient une URL, extraction du paramètre 'fiche'...");
+    
+    try {
+      const url = new URL(qrText);
+      const ficheParam = url.searchParams.get('fiche');
+      
+      if (!ficheParam) {
+        throw new Error("Paramètre 'fiche' introuvable dans l'URL");
+      }
+      
+      console.log("✅ Paramètre 'fiche' extrait de l'URL");
+      console.log("  - Longueur:", ficheParam.length, "caractères");
+      
+      // Décoder Base64 URL-safe et restaurer padding
+      let normalizedData = ficheParam
+        .replace(/-/g, '+')
+        .replace(/_/g, '/');
+      
+      // Restaurer le padding Base64 manquant
+      const paddingNeeded = (4 - (normalizedData.length % 4)) % 4;
+      normalizedData += '='.repeat(paddingNeeded);
+      
+      console.log("🔄 Données normalisées pour décodage");
+      
+      // Décoder la fiche
+      return decodeFiche(normalizedData);
+      
+    } catch (error) {
+      console.error("❌ Erreur extraction URL:", error);
+      throw new Error("Impossible d'extraire la fiche de l'URL : " + error.message);
+    }
+  }
+  
+  // CAS 2 : Le QR contient des données compressées directement
+  else {
+    console.log("📦 QR contient des données compressées directement");
+    return decodeFiche(qrText);
+  }
+}
+
+// ------------------------------------------------------------------------
 // Quand une fiche est décodée (depuis fichier ou caméra)
 // ------------------------------------------------------------------------
 function onFicheDecoded(fiche) {
@@ -211,9 +262,10 @@ if (fileInput) {
       const result = await window.QrScanner.scanImage(file);
       const text = (typeof result === "string") ? result : result.data;
       
-      console.log("📄 Texte brut QR :", text);
+      console.log("📄 Texte brut QR :", text.substring(0, 100) + "...");
       
-      const fiche = decodeFiche(text);
+      // ✅ Utiliser la fonction de détection URL/données
+      const fiche = decodeQRData(text);
       onFicheDecoded(fiche);
       
     } catch (err) {
@@ -243,10 +295,11 @@ if (btnStartCam && btnStopCam && videoEl) {
         videoEl, 
         result => {
           const text = result.data || result;
-          console.log("📷 QR scanné :", text);
+          console.log("📷 QR scanné :", text.substring(0, 100) + "...");
           
           try {
-            const fiche = decodeFiche(text);
+            // ✅ Utiliser la fonction de détection URL/données
+            const fiche = decodeQRData(text);
             
             // On stoppe dès qu'un QR valide est lu
             cleanupScanner().then(() => {
