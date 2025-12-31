@@ -1,6 +1,6 @@
 // ======================================================================
-// createFiche.js — Module principal de l'onglet création de fiche IA RCH
-// Version corrigée : ajout des indices IA + validation renforcée + génération URL
+// createFiche.js – Module principal de l'onglet création de fiche IA RCH
+// Version corrigée : QR Code contient l'URL au lieu des données
 // ======================================================================
 
 import { initVariablesUI, getVariablesFromUI } from "./uiVariables.js";
@@ -93,7 +93,7 @@ async function onGenerate() {
     // Construction JSON final (AVEC indices IA)
     const fiche = {
         meta,
-        ai: aiIndices,  // ✅ CORRECTION : ajout des indices
+        ai: aiIndices,
         prompt: {
             base: prompt,
             variables: vars
@@ -124,54 +124,75 @@ async function onGenerate() {
         return;
     }
 
-    // Génération QR
+    // ================================================================
+    // ✅ ÉTAPE 1 : GÉNÉRER L'URL EN PREMIER
+    // ================================================================
+    let ficheUrl;
+    const urlContainer = document.getElementById("urlContainer");
+    const generatedUrlInput = document.getElementById("generatedUrlCreate");
+    
+    console.log("🔗 Génération de l'URL cliquable...");
+    
+    try {
+        // Générer l'URL
+        ficheUrl = generateFicheUrl(fiche);
+        
+        // Afficher l'URL
+        if (generatedUrlInput) {
+            generatedUrlInput.value = ficheUrl;
+        }
+        if (urlContainer) {
+            urlContainer.style.display = "block";
+        }
+        
+        console.log("✅ URL générée avec succès");
+        console.log("  - Longueur:", ficheUrl.length, "caractères");
+        
+    } catch (err) {
+        console.error("❌ Erreur génération URL :", err);
+        alert("❌ Impossible de générer l'URL : " + err.message);
+        return;
+    }
+
+    // ================================================================
+    // ✅ ÉTAPE 2 : GÉNÉRER LE QR CODE AVEC L'URL
+    // ================================================================
     const qrContainer = document.getElementById("qrContainer");
     if (qrContainer) {
         qrContainer.innerHTML = "<p>⏳ Génération du QR Code...</p>";
 
         try {
-            const result = generateQrForFiche(fiche, "qrContainer");
-            console.log("🎉 QR généré ! Taille :", result.qrSize, "px");
+            // ✅ MODIFICATION PRINCIPALE : Utiliser l'URL au lieu des données
+            console.log("📱 Génération du QR Code avec l'URL...");
+            
+            // Générer le QR avec l'URL au lieu de fiche
+            const result = generateQrForFiche(ficheUrl, "qrContainer");
+            
+            console.log("🎉 QR généré avec l'URL !");
+            console.log("  - Taille QR:", result.qrSize, "px");
+            console.log("  - Contenu: URL (", ficheUrl.length, "caractères)");
             
             // Ajout d'un message de succès
             const successMsg = document.createElement("p");
             successMsg.style.color = "#1dbf65";
             successMsg.style.fontWeight = "600";
             successMsg.style.marginTop = "15px";
-            successMsg.textContent = "✅ QR Code généré avec succès !";
+            successMsg.textContent = "✅ QR Code généré avec l'URL de la fiche !";
             qrContainer.appendChild(successMsg);
-        }
-        catch (err) {
+            
+            // Info supplémentaire
+            const infoMsg = document.createElement("p");
+            infoMsg.style.color = "#666";
+            infoMsg.style.fontSize = "12px";
+            infoMsg.style.marginTop = "5px";
+            infoMsg.textContent = `Scanner ce QR ouvrira directement la fiche dans le navigateur`;
+            qrContainer.appendChild(infoMsg);
+            
+        } catch (err) {
             alert("❌ Erreur génération QR : " + err.message);
             console.error("Erreur QR :", err);
             qrContainer.innerHTML = "<p style='color:#ff4d4d;'>❌ Erreur lors de la génération</p>";
-            return; // Arrêter si le QR a échoué
-        }
-    }
-
-    // ================================================================
-    // ✅ NOUVELLE FONCTIONNALITÉ : GÉNÉRATION DE L'URL
-    // ================================================================
-    const urlContainer = document.getElementById("urlContainer");
-    const generatedUrlInput = document.getElementById("generatedUrlCreate");
-    
-    if (urlContainer && generatedUrlInput) {
-        console.log("🔗 Génération de l'URL cliquable...");
-        
-        try {
-            // Générer l'URL
-            const ficheUrl = generateFicheUrl(fiche);
-            
-            // Afficher l'URL
-            generatedUrlInput.value = ficheUrl;
-            urlContainer.style.display = "block";
-            
-            console.log("✅ URL générée avec succès");
-            console.log("  - Longueur:", ficheUrl.length, "caractères");
-            
-        } catch (err) {
-            console.error("❌ Erreur génération URL :", err);
-            // Ne pas bloquer si l'URL échoue, le QR est déjà généré
+            return;
         }
     }
 }
