@@ -8,8 +8,9 @@ console.log("🚀 DÉBUT DU CHARGEMENT DE uiScan.js - Version URL uniquement");
 
 import { decodeFiche } from "../core/compression.js";
 import { getFicheFromUrl } from "../core/urlEncoder.js";
+import { startCameraScan, stopCameraScan } from "../core/qrReaderCamera.js";
 
-console.log("✅ Imports réussis (decodeFiche, getFicheFromUrl)");
+console.log("✅ Imports réussis (decodeFiche, getFicheFromUrl, caméra)");
 
 // ---------- Sections ----------
 const sectionScan   = document.getElementById("sectionScan");
@@ -32,32 +33,8 @@ const videoContainer= document.getElementById("videoContainer");
 const videoEl       = document.getElementById("qrVideo");
 const fileInput     = document.getElementById("qrFileInput");
 
-// Stockage de la fiche courante + scanner
+// Stockage de la fiche courante
 window.currentFiche = null;
-let scanner = null;
-
-// ------------------------------------------------------------------------
-// ✅ Cleanup systématique du scanner
-// ------------------------------------------------------------------------
-async function cleanupScanner() {
-  if (!scanner) return;
-
-  console.log("🧹 Nettoyage scanner...");
-  
-  try {
-    await scanner.stop();
-  } catch (e) {
-    console.warn("⚠️ Erreur arrêt scanner :", e);
-  }
-
-  try {
-    scanner.destroy();
-  } catch (e) {
-    console.warn("⚠️ Erreur destruction scanner :", e);
-  } finally {
-    scanner = null;
-  }
-}
 
 // ------------------------------------------------------------------------
 // ✅ FONCTION SIMPLIFIÉE : Extraction fiche depuis URL du QR
@@ -275,59 +252,48 @@ if (fileInput) {
 }
 
 // ------------------------------------------------------------------------
-// Lecture via CAMÉRA
+// Lecture via CAMÉRA - Utilise le module qrReaderCamera.js
 // ------------------------------------------------------------------------
 if (btnStartCam && btnStopCam && videoEl) {
   
   btnStartCam.onclick = async () => {
-    console.log("🎥 Démarrage caméra...");
-
-    // Cleanup avant de créer nouveau scanner
-    await cleanupScanner();
+    console.log("🎥 Démarrage caméra via qrReaderCamera.js...");
 
     videoContainer.style.display = "block";
     btnStartCam.disabled = true;
     btnStopCam.disabled = false;
 
     try {
-      scanner = new window.QrScanner(
-        videoEl, 
-        result => {
-          const qrText = result.data || result;
-          console.log("📷 QR scanné par caméra");
+      // ✅ Utiliser le module robuste qrReaderCamera
+      await startCameraScan(videoEl, (qrText) => {
+        console.log("📷 QR détecté par caméra");
+        console.log("  - Texte extrait:", qrText.substring(0, 100) + "...");
+        
+        try {
+          // ✅ Extraire la fiche depuis l'URL
+          const fiche = extractFicheFromQR(qrText);
           
-          try {
-            // ✅ Extraire la fiche depuis l'URL
-            const fiche = extractFicheFromQR(qrText);
-            
-            // On stoppe dès qu'un QR valide est lu
-            cleanupScanner().then(() => {
-              videoContainer.style.display = "none";
-              btnStartCam.disabled = false;
-              btnStopCam.disabled = true;
-              onFicheDecoded(fiche);
-            });
-            
-          } catch (e) {
-            console.warn("⚠️ QR non compatible :", e.message);
-            alert("⚠️ " + e.message);
-            // On continue le scan
-          }
-        },
-        {
-          returnDetailedScanResult: true,
-          highlightScanRegion: true,
-          highlightCodeOutline: true
+          // Arrêter la caméra après scan réussi
+          stopCameraScan().then(() => {
+            videoContainer.style.display = "none";
+            btnStartCam.disabled = false;
+            btnStopCam.disabled = true;
+            onFicheDecoded(fiche);
+          });
+          
+        } catch (e) {
+          console.error("❌ Erreur décodage QR:", e);
+          alert("⚠️ " + e.message + "\n\nContinuez à scanner...");
+          // Ne pas arrêter la caméra, continuer le scan
         }
-      );
+      });
 
-      await scanner.start({ facingMode: "environment" });
-      console.log("✅ Caméra démarrée");
+      console.log("✅ Caméra démarrée avec succès");
       
     } catch (err) {
       console.error("❌ Erreur caméra :", err);
       alert("❌ Impossible d'accéder à la caméra : " + err.message);
-      await cleanupScanner();
+      await stopCameraScan();
       videoContainer.style.display = "none";
       btnStartCam.disabled = false;
       btnStopCam.disabled = true;
@@ -336,7 +302,7 @@ if (btnStartCam && btnStopCam && videoEl) {
 
   btnStopCam.onclick = async () => {
     console.log("⏹️ Arrêt caméra manuel");
-    await cleanupScanner();
+    await stopCameraScan();
     videoContainer.style.display = "none";
     btnStartCam.disabled = false;
     btnStopCam.disabled = true;
@@ -519,7 +485,8 @@ function executeReset() {
   const modal = document.getElementById("confirmResetModal");
   if (modal) modal.style.display = "none";
   
-  cleanupScanner();
+  // Arrêter la caméra si active
+  stopCameraScan();
   
   if (sectionScan) sectionScan.style.display = "block";
   if (sectionMeta) sectionMeta.style.display = "none";
