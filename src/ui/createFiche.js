@@ -1,6 +1,6 @@
 // ======================================================================
 // createFiche.js – Module principal de l'onglet création de fiche IA RCH
-// Version corrigée : QR Code contient l'URL au lieu des données
+// Version corrigée : QR Code contient l'URL + Support "NC" pour indices IA
 // ======================================================================
 
 import { initVariablesUI, getVariablesFromUI } from "./uiVariables.js";
@@ -44,17 +44,42 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 // ================================================================
-// NOUVELLE FONCTION : Récupérer les indices IA
+// ✅ FONCTION MODIFIÉE : Récupérer les indices IA (avec support NC)
 // ================================================================
 function getAIIndicesFromUI() {
     const chatgpt = document.getElementById("aiChatGPT");
     const perplexity = document.getElementById("aiPerplexity");
     const mistral = document.getElementById("aiMistral");
 
+    // Fonction helper pour gérer NC et les valeurs numériques
+    function parseIndexValue(element, defaultValue = 3) {
+        if (!element) return defaultValue;
+        
+        const value = element.value;
+        
+        // ✅ Si c'est "NC", on garde la string
+        if (value === "NC") {
+            console.log(`  - Indice "${element.id}" : NC (Non classé)`);
+            return "NC";
+        }
+        
+        // Sinon on parse en nombre
+        const parsed = parseInt(value);
+        if (isNaN(parsed)) {
+            console.warn(`⚠️ Valeur invalide pour ${element.id}, fallback à ${defaultValue}`);
+            return defaultValue;
+        }
+        
+        console.log(`  - Indice "${element.id}" : ${parsed}`);
+        return parsed;
+    }
+
+    console.log("📊 Récupération des indices IA :");
+    
     return {
-        chatgpt: chatgpt ? parseInt(chatgpt.value) : 3,
-        perplexity: perplexity ? parseInt(perplexity.value) : 3,
-        mistral: mistral ? parseInt(mistral.value) : 3
+        chatgpt: parseIndexValue(chatgpt),
+        perplexity: parseIndexValue(perplexity),
+        mistral: parseIndexValue(mistral)
     };
 }
 
