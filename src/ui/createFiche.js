@@ -1,6 +1,6 @@
 // ======================================================================
 // createFiche.js – Module principal de l'onglet création de fiche IA RCH
-// Version corrigée : QR Code contient l'URL + Support "NC" pour indices IA
+// Version complète : QR avec URL + Support NC + Chargement fiche
 // ======================================================================
 
 import { initVariablesUI, getVariablesFromUI } from "./uiVariables.js";
@@ -10,7 +10,7 @@ import { resetConfidenceIndexes } from "./uiReset.js";
 import { encodeFiche } from "../core/compression.js";
 import { generateQrForFiche } from "../core/qrWriter.js";
 import { generateFicheUrl } from "../core/urlEncoder.js";
-import { loadFicheFromUrl } from "./loadFicheFromUrl.js";
+import { loadFicheFromUrl } from "./loadFicheFromUrl.js";  // ✅ AJOUT
 
 // ================================================================
 // INITIALISATION DE LA PAGE
@@ -40,11 +40,16 @@ document.addEventListener("DOMContentLoaded", () => {
     if (btnReset) {
         btnReset.addEventListener("click", onReset);
     }
-    // Bouton CHARGER FICHE
+
+    // ✅ NOUVEAU : Bouton CHARGER FICHE
     const btnLoadFiche = document.getElementById("btnLoadFiche");
     if (btnLoadFiche) {
         btnLoadFiche.addEventListener("click", loadFicheFromUrl);
+        console.log("✅ Bouton Charger fiche initialisé");
+    } else {
+        console.warn("⚠️ Bouton btnLoadFiche introuvable");
     }
+
 });
 
 
