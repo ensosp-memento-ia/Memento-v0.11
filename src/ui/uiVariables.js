@@ -1,5 +1,6 @@
 // ===============================================================
 // uiVariables.js — Gestion UI des variables pour CREATE MODE
+// Version corrigée : Support chargement depuis URL
 // ===============================================================
 
 let varCount = 0;
@@ -66,105 +67,6 @@ export function addVariableUI() {
 
   container.appendChild(div);
 }
-// ======================================================================
-// AJOUT À uiVariables.js
-// Fonction pour charger les variables depuis une fiche
-// ======================================================================
-
-/**
- * Charge les variables d'une fiche dans l'interface
- * @param {Array} variables - Tableau de variables à charger
- */
-export function setVariablesToUI(variables) {
-    if (!Array.isArray(variables) || variables.length === 0) {
-        console.log("  ℹ️ Aucune variable à charger");
-        return;
-    }
-    
-    // Vider les variables actuelles
-    const container = document.getElementById("variablesContainer");
-    if (!container) {
-        console.error("❌ Conteneur variables introuvable");
-        return;
-    }
-    
-    container.innerHTML = "";
-    
-    // Recréer chaque variable
-    variables.forEach((variable, index) => {
-        // Créer un bloc variable
-        const block = document.createElement("div");
-        block.className = "variable-item";
-        block.dataset.index = index;
-        
-        // HTML du bloc variable
-        block.innerHTML = `
-            <div style="display:flex;gap:10px;align-items:flex-start;">
-                <div style="flex:1;">
-                    <label>Identifiant
-                        <input type="text" class="var-id" value="${variable.id || ''}" placeholder="Ex: produit">
-                    </label>
-                </div>
-                <div style="flex:1;">
-                    <label>Label
-                        <input type="text" class="var-label" value="${variable.label || ''}" placeholder="Ex: Nom du produit">
-                    </label>
-                </div>
-                <div style="flex:0.7;">
-                    <label>Type
-                        <select class="var-type">
-                            <option value="text" ${variable.type === 'text' ? 'selected' : ''}>Texte</option>
-                            <option value="number" ${variable.type === 'number' ? 'selected' : ''}>Nombre</option>
-                            <option value="textarea" ${variable.type === 'textarea' ? 'selected' : ''}>Texte long</option>
-                            <option value="choice" ${variable.type === 'choice' ? 'selected' : ''}>Choix</option>
-                            <option value="geoloc" ${variable.type === 'geoloc' ? 'selected' : ''}>Géoloc</option>
-                        </select>
-                    </label>
-                </div>
-                <button class="btn-remove-var" data-index="${index}" style="align-self:flex-end;">❌</button>
-            </div>
-            
-            <div style="margin-top:10px;">
-                <label>Placeholder / Options
-                    <input type="text" class="var-placeholder" value="${variable.placeholder || ''}" placeholder="Texte d'aide">
-                </label>
-            </div>
-            
-            <div style="margin-top:8px;">
-                <label style="display:flex;align-items:center;gap:8px;">
-                    <input type="checkbox" class="var-required" ${variable.required ? 'checked' : ''}>
-                    <span>Champ requis</span>
-                </label>
-            </div>
-        `;
-        
-        container.appendChild(block);
-    });
-    
-    // Réattacher les événements de suppression
-    attachRemoveEvents();
-    
-    console.log(`  ✅ ${variables.length} variable(s) chargée(s)`);
-}
-
-/**
- * Attache les événements de suppression aux boutons
- */
-function attachRemoveEvents() {
-    const removeButtons = document.querySelectorAll(".btn-remove-var");
-    removeButtons.forEach(btn => {
-        btn.addEventListener("click", (e) => {
-            const block = e.target.closest(".variable-item");
-            if (block) {
-                block.remove();
-            }
-        });
-    });
-}
-
-// ======================================================================
-// FONCTIONS EXISTANTES restent inchangées
-// ======================================================================
 
 // ===============================================================
 // EXTRACTION DU JSON FINAL
@@ -208,4 +110,87 @@ export function getVariablesFromUI() {
   }
 
   return vars;
+}
+
+// ===============================================================
+// ✅ NOUVEAU : CHARGEMENT DEPUIS FICHE
+// ===============================================================
+
+/**
+ * Charge les variables d'une fiche dans l'interface
+ * @param {Array} variables - Tableau de variables à charger
+ */
+export function setVariablesToUI(variables) {
+    if (!Array.isArray(variables) || variables.length === 0) {
+        console.log("  ℹ️ Aucune variable à charger");
+        // Initialiser avec une variable vide par défaut
+        initVariablesUI();
+        return;
+    }
+    
+    const container = document.getElementById("variablesContainer");
+    if (!container) {
+        console.error("❌ Conteneur variables introuvable");
+        return;
+    }
+    
+    // Vider et réinitialiser
+    container.innerHTML = "";
+    varCount = 0;
+    
+    // Recréer chaque variable
+    variables.forEach((variable) => {
+        varCount++;
+        
+        const div = document.createElement("div");
+        div.className = "variableBlock";
+        div.dataset.index = varCount;
+        
+        // Construire le HTML avec les valeurs
+        div.innerHTML = `
+            <input class="input" placeholder="Label (ex : Code ONU)" id="var_label_${varCount}" value="${variable.label || ''}">
+            <input class="input" placeholder="Identifiant (ex : code_onu)" id="var_id_${varCount}" value="${variable.id || ''}">
+
+            <select class="input varTypeSelect" id="var_type_${varCount}">
+              <option value="text" ${variable.type === 'text' ? 'selected' : ''}>text</option>
+              <option value="number" ${variable.type === 'number' ? 'selected' : ''}>number</option>
+              <option value="choice" ${variable.type === 'choice' ? 'selected' : ''}>choice</option>
+              <option value="geoloc" ${variable.type === 'geoloc' ? 'selected' : ''}>geoloc</option>
+            </select>
+
+            <div id="var_choice_options_${varCount}" class="choiceOptions ${variable.type === 'choice' ? '' : 'hidden'}">
+              <input class="input" placeholder="Choix séparés par ;" id="var_opts_${varCount}" value="${variable.options ? variable.options.join(' ; ') : ''}">
+              <p class="helper-small">Exemple : rouge ; vert ; bleu</p>
+            </div>
+
+            <label class="checkbox">
+              <input type="checkbox" id="var_req_${varCount}" ${variable.required ? 'checked' : ''}>
+              Obligatoire
+            </label>
+
+            <button class="btnSmall" data-del="${varCount}">Supprimer</button>
+        `;
+        
+        // Suppression du bloc
+        const currentIndex = varCount;
+        div.querySelector("button").addEventListener("click", () => {
+            div.remove();
+            varCount--;
+        });
+        
+        // Détection du type pour afficher les options
+        const typeSelect = div.querySelector(".varTypeSelect");
+        typeSelect.addEventListener("change", () => {
+            const optBox = document.getElementById(`var_choice_options_${currentIndex}`);
+            if (typeSelect.value === "choice") {
+                optBox.classList.remove("hidden");
+            } else {
+                optBox.classList.add("hidden");
+            }
+        });
+        
+        container.appendChild(div);
+    });
+    
+    console.log(`  ✅ ${variables.length} variable(s) chargée(s)`);
 }
