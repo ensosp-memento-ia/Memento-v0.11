@@ -1,10 +1,10 @@
 // ========================================================================
 // uiScan.js — Lecture + exploitation de fiche IA RCH
-// Version corrigée : Bouton compiler attaché après chargement fiche
+// Version finale : URL uniquement + Codes couleur + Transmission prompt
 // ========================================================================
 
 // 🔍 LOG DE DÉBOGAGE IMMÉDIAT
-console.log("🚀 DÉBUT DU CHARGEMENT DE uiScan.js - Version URL uniquement");
+console.log("🚀 DÉBUT DU CHARGEMENT DE uiScan.js - Version finale");
 
 import { decodeFiche } from "../core/compression.js";
 import { getFicheFromUrl } from "../core/urlEncoder.js";
@@ -300,8 +300,8 @@ function initializeCompileButton(fiche) {
     // Afficher
     promptResult.textContent = prompt;
 
-    // Générer boutons IA
-    generateAIButtons(ficheData, aiButtons);
+    // ✅ Générer boutons IA avec le prompt
+    buildAIButtons(ficheData, prompt, aiButtons);
 
     console.log("✅ Prompt compilé avec succès");
   };
@@ -310,148 +310,102 @@ function initializeCompileButton(fiche) {
 }
 
 // ------------------------------------------------------------------------
-// Génération boutons IA avec codes couleur selon indices
+// ✅ FONCTION FINALE : Boutons IA avec codes couleur + transmission prompt
 // ------------------------------------------------------------------------
-function generateAIButtons(fiche, aiButtonsContainer) {
+function buildAIButtons(fiche, prompt, aiButtonsContainer) {
   if (!aiButtonsContainer) return;
-
+  
   aiButtonsContainer.innerHTML = "";
-
-  // Récupérer le prompt compilé
-  const promptResult = document.getElementById("promptResult");
-  const promptText = promptResult?.textContent || "";
+  aiButtonsContainer.style.display = "flex";
   
-  // Encoder le prompt pour l'URL
-  const encodedPrompt = encodeURIComponent(promptText);
+  if (!prompt.trim()) return;
 
-  const aiPlatforms = [
-    { 
-      name: "ChatGPT", 
-      baseUrl: "https://chat.openai.com/",
-      urlParam: "?q=",
-      index: fiche.ai?.chatgpt !== undefined ? fiche.ai.chatgpt : 3 
-    },
-    { 
-      name: "Perplexity", 
-      baseUrl: "https://www.perplexity.ai/",
-      urlParam: "search?q=",
-      index: fiche.ai?.perplexity !== undefined ? fiche.ai.perplexity : 3 
-    },
-    { 
-      name: "Mistral AI", 
-      baseUrl: "https://chat.mistral.ai/",
-      urlParam: "chat?q=",
-      index: fiche.ai?.mistral !== undefined ? fiche.ai.mistral : 3 
-    }
-  ];
+  // Récupération des indices IA (avec support NC)
+  const levels = fiche.ai || {
+    chatgpt: 3,
+    perplexity: 3,
+    mistral: 3,
+  };
 
-  aiPlatforms.forEach(platform => {
-    // Construire l'URL complète avec le prompt
-    const fullUrl = platform.baseUrl + platform.urlParam + encodedPrompt;
+  // Fonction pour déterminer le style selon l'indice
+  const styleForLevel = (lvl) => {
+    const lvlStr = String(lvl);
     
-    // Déterminer couleur et état selon l'indice
-    let bgColor, textColor, disabled, label, cursorStyle;
-    
-    // Convertir en string pour gérer à la fois "NC" et les nombres
-    const indexStr = String(platform.index);
-    
-    switch(indexStr) {
+    switch (lvlStr) {
       case "3":
-        bgColor = "#1dbf65";  // Vert - Recommandée
-        textColor = "#fff";
-        disabled = false;
-        label = "3 - Recommandée";
-        cursorStyle = "pointer";
-        break;
-        
+        return "background:#1dbf65;color:white;"; // Vert - Recommandée
       case "2":
-        bgColor = "#ff9f1c";  // Orange - Acceptable
-        textColor = "#fff";
-        disabled = false;
-        label = "2 - Acceptable";
-        cursorStyle = "pointer";
-        break;
-        
+        return "background:#ff9f1c;color:white;"; // Orange - Acceptable
       case "1":
-        bgColor = "#999";     // Gris - Non recommandée
-        textColor = "#ccc";
-        disabled = true;
-        label = "1 - Non recommandée";
-        cursorStyle = "not-allowed";
-        break;
-        
+        return "background:#999;color:#ccc;"; // Gris - Non recommandée
       case "NC":
-        bgColor = "#001F8F";  // Bleu ENSOSP - Non classé
-        textColor = "#fff";
-        disabled = false;
-        label = "NC - Non classé";
-        cursorStyle = "pointer";
-        break;
-        
+        return "background:#001F8F;color:white;"; // Bleu ENSOSP - Non classé
       default:
-        // Fallback si valeur inattendue
-        bgColor = "#666";
-        textColor = "#fff";
-        disabled = false;
-        label = `Indice: ${platform.index}`;
-        cursorStyle = "pointer";
+        return "background:#cccccc;color:#777;"; // Fallback
     }
+  };
+
+  // Fonction pour obtenir le label de l'indice
+  const getLabelForLevel = (lvl) => {
+    const lvlStr = String(lvl);
+    switch (lvlStr) {
+      case "3": return "3 - Recommandée";
+      case "2": return "2 - Acceptable";
+      case "1": return "1 - Non recommandée";
+      case "NC": return "NC - Non classé";
+      default: return `Indice: ${lvl}`;
+    }
+  };
+
+  // Fonction de création de bouton
+  const mkBtn = (label, lvl, baseUrl) => {
+    const btn = document.createElement("button");
     
-    // Créer le bouton
-    if (disabled) {
-      // Bouton désactivé (indice 1)
-      const btn = document.createElement("div");
-      btn.className = "btn";
-      btn.style.background = bgColor;
-      btn.style.color = textColor;
-      btn.style.cursor = cursorStyle;
+    // Texte du bouton avec badge indice
+    const lvlLabel = getLabelForLevel(lvl);
+    btn.innerHTML = `
+      🤖 ${label}
+      <span style="background:rgba(255,255,255,0.3);padding:2px 8px;border-radius:12px;margin-left:8px;font-size:12px;">
+        ${lvlLabel}
+      </span>
+    `;
+    
+    // Style de base
+    btn.style = styleForLevel(lvl)
+      + "padding:12px 20px;margin-right:10px;margin-bottom:10px;border:none;border-radius:8px;font-weight:600;cursor:pointer;";
+
+    // Gestion selon l'indice
+    const lvlStr = String(lvl);
+    
+    if (lvlStr === "1") {
+      // Indice 1 : Non cliquable
+      btn.disabled = true;
+      btn.style.cursor = "not-allowed";
       btn.style.opacity = "0.6";
-      btn.style.display = "inline-block";
-      btn.style.padding = "12px 20px";
-      btn.style.borderRadius = "8px";
-      btn.style.marginRight = "10px";
-      btn.style.marginBottom = "10px";
-      btn.style.fontWeight = "600";
-      btn.innerHTML = `
-        🤖 ${platform.name} 
-        <span style="background:rgba(255,255,255,0.3);padding:2px 8px;border-radius:12px;margin-left:8px;font-size:12px;">
-          ${label}
-        </span>
-      `;
-      
-      // Tooltip au survol
-      btn.title = `Cette IA n'est pas recommandée pour cette fiche (indice: 1)`;
-      
-      aiButtonsContainer.appendChild(btn);
-      
+      btn.title = "Cette IA n'est pas recommandée pour cette fiche (indice: 1)";
     } else {
-      // Bouton actif (indices 2, 3, NC)
-      const btn = document.createElement("a");
-      btn.href = fullUrl;  // ✅ URL avec le prompt
-      btn.target = "_blank";
-      btn.className = "btn";
-      btn.style.background = bgColor;
-      btn.style.color = textColor;
-      btn.style.cursor = cursorStyle;
-      btn.style.textDecoration = "none";
-      btn.style.display = "inline-block";
-      btn.style.padding = "12px 20px";
-      btn.style.borderRadius = "8px";
-      btn.style.marginRight = "10px";
-      btn.style.marginBottom = "10px";
-      btn.style.fontWeight = "600";
-      btn.innerHTML = `
-        🤖 Ouvrir ${platform.name} 
-        <span style="background:rgba(255,255,255,0.3);padding:2px 8px;border-radius:12px;margin-left:8px;font-size:12px;">
-          ${label}
-        </span>
-      `;
-      
-      aiButtonsContainer.appendChild(btn);
+      // Indices 2, 3, NC : Cliquable avec transmission du prompt
+      btn.onclick = () => {
+        const encoded = encodeURIComponent(prompt);
+        const fullUrl = baseUrl + encoded;
+        
+        console.log(`🚀 Ouverture de ${label} avec prompt`);
+        console.log("  - Longueur prompt:", prompt.length, "caractères");
+        console.log("  - URL:", fullUrl.substring(0, 100) + "...");
+        
+        window.open(fullUrl, "_blank");
+      };
     }
-  });
+
+    aiButtonsContainer.appendChild(btn);
+  };
+
+  // Création des 3 boutons avec URLs correctes
+  mkBtn("ChatGPT",   levels.chatgpt,   "https://chat.openai.com/?q=");
+  mkBtn("Perplexity",levels.perplexity,"https://www.perplexity.ai/search?q=");
+  mkBtn("Mistral",   levels.mistral,   "https://chat.mistral.ai/chat?q=");
   
-  console.log("✅ Boutons IA générés avec codes couleur et prompt transmis");
+  console.log("✅ Boutons IA générés avec codes couleur et transmission prompt");
 }
 
 // ------------------------------------------------------------------------
@@ -668,4 +622,4 @@ if (btnBetaTest) {
   });
 }
 
-console.log("✅ Module uiScan.js chargé - Version URL uniquement");
+console.log("✅ Module uiScan.js chargé - Version finale complète");
