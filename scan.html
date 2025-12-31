@@ -227,21 +227,19 @@
       </button>
     </div>
 
-    <!-- SCAN / IMPORT -->
+    <!-- ===================================================================== -->
+    <!-- SCAN CAMÉRA UNIQUEMENT (Import fichier supprimé) -->
+    <!-- ===================================================================== -->
     <section class="card" id="sectionScan">
       <h2>Scanner un QR Code</h2>
 
       <button id="btnStartCam" class="btn-add-var">🎥 Scanner via caméra</button>
       <button id="btnStopCam" class="btn-reset" disabled>Arrêter</button>
 
-      <!-- Masqué par défaut -->
+      <!-- Vidéo caméra (masquée par défaut) -->
       <div id="videoContainer" style="display:none;margin-top:15px;">
         <video id="qrVideo" style="width:100%;background:#000;border-radius:12px;"></video>
       </div>
-
-      <h3>Ou importer une image</h3>
-      <input type="file" id="qrFileInput" accept="image/*">
-      <pre id="qrRaw" style="display:none;"></pre>
     </section>
 
     <!-- METADONNEES -->
