@@ -187,6 +187,9 @@ async function onGenerate() {
         if (ficheUrl.length > 2500) {
             console.warn("⚠️ URL très longue:", ficheUrl.length, "caractères");
             
+            // ✅ CORRECTION : Calculer le nombre de variables
+            const nbVariables = Array.isArray(vars) ? vars.length : 0;
+            
             const continueGeneration = confirm(
                 `⚠️ ATTENTION : URL VOLUMINEUSE\n\n` +
                 `Longueur : ${ficheUrl.length} caractères\n` +
@@ -196,7 +199,7 @@ async function onGenerate() {
                 `• Impossible à lire avec certains smartphones\n\n` +
                 `RECOMMANDATIONS :\n` +
                 `• Réduire le prompt (actuellement ${prompt.length} caractères)\n` +
-                `• Limiter les variables (actuellement ${vars.length})\n` +
+                (nbVariables > 0 ? `• Limiter les variables (actuellement ${nbVariables})\n` : '') +
                 `• Simplifier les métadonnées\n\n` +
                 `Voulez-vous continuer malgré tout ?`
             );
