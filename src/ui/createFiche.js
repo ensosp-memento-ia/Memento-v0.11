@@ -1,6 +1,6 @@
 // ======================================================================
 // createFiche.js – Module principal de l'onglet création de fiche IA RCH
-// Version complète : QR avec URL + Support NC + Chargement fiche
+// Version finale : QR avec URL + Support NC + Avertissement taille + QR adaptatif
 // ======================================================================
 
 import { initVariablesUI, getVariablesFromUI } from "./uiVariables.js";
@@ -10,7 +10,7 @@ import { resetConfidenceIndexes } from "./uiReset.js";
 import { encodeFiche } from "../core/compression.js";
 import { generateQrForFiche } from "../core/qrWriter.js";
 import { generateFicheUrl } from "../core/urlEncoder.js";
-import { loadFicheFromUrl } from "./loadFicheFromUrl.js";  // ✅ AJOUT
+import { loadFicheFromUrl } from "./loadFicheFromUrl.js";
 
 // ================================================================
 // INITIALISATION DE LA PAGE
@@ -41,7 +41,7 @@ document.addEventListener("DOMContentLoaded", () => {
         btnReset.addEventListener("click", onReset);
     }
 
-    // ✅ NOUVEAU : Bouton CHARGER FICHE
+    // ✅ Bouton CHARGER FICHE
     const btnLoadFiche = document.getElementById("btnLoadFiche");
     if (btnLoadFiche) {
         btnLoadFiche.addEventListener("click", loadFicheFromUrl);
@@ -160,7 +160,7 @@ async function onGenerate() {
     }
 
     // ================================================================
-    // ✅ ÉTAPE 1 : GÉNÉRER L'URL EN PREMIER
+    // ✅ ÉTAPE 1 : GÉNÉRER L'URL AVEC VÉRIFICATION TAILLE
     // ================================================================
     let ficheUrl;
     const urlContainer = document.getElementById("urlContainer");
@@ -172,6 +172,9 @@ async function onGenerate() {
         // Générer l'URL
         ficheUrl = generateFicheUrl(fiche);
         
+        // ✅ NOUVEAU : Vérifier la longueur de l'URL
+        console.log("📊 Longueur URL générée:", ficheUrl.length, "caractères");
+        
         // Afficher l'URL
         if (generatedUrlInput) {
             generatedUrlInput.value = ficheUrl;
@@ -180,8 +183,32 @@ async function onGenerate() {
             urlContainer.style.display = "block";
         }
         
+        // ✅ NOUVEAU : Avertissement si URL très longue
+        if (ficheUrl.length > 2500) {
+            console.warn("⚠️ URL très longue:", ficheUrl.length, "caractères");
+            
+            const continueGeneration = confirm(
+                `⚠️ ATTENTION : URL VOLUMINEUSE\n\n` +
+                `Longueur : ${ficheUrl.length} caractères\n` +
+                `Limite recommandée : 2000 caractères\n\n` +
+                `Le QR Code généré risque d'être :\n` +
+                `• Très dense et difficile à scanner\n` +
+                `• Impossible à lire avec certains smartphones\n\n` +
+                `RECOMMANDATIONS :\n` +
+                `• Réduire le prompt (actuellement ${prompt.length} caractères)\n` +
+                `• Limiter les variables (actuellement ${vars.length})\n` +
+                `• Simplifier les métadonnées\n\n` +
+                `Voulez-vous continuer malgré tout ?`
+            );
+            
+            if (!continueGeneration) {
+                console.log("❌ Génération annulée par l'utilisateur");
+                // On garde l'URL affichée pour qu'ils puissent l'utiliser
+                return;
+            }
+        }
+        
         console.log("✅ URL générée avec succès");
-        console.log("  - Longueur:", ficheUrl.length, "caractères");
         
     } catch (err) {
         console.error("❌ Erreur génération URL :", err);
@@ -190,43 +217,85 @@ async function onGenerate() {
     }
 
     // ================================================================
-    // ✅ ÉTAPE 2 : GÉNÉRER LE QR CODE AVEC L'URL
+    // ✅ ÉTAPE 2 : GÉNÉRER LE QR CODE AVEC TAILLE ADAPTATIVE
     // ================================================================
     const qrContainer = document.getElementById("qrContainer");
     if (qrContainer) {
         qrContainer.innerHTML = "<p>⏳ Génération du QR Code...</p>";
 
         try {
-            // ✅ MODIFICATION PRINCIPALE : Utiliser l'URL au lieu des données
             console.log("📱 Génération du QR Code avec l'URL...");
             
-            // Générer le QR avec l'URL au lieu de fiche
-            const result = generateQrForFiche(ficheUrl, "qrContainer");
+            // ✅ NOUVEAU : Taille adaptative selon longueur URL
+            let qrSize = 512; // Taille par défaut
             
-            console.log("🎉 QR généré avec l'URL !");
-            console.log("  - Taille QR:", result.qrSize, "px");
-            console.log("  - Contenu: URL (", ficheUrl.length, "caractères)");
+            if (ficheUrl.length > 2500) {
+                qrSize = 1024; // Grande taille pour URLs longues
+                console.log("  - URL longue détectée, taille QR augmentée à", qrSize, "px");
+            } else if (ficheUrl.length > 2000) {
+                qrSize = 768; // Taille intermédiaire
+                console.log("  - URL moyenne, taille QR:", qrSize, "px");
+            }
             
-            // Ajout d'un message de succès
+            // Générer le QR avec l'URL
+            const result = generateQrForFiche(ficheUrl, "qrContainer", qrSize);
+            
+            console.log("🎉 QR généré avec succès !");
+            console.log("  - Taille QR:", qrSize, "px");
+            console.log("  - Longueur URL:", ficheUrl.length, "caractères");
+            
+            // ✅ NOUVEAU : Message adapté selon la longueur
             const successMsg = document.createElement("p");
-            successMsg.style.color = "#1dbf65";
             successMsg.style.fontWeight = "600";
             successMsg.style.marginTop = "15px";
-            successMsg.textContent = "✅ QR Code généré avec l'URL de la fiche !";
+            
+            if (ficheUrl.length > 2500) {
+                successMsg.style.color = "#ff9f1c"; // Orange - Avertissement
+                successMsg.innerHTML = `
+                    ⚠️ QR Code généré (${ficheUrl.length} car.)<br>
+                    <small style="font-weight:400;">
+                        Densité élevée - Scan mobile difficile possible.<br>
+                        Préférez l'URL cliquable pour partager la fiche.
+                    </small>
+                `;
+            } else if (ficheUrl.length > 2000) {
+                successMsg.style.color = "#ff9f1c"; // Orange
+                successMsg.innerHTML = `
+                    ✅ QR Code généré (${ficheUrl.length} car.)<br>
+                    <small style="font-weight:400;">
+                        Densité moyenne - Testez le scan sur votre mobile.
+                    </small>
+                `;
+            } else {
+                successMsg.style.color = "#1dbf65"; // Vert - OK
+                successMsg.innerHTML = `
+                    ✅ QR Code généré avec succès !<br>
+                    <small style="font-weight:400;">
+                        Scanner ce QR ouvrira directement la fiche.
+                    </small>
+                `;
+            }
+            
             qrContainer.appendChild(successMsg);
             
-            // Info supplémentaire
-            const infoMsg = document.createElement("p");
-            infoMsg.style.color = "#666";
-            infoMsg.style.fontSize = "12px";
-            infoMsg.style.marginTop = "5px";
-            infoMsg.textContent = `Scanner ce QR ouvrira directement la fiche dans le navigateur`;
-            qrContainer.appendChild(infoMsg);
-            
         } catch (err) {
-            alert("❌ Erreur génération QR : " + err.message);
-            console.error("Erreur QR :", err);
-            qrContainer.innerHTML = "<p style='color:#ff4d4d;'>❌ Erreur lors de la génération</p>";
+            console.error("❌ Erreur génération QR :", err);
+            
+            // ✅ Message d'erreur détaillé
+            qrContainer.innerHTML = `
+                <p style='color:#ff4d4d;font-weight:600;'>❌ Erreur lors de la génération du QR Code</p>
+                <p style='font-size:14px;margin-top:10px;'>
+                    L'URL est probablement trop longue (${ficheUrl.length} caractères).<br>
+                    Limite maximale : ~2900 caractères
+                </p>
+                <p style='font-size:14px;margin-top:10px;background:#fff3cd;padding:10px;border-radius:6px;'>
+                    <strong>💡 Solution :</strong><br>
+                    Utilisez l'URL cliquable ci-dessus pour partager la fiche.<br>
+                    Pour générer un QR Code, réduisez le contenu de la fiche.
+                </p>
+            `;
+            
+            // On n'affiche pas d'alert supplémentaire car le message est clair
             return;
         }
     }
