@@ -4,11 +4,7 @@
   <meta charset="UTF-8" />
   <title>Mémento IA – ENSOSP | Accueil</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <!-- Police -->
   <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
-
-  <!-- Style ENSOSP -->
   <style>
     body {
       font-family: "Inter", sans-serif;
@@ -20,30 +16,33 @@
       min-height: 100vh;
       color: #001F8F;
     }
-
-header {
-  background: #001F8F;
-  padding: 12px 20px;
-  text-align: center;
-  color: white;
-  font-size: 16px;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-}
-main {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 13px;
-  gap: 10px;
-  text-align: center;
-}
+    header {
+      background: #001F8F;
+      padding: 12px 20px;
+      text-align: center;
+      color: white;
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 16px;
+      gap: 10px;
+      text-align: center;
+    }
+    h1 {
+      margin: 0 0 2px 0;
+      font-size: 20px;
+    }
     .btn {
       display: block;
       width: 260px;
-      padding: 16px;
+      padding: 13px;
       font-size: 16px;
       font-weight: 600;
       border-radius: 12px;
@@ -52,89 +51,45 @@ main {
       cursor: pointer;
       transition: 0.2s;
     }
-
-    .btn-create {
-      background: #001F8F;
-      color: white;
-    }
-    .btn-create:hover {
-      background: #002bbf;
-    }
-
-    .btn-scan {
-      background: #e7ecff;
-      color: #001F8F;
-      border: 2px solid #001F8F;
-    }
-    .btn-scan:hover {
-      background: #dbe3ff;
-    }
-
     footer {
-      padding: 14px;
+      padding: 10px;
       text-align: center;
       font-size: 13px;
       color: #444;
     }
   </style>
 </head>
-
 <body>
-
   <header>Mémento Opérationnel IA – ENSOSP</header>
-
   <main>
-    
     <h1>Bienvenue</h1>
     <p style="max-width:560px;margin:0;font-size:14px;">
-      Sélectionnez une action pour commencer.  
-      Vous pouvez créer une fiche opérationnelle IA ou lire une fiche existante au moyen du scan.
+      Créez ou lisez une fiche opérationnelle IA via le scan.
     </p>
-
-    <!-- Message d'avertissement -->
     <div style="background:#fff3cd;border-left:4px solid #ff9f1c;padding:10px 14px;border-radius:8px;max-width:560px;">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-        <span style="font-size:15px;">⚠️</span>
-        <strong style="color:#856404;">Avertissement</strong>
-      </div>
-      <p style="margin:0;color:#856404;line-height:1.6;">
-        L'IA peut faire des erreurs. Veuillez vérifier les réponses et exercer votre jugement professionnel avant toute action opérationnelle.
-      </p>
+      <span style="font-size:14px;color:#856404;">⚠️ <strong>Avertissement</strong> — L'IA peut faire des erreurs. Exercez votre jugement professionnel avant toute action opérationnelle.</span>
     </div>
-    
     <a href="scan.html" class="btn btn-primary" style="background:#001F8F;color:white;text-decoration:none;">📷 Lire une fiche (Scan QR Code)</a>
-    
     <a href="create.html" class="btn btn-primary" style="background:#001F8F;color:white;text-decoration:none;">📝 Créer une fiche IA</a>
-
     <a href="https://sdis76-my.sharepoint.com/:f:/g/personal/anne_tirelle_sdis76_fr/IgBMN_Ng429YRqwq0tPmPs2XAXwV8MXJFYjQnvp7jmM_M8g?e=mZgrwl" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="background:#001F8F;color:white;text-decoration:none;">📁 Accéder aux Mémentos IA</a>
-    
-
   </main>
-
   <footer>
-    © ENSOSP — Cne Eddy Fischer – Cdt Anne Tirelle — V0.11.14
+    © ENSOSP — Cne Eddy Fischer – Cdt Anne Tirelle — V0.11.15
   </footer>
-
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const buttons = document.querySelectorAll('.btn-primary');
-    buttons.forEach(btn => {
-      // Mémoriser la couleur définie dans le style inline de chaque bouton
-      const baseColor = btn.style.background;
-
-      btn.style.color = 'white';
-      btn.style.textDecoration = 'none';
-
-      btn.addEventListener('mouseenter', function() {
-        this.style.filter = 'brightness(1.2)';
-      });
-
-      btn.addEventListener('mouseleave', function() {
-        this.style.filter = 'brightness(1)';
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const buttons = document.querySelectorAll('.btn-primary');
+      buttons.forEach(btn => {
+        btn.style.color = 'white';
+        btn.style.textDecoration = 'none';
+        btn.addEventListener('mouseenter', function() {
+          this.style.filter = 'brightness(1.2)';
+        });
+        btn.addEventListener('mouseleave', function() {
+          this.style.filter = 'brightness(1)';
+        });
       });
     });
-  });
-</script>
-
+  </script>
 </body>
 </html>
