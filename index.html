@@ -107,35 +107,36 @@
     <a href="scan.html" class="btn btn-primary" style="background:#001F8F;color:white;text-decoration:none;">📷 Lire une fiche (Scan QR Code)</a>
     
     <a href="create.html" class="btn btn-primary" style="background:#001F8F;color:white;text-decoration:none;">📝 Créer une fiche IA</a>
+
+    <a href="https://sdis76-my.sharepoint.com/:f:/g/personal/anne_tirelle_sdis76_fr/IgBMN_Ng429YRqwq0tPmPs2XAXwV8MXJFYjQnvp7jmM_M8g?e=mZgrwl" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="background:#0078D4;color:white;text-decoration:none;">📁 Accéder aux Mémentos IA</a>
     
 
   </main>
 
   <footer>
-    © ENSOSP — Cne Eddy Fischer – Cdt Anne Tirelle — V0.11.13
+    © ENSOSP — Cne Eddy Fischer – Cdt Anne Tirelle — V0.11.14
   </footer>
 
-  <script>
-    // Forcer la couleur bleue des boutons et gérer le hover
-    document.addEventListener('DOMContentLoaded', function() {
-      const buttons = document.querySelectorAll('.btn-primary');
-      buttons.forEach(btn => {
-        // Couleur par défaut
-        btn.style.background = '#001F8F';
-        btn.style.color = 'white';
-        btn.style.textDecoration = 'none';
-        
-        // Hover
-        btn.addEventListener('mouseenter', function() {
-          this.style.background = '#002bbf';
-        });
-        
-        btn.addEventListener('mouseleave', function() {
-          this.style.background = '#001F8F';
-        });
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const buttons = document.querySelectorAll('.btn-primary');
+    buttons.forEach(btn => {
+      // Mémoriser la couleur définie dans le style inline de chaque bouton
+      const baseColor = btn.style.background;
+
+      btn.style.color = 'white';
+      btn.style.textDecoration = 'none';
+
+      btn.addEventListener('mouseenter', function() {
+        this.style.filter = 'brightness(1.2)';
+      });
+
+      btn.addEventListener('mouseleave', function() {
+        this.style.filter = 'brightness(1)';
       });
     });
-  </script>
+  });
+</script>
 
 </body>
 </html>
