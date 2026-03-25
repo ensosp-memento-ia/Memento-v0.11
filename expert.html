@@ -421,6 +421,976 @@
 </head>
 <body>
 
+<!-- ── TITRE PRINCIPAL centré ── -->
+<header style="background:#001F8F;padding:20px;text-align:center;color:white;font-size:22px;font-weight:700;letter-spacing:0.5px;justify-content:center;">
+  Mémento Opérationnel IA – ENSOSP
+</header>
+
+<!-- ── BARRE DE NAVIGATION centrée ── -->
+<div style="background:#e9ecf5;padding:10px 20px;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:12px;border-bottom:1px solid #ccd2e3;text-align:center;">
+  <a href="index.html" style="color:#001F8F;text-decoration:none;font-weight:600;font-size:14px;">← Accueil</a>
+  <span style="color:#aab;font-size:13px;">|</span>
+  <span style="color:#001F8F;font-size:14px;font-weight:700;">🗺️ Cartographie Experts NRBC - mise à jour : 25/03/2026</span>
+  <span style="color:#000000;font-size:12px;font-weight:700;">En cas d'erreur ou de proposition d'ajout : utiliser le bouton donner mon avis</span>
+</div>
+
+<div class="container">
+
+<div class="stats" style="align-items:center;">
+    <div class="stat-card"><div class="stat-val" id="total-count">0</div><div class="stat-label">Experts</div></div>
+    <div class="stat-card"><div class="stat-val" id="h24-count">0</div><div class="stat-label">H24</div></div>
+    <div class="stat-card"><div class="stat-val" id="chim-count" style="color:var(--C)">0</div><div class="stat-label">Chimique</div></div>
+    <div class="stat-card"><div class="stat-val" id="rad-count"  style="color:var(--R)">0</div><div class="stat-label">Radio/Nuc</div></div>
+    <div class="stat-card"><div class="stat-val" id="bio-count"  style="color:var(--B)">0</div><div class="stat-label">Biologique</div></div>
+    <a href=https://forms.office.com/e/m1BckbZReX
+       target="_blank"
+       style="margin-left:auto;display:inline-block;padding:10px 20px;background:white;color:#001F8F;border:2px solid #001F8F;border-radius:12px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;text-decoration:none;white-space:nowrap;"
+       onmouseover="this.style.background='#f0f3ff'"
+       onmouseout="this.style.background='white'">
+      💬 Donner mon avis — Mémento IA · Beta test
+    </a>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><div class="dot" style="background:var(--C)"></div>Chimique</div>
+    <div class="legend-item"><div class="dot" style="background:var(--R)"></div>Radiologique / Nucléaire</div>
+    <div class="legend-item"><div class="dot" style="background:var(--B)"></div>Biologique</div>
+    <div class="legend-item"><div class="dot" style="background:var(--M)"></div>Multi-risques</div>
+  </div>
+
+  <div class="search-bar">
+    <span class="search-icon">🔍</span>
+    <input class="search-input" id="search-input" type="text"
+      placeholder="Rechercher un expert, une spécialité, un domaine…"
+      oninput="onSearch(this.value)">
+    <button class="search-clear" id="search-clear" onclick="clearSearch()">✕</button>
+    <span class="search-count" id="search-count"></span>
+  </div>
+
+  <div class="filters">
+    <span class="filter-label">Filtre :</span>
+    <button class="filter-btn active"        onclick="filterDomain('all')">Tous</button>
+    <button class="filter-btn"               onclick="filterDomain('h24')">24H/24H</button>
+    <button class="filter-btn"               onclick="filterDomain('tox')">Toxicologie</button>
+    <button class="filter-btn"               onclick="filterDomain('id')">Identification</button>
+    <button class="filter-btn"               onclick="filterDomain('env')">Environnement</button>
+    <button class="filter-btn"               onclick="filterDomain('retex')">RETEX</button>
+    <button class="filter-btn"               onclick="filterDomain('tmd')">TMD</button>
+    <button class="filter-btn filter-conv"   onclick="filterDomain('convention')"> Convention</button>
+    <button class="filter-btn filter-nrbce"  onclick="filterDomain('nrbce')">NRBCe</button>
+  </div>
+
+  <div id="cards-container"></div>
+  <div class="no-results" id="no-results">Aucun expert ne correspond aux filtres sélectionnés.</div>
+<div style="text-align:center;margin:32px 0 8px;">
+  </div>
+</div>
+
+<script>
+const experts = [
+  {
+    acronym: "CASU",
+    name: "Cellule d'Appui aux Situations d'Urgence — INERIS",
+    domain: ["C","M"],
+    specialty: "Appui opérationnel toxicologique, dimensionnement des effets d'un rejet chimique, modélisation en temps réel — cadre : circulaire du 15 juillet 2005 — convention d'activation via préfecture/DREAL",
+    contact: "03.44.55.69.99", via: null, h24: true,
+    tags: ["tox","id","conv"], section: "chimique"
+  },
+  {
+    acronym: "France Chimie",
+    name: "Union des Industries Chimiques",
+    domain: ["C"],
+    specialty: "Expertise filière chimique industrielle, appui technique sur produits et procédés",
+    contact: "02.99.36.47.20", via: null, h24: false,
+    tags: ["tox"], section: "chimique"
+  },
+  {
+    acronym: "GESIP",
+    name: "Groupe d'Étude de Sécurité des Industries Pétrolières et Chimiques",
+    domain: ["C"],
+    specialty: "Liquides inflammables hydrocarbures UNIQUEMENT — expertise sécurité industrielle pétrolière",
+    contact: "01.44.82.72.74", via: null, h24: false,
+    tags: ["tmd"], section: "chimique"
+  },
+  {
+    acronym: "Total",
+    name: "TotalEnergies — Appui urgence",
+    domain: ["C"],
+    specialty: "Liquides inflammables hydrocarbures UNIQUEMENT — appui technique produits pétroliers",
+    contact: "02.35.13.21.21", via: null, h24: true,
+    tags: ["tmd"], section: "chimique"
+  },
+  {
+    acronym: "CFBP",
+    name: "Comité Français Butane Propane (France Gaz Liquides)",
+    domain: ["C"],
+    specialty: "GPL (butane/propane) UNIQUEMENT — comportement gaz inflammables, sécurité stockages — convention d'assistance formalisée avec formulaire de sollicitation disponible sur site",
+    contact: "01.41.97.02.80", via: null, h24: false,
+    tags: ["conv","tmd"], formulaire: "https://www.francegazliquides.fr",
+    section: "chimique"
+  },
+  {
+    acronym: "Air Liquide",
+    name: "Air Liquide Assistance",
+    domain: ["C"],
+    specialty: "Gaz industriels (O₂, N₂, Cl₂, NH₃…) — expertise comportement, neutralisation, stockage",
+    contact: "0.825.887.913", via: null, h24: true,
+    tags: ["tox","id"], section: "chimique"
+  },
+  {
+    acronym: "TRANSAID",
+    name: "TRANSAID SO — Appui TMD Route",
+    domain: ["C"],
+    specialty: "TMD route — transfert produits dangereux, colmatage fuites, spécialistes produits — protocole formalisé : formulaire de recueil + localisation centres d'appui par zone de défense disponibles sur transaid.fr",
+    contact: "05.59.92.20.10", via: null, h24: true,
+    tags: ["tmd","id","conv"], formulaire: "https://www.transaid.fr",
+    section: "chimique"
+  },
+  {
+    acronym: "CAP Paris",
+    name: "Centre Antipoison de Paris",
+    domain: ["C","B"],
+    specialty: "Toxicologie médicale, prise en charge intoxications aiguës, conseil médical H24",
+    contact: "02.40.05.48.48", via: null, h24: true,
+    tags: ["tox"], section: "chimique"
+  },
+  {
+    acronym: "CEDRE",
+    name: "Centre de Documentation, de Recherche et d'Expérimentations sur les Pollutions Accidentelles des Eaux",
+    domain: ["C","M"],
+    specialty: "Pollution milieux aquatiques : 3 volets — littoral (dérive nappes, dépollution côtière), eaux intérieures (qualification pollution, barrages antipollution), portuaire (fiches réflexes) — convention d'assistance technique",
+    contact: "02.98.33.10.10", via: null, h24: true,
+    tags: ["env","conv"], section: "chimique"
+  },
+  {
+    acronym: "Météo France",
+    name: "Météo France — Service Prévision",
+    domain: ["C","R","B","M"],
+    specialty: "Modélisation dispersion atmosphérique panache toxique, données vent/stabilité",
+    contact: "04.26.79.73.24", via: null, h24: true,
+    tags: ["tox","env"], section: "chimique"
+  },
+  {
+    acronym: "LCPP",
+    name: "Laboratoire Central de la Préfecture de Police de Paris",
+    domain: ["C","M"],
+    specialty: "Identification et analyse de produits chimiques, appui terrain IDF, expertise judiciaire",
+    contact: "01.55.76.22.33", via: null, h24: false,
+    tags: ["id"], section: "chimique"
+  },
+  {
+    acronym: "VDIP / BSPP",
+    name: "Véhicule de Détection, d'Identification et de Prélèvement — UIISC / Laboratoire mobile BSPP",
+    domain: ["C","R","B","M"],
+    specialty: "Détection, identification et prélèvement NRBC terrain toutes menaces — BSPP : laboratoire mobile chimique/biologique et expertise robotique d'intervention",
+    contact: null, via: "via COZ", h24: true,
+    tags: ["id","tox"], section: "chimique"
+  },
+  {
+    acronym: "RADART",
+    name: "Réseau d'Alerte et de Détection Atmosphérique en Temps Réel — COGIC",
+    domain: ["C","R","M"],
+    specialty: "Modélisation dispersion atmosphérique temps réel, appui COS pour périmètres — déclenchement via formulaire spécifique de recueil (circulaire 2010) transmis au COGIC",
+    contact: null, via: "via COGIC", h24: true,
+    tags: ["tox","env","conv"], section: "chimique"
+  },
+  {
+    acronym: "DREAL",
+    name: "Direction Régionale de l'Environnement, de l'Aménagement et du Logement",
+    domain: ["C","M"],
+    specialty: "Données ICPE/Seveso, quantités stockées, plan de prévention, contacts exploitant",
+    contact: null, via: "via préfecture", h24: false,
+    tags: ["retex","env"], section: "chimique"
+  },
+  {
+    acronym: "BARPI/ARIA",
+    name: "Bureau d'Analyse des Risques et Pollutions Industrielles — Base ARIA",
+    domain: ["C","M"],
+    specialty: "Retex accidents industriels, scénarios accidentels connus, aide à l'anticipation",
+    contact: null, via: "aria.developpement-durable.gouv.fr", h24: false,
+    tags: ["retex"], section: "chimique"
+  },
+  {
+    acronym: "SAMU/SMUR",
+    name: "Service d'Aide Médicale Urgente",
+    domain: ["C","R","B","M"],
+    specialty: "Prise en charge médicale des victimes, décontamination médicale, référent toxicologie",
+    contact: "15", via: null, h24: true,
+    tags: ["tox"], section: "chimique"
+  },
+  {
+    acronym: "GRT Gaz",
+    name: "GRT Gaz / Enedis — Astreinte opérateur",
+    domain: ["C"],
+    specialty: "Incidents sur réseaux gaz naturel et électricité — expertise réseau, coupure, sécurisation",
+    contact: null, via: "astreinte opérateur", h24: true,
+    tags: ["tmd"], section: "chimique"
+  },
+  {
+    acronym: "Démineurs",
+    name: "Démineurs — COGIC (plis/colis suspects)",
+    domain: ["C","M"],
+    specialty: "Colis suspects, engins improvisés, appui sur matières chimiques/biologiques non identifiées",
+    contact: "01.56.04.74.74", via: null, h24: true,
+    tags: ["id"], section: "chimique"
+  },
+  {
+    acronym: "Séché / Triadis",
+    name: "Séché Environnement / Triadis — Déchets spécifiques",
+    domain: ["C"],
+    specialty: "Collecte et traitement déchets dangereux, eaux d'extinction, résidus d'intervention",
+    contact: null, via: "à vérifier", h24: false,
+    tags: ["env"], section: "chimique"
+  },
+  {
+    acronym: "INERIS",
+    name: "Institut National de l'Environnement Industriel et des Risques",
+    domain: ["C","M"],
+    specialty: "Référent national risques technologiques — modélisation dispersion toxique, explosion, incendie (BLEVE, UVCE), toxicologie industrielle, études de dangers Seveso",
+    contact: "03.44.55.69.99", via: null, h24: true,
+    tags: ["tox","id","retex","env"], section: "chimique"
+  },
+  {
+    acronym: "INRS",
+    name: "Institut National de Recherche et de Sécurité",
+    domain: ["C","M"],
+    specialty: "Analyse toxiques industriels, atmosphères dangereuses, explosifs — expertise hygiène industrielle et prévention risques chimiques professionnels",
+    contact: null, via: "inrs.fr", h24: false,
+    tags: ["tox","id"], section: "chimique"
+  },
+  {
+    acronym: "USINAÏD",
+    name: "USINAÏD — Entraide inter-industrielle",
+    domain: ["C"],
+    specialty: "Entraide entre plateformes industrielles voisines — moyens de pompage lourds, transfert de produits, ressources matérielles mutualisées entre sites Seveso",
+    contact: null, via: "à vérifier", h24: false,
+    tags: ["tmd","env"], section: "chimique"
+  },
+  {
+    acronym: "SNCF Vigie Fret",
+    name: "SNCF — Vigie Fret / Appui Ferroviaire TMD",
+    domain: ["C"],
+    specialty: "Incidents TMD ferroviaires — expertise wagons-citernes, mise à disposition trains de secours/levage, données chargement matières dangereuses",
+    contact: null, via: "à vérifier", h24: true,
+    tags: ["tmd"], section: "chimique"
+  },
+  {
+    acronym: "ASNR (ex-ASN)",
+    name: "Autorité de Sûreté Nucléaire et de Radioprotection — fusion ASN+IRSN en cours depuis 2024",
+    domain: ["R"],
+    specialty: "Sûreté nucléaire, autorisation de transport, appui réglementaire en urgence radiologique — ⚠️ numéro maintenu ASN, vérifier mise à jour ASNR",
+    contact: "0.800.804.135", via: null, h24: true,
+    tags: ["id","retex"], section: "radio"
+  },
+  {
+    acronym: "IRSN",
+    name: "Institut de Radioprotection et de Sûreté Nucléaire",
+    domain: ["R","M"],
+    specialty: "Radioprotection, dosimétrie, modélisation dispersion radioactive, appui technique H24",
+    contact: "06.07.31.56.63", via: null, h24: true,
+    tags: ["tox","id","env"], section: "radio"
+  },
+  {
+    acronym: "CEA",
+    name: "Commissariat à l'Énergie Atomique et aux Énergies Alternatives",
+    domain: ["R","B","M"],
+    specialty: "Recherche NRBC, contre-mesures médicales radiologiques et biologiques, détection avancée, coordinateur projets européens NRBC (ex. COUNTERACT)",
+    contact: null, via: "cea.fr", h24: false,
+    tags: ["id","tox","retex"], section: "radio"
+  },
+  {
+    acronym: "CIBU",
+    name: "Cellule d'Intervention Biologique d'Urgence — Institut Pasteur",
+    domain: ["B","M"],
+    specialty: "Identification agents biologiques, appui expertise en cas de menace NRBC biologique",
+    contact: null, via: "via préfecture", h24: true,
+    tags: ["id","tox","nrbce"], section: "bio"
+  },
+  {
+    acronym: "BIOTOX/PIRATOX",
+    name: "Plans BIOTOX et PIRATOX — DGS/DGA",
+    domain: ["B","C","M"],
+    specialty: "Activation plans gouvernementaux menace biologique/chimique, coordination interministérielle",
+    contact: null, via: "via préfecture", h24: true,
+    tags: ["tox","nrbce"], section: "bio"
+  },
+  {
+    acronym: "CMVOA",
+    name: "Cellule Ministérielle de Veille Opérationnelle et d'Alerte — Agriculture/Environnement",
+    domain: ["B","C","M"],
+    specialty: "Veille et alerte sur risques biologiques et chimiques environnementaux, appui interministériel",
+    contact: null, via: "via préfecture", h24: false,
+    tags: ["env","retex"], section: "bio"
+  },
+  {
+    acronym: "LIF",
+    name: "Laboratoire d'Identification et de Formation",
+    domain: ["B","C","M"],
+    specialty: "Identification agents NRBC, formation et expertise analytique, appui laboratoire",
+    contact: null, via: "à vérifier", h24: false,
+    tags: ["id"], section: "bio"
+  },
+  {
+    acronym: "ANSES",
+    name: "Agence Nationale de Sécurité Sanitaire de l'Alimentation, de l'Environnement et du Travail",
+    domain: ["B","C","M"],
+    specialty: "Évaluation risques sanitaires agents biologiques et chimiques, zoonoses, contamination environnementale, appui scientifique aux autorités",
+    contact: null, via: "anses.fr", h24: false,
+    tags: ["tox","env","retex"], section: "bio"
+  },
+  {
+    acronym: "SSA",
+    name: "Service de Santé des Armées",
+    domain: ["B","R","C","M"],
+    specialty: "Expertise NRBC militaire, contre-mesures médicales, détection avancée, prise en charge victimes en environnement contaminé",
+    contact: null, via: "via COGIC / chaîne défense", h24: true,
+    tags: ["tox","id","nrbce"], section: "bio"
+  },
+  {
+    acronym: "CANUTEC",
+    name: "Centre canadien d'urgence transport — Transport Canada",
+    domain: ["C","M"],
+    specialty: "Guide nord-américain des mesures d'urgence (GNAMU) — réponse opérationnelle par familles de produits dangereux, base de données toxicologiques",
+    contact: null, via: "canutec.tc.gc.ca", h24: false,
+    tags: ["retex","tox","id","tmd"], section: "retex"
+  },
+  {
+    acronym: "CEFIC / ERICards",
+    name: "Conseil Européen de l'Industrie Chimique — Emergency Response Intervention Cards",
+    domain: ["C","M"],
+    specialty: "Cartes de réponse opérationnelle par produit chimique — guide européen des premières mesures d'urgence TMD",
+    contact: null, via: "ericards.net", h24: false,
+    tags: ["retex","tmd","id"], section: "retex"
+  },
+  {
+    acronym: "ANSM",
+    name: "Agence Nationale de Sécurité du Médicament (ex-AFSSAPS)",
+    domain: ["B","C","M"],
+    specialty: "Fiches toxiques de guerre et agents biologiques de guerre — données médicales et thérapeutiques pour toxiques NRBC",
+    contact: null, via: "ansm.sante.fr", h24: false,
+    tags: ["retex","tox","nrbce"], section: "retex"
+  },
+  {
+    acronym: "RISCAD",
+    name: "Base RISCAD — Retex accidents chimiques",
+    domain: ["C","M"],
+    specialty: "Base de données retex accidents chimiques industriels — scénarios accidentels, causes, conséquences, enseignements",
+    contact: null, via: "à vérifier", h24: false,
+    tags: ["retex"], section: "retex"
+  },
+  {
+    acronym: "eMARS / CSB / NTSB",
+    name: "Bases RETEX internationales — eMARS (EU), CSB (USA), NTSB (USA)",
+    domain: ["C","M"],
+    specialty: "Bases de données accidents industriels et TMD internationales — eMARS (Europe), CSB Chemical Safety Board (USA), NTSB (transport USA) — analyses approfondies et enseignements",
+    contact: null, via: "emars.jrc.ec.europa.eu / csb.gov / ntsb.gov", h24: false,
+    tags: ["retex"], section: "retex"
+  }
+];
+
+const sections = [
+  { id: "chimique", label: "Chimique",                    tag: "C",   tagClass: "C" },
+  { id: "radio",    label: "Radiologique / Nucléaire",    tag: "R/N", tagClass: "R" },
+  { id: "bio",      label: "Biologique",                  tag: "B",   tagClass: "B" },
+  { id: "retex",    label: "RETEX & Bases Documentaires", tag: "REX", tagClass: "M" }
+];
+
+const tagStyles = {
+  C: { bg: "#fef3c7", color: "#b45309" },
+  R: { bg: "#fee2e2", color: "#b91c1c" },
+  B: { bg: "#dcfce7", color: "#15803d" },
+  M: { bg: "#ede9fe", color: "#6d28d9" }
+};
+
+let activeFilters = { special: 'all' };
+
+function buildUI() {
+  const container = document.getElementById('cards-container');
+  container.innerHTML = '';
+  sections.forEach(sec => {
+    const secExperts = experts.filter(e => e.section === sec.id);
+    const secDiv = document.createElement('div');
+    secDiv.className = 'section';
+    secDiv.dataset.section = sec.id;
+    const ts = tagStyles[sec.tagClass] || tagStyles.C;
+    secDiv.innerHTML = `
+      <div class="section-header">
+        <div class="section-tag" style="background:${ts.bg};color:${ts.color}">${sec.tag}</div>
+        <div class="section-title">${sec.label}</div>
+        <div class="section-count">${secExperts.length} experts</div>
+      </div>
+      <div class="cards-grid" id="grid-${sec.id}"></div>
+    `;
+    container.appendChild(secDiv);
+    const grid = secDiv.querySelector(`#grid-${sec.id}`);
+    secExperts.forEach(e => grid.appendChild(buildCard(e, experts.indexOf(e))));
+  });
+  updateStats();
+}
+
+function buildCard(e, idx) {
+  const card = document.createElement('div');
+  const domClass = e.domain.length > 1 ? 'nrbc' :
+    e.domain[0] === 'C' ? 'chim' :
+    e.domain[0] === 'R' ? 'rn' :
+    e.domain[0] === 'B' ? 'bio' : 'chim';
+
+  card.className = `card ${domClass}`;
+  card.dataset.domain = e.domain.join(',');
+  card.dataset.tags   = e.tags.join(',');
+  card.dataset.h24    = e.h24;
+  card.dataset.search = [e.acronym, e.name, e.specialty, e.contact||'', e.via||'', e.tags.join(' ')].join(' ').toLowerCase();
+  card.dataset.expertIdx = idx;
+
+  const domTags = e.domain.map(d => {
+    const cls   = d === 'C' ? 'C' : d === 'R' ? 'R' : d === 'B' ? 'B' : 'NR';
+    const label = d === 'C' ? 'CHI' : d === 'R' ? 'RAD' : d === 'B' ? 'BIO' : 'MULTI';
+    return `<span class="tag ${cls}">${label}</span>`;
+  }).join('');
+
+  const contactHtml = e.contact
+    ? `<span class="contact-val">${e.contact}</span>`
+    : `<span class="contact-via">${e.via}</span>`;
+
+  const siteHtml = e.formulaire
+    ? `<a href="${e.formulaire}" target="_blank" style="color:#001F8F;font-size:11px;margin-left:auto;font-weight:600;text-decoration:none;">📋 Formulaire</a>`
+    : '';
+
+  card.innerHTML = `
+    <div class="card-header">
+      <div class="card-acronym">${e.acronym}</div>
+      <div class="card-tags">${domTags}${e.h24 ? '<span class="h24-badge">H24</span>' : ''}</div>
+    </div>
+    <div class="card-name">${e.name}</div>
+    <div class="card-specialty">${e.specialty}</div>
+    <div class="card-contact">
+      <span class="contact-icon">📞</span>
+      ${contactHtml}
+      ${siteHtml}
+    </div>
+  `;
+
+  const hasConv  = e.tags.includes('conv');
+  const hasNrbce = e.tags.includes('nrbce');
+  if (hasConv || hasNrbce) {
+    const bd = document.createElement('div');
+    bd.className = 'card-badges';
+    if (hasConv)  { const b = document.createElement('span'); b.className = 'conv-badge';  b.textContent = '⚖ Convention'; bd.appendChild(b); }
+    if (hasNrbce) { const b = document.createElement('span'); b.className = 'nrbce-badge'; b.textContent = '☣ NRBCe';     bd.appendChild(b); }
+    card.appendChild(bd);
+  }
+  return card;
+}
+
+let currentSearch = '';
+
+function onSearch(val) {
+  currentSearch = val.trim().toLowerCase();
+  document.getElementById('search-clear').style.display = currentSearch ? 'block' : 'none';
+  applyFilters();
+}
+
+function clearSearch() {
+  document.getElementById('search-input').value = '';
+  currentSearch = '';
+  document.getElementById('search-clear').style.display = 'none';
+  document.getElementById('search-count').textContent = '';
+  applyFilters();
+}
+
+function highlight(text, query) {
+  if (!query) return text;
+  const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return text.replace(new RegExp(`(${escaped})`, 'gi'), '<span class="highlight">$1</span>');
+}
+
+function applyHighlights(card, e, query) {
+  if (!query) {
+    card.querySelector('.card-acronym').textContent  = e.acronym;
+    card.querySelector('.card-name').textContent     = e.name;
+    card.querySelector('.card-specialty').textContent = e.specialty;
+  } else {
+    card.querySelector('.card-acronym').innerHTML   = highlight(e.acronym, query);
+    card.querySelector('.card-name').innerHTML      = highlight(e.name, query);
+    card.querySelector('.card-specialty').innerHTML = highlight(e.specialty, query);
+  }
+}
+
+function filterDomain(type) {
+  const btn = event.target;
+  const isAlreadyActive = btn.classList.contains('active');
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  if (isAlreadyActive && type !== 'all') {
+    document.querySelector('.filter-btn').classList.add('active');
+    activeFilters.special = 'all';
+  } else {
+    btn.classList.add('active');
+    activeFilters.special = type;
+  }
+  applyFilters();
+}
+
+function applyFilters() {
+  const cards = document.querySelectorAll('.card');
+  let visible = 0;
+  cards.forEach(card => {
+    const e = experts[parseInt(card.dataset.expertIdx)];
+    let show = true;
+    if (activeFilters.special === 'h24'        && card.dataset.h24 !== 'true')           show = false;
+    if (activeFilters.special === 'tox'        && !card.dataset.tags.includes('tox'))    show = false;
+    if (activeFilters.special === 'id'         && !card.dataset.tags.includes('id'))     show = false;
+    if (activeFilters.special === 'env'        && !card.dataset.tags.includes('env'))    show = false;
+    if (activeFilters.special === 'retex'      && !card.dataset.tags.includes('retex'))  show = false;
+    if (activeFilters.special === 'tmd'        && !card.dataset.tags.includes('tmd'))    show = false;
+    if (activeFilters.special === 'convention' && !card.dataset.tags.includes('conv'))   show = false;
+    if (activeFilters.special === 'nrbce'      && !card.dataset.tags.includes('nrbce'))  show = false;
+    if (currentSearch && !card.dataset.search.includes(currentSearch))                   show = false;
+    card.classList.toggle('hidden', !show);
+    if (show) { visible++; applyHighlights(card, e, currentSearch); }
+  });
+  document.querySelectorAll('.section').forEach(sec => {
+    sec.style.display = sec.querySelectorAll('.card:not(.hidden)').length > 0 ? '' : 'none';
+  });
+  document.getElementById('no-results').style.display = visible === 0 ? 'block' : 'none';
+  document.getElementById('search-count').textContent = currentSearch
+    ? `${visible} résultat${visible > 1 ? 's' : ''}` : '';
+  updateStats();
+}
+
+function updateStats() {
+  document.getElementById('total-count').textContent = document.querySelectorAll('.card:not(.hidden)').length;
+  document.getElementById('h24-count').textContent   = document.querySelectorAll('.card:not(.hidden)[data-h24="true"]').length;
+  document.getElementById('chim-count').textContent  = document.querySelectorAll('.card:not(.hidden)[data-domain*="C"]').length;
+  document.getElementById('rad-count').textContent   = document.querySelectorAll('.card:not(.hidden)[data-domain*="R"]').length;
+  document.getElementById('bio-count').textContent   = document.querySelectorAll('.card:not(.hidden)[data-domain*="B"]').length;
+}
+
+buildUI();
+</script>
+</body>
+</html><!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cartographie Experts NRBC — Mémento IA-RCH | ENSOSP</title>
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<link rel="stylesheet" href="style.css">
+<style>
+  :root {
+    --ensosp:      #001F8F;
+    --ensosp-dark: #001470;
+    --ensosp-light:#e7ecff;
+    --bg:          #f5f7fb;
+    --surface:     #ffffff;
+    --border:      #ccd2e3;
+    --border-light:#e9ecf5;
+    --text:        #111;
+    --text-dim:    #555;
+
+    --C:   #b45309;
+    --R:   #b91c1c;
+    --B:   #15803d;
+    --M:   #6d28d9;
+
+    --C-bg:  #fef3c7;
+    --R-bg:  #fee2e2;
+    --B-bg:  #dcfce7;
+    --M-bg:  #ede9fe;
+
+    --shadow:      0 3px 8px rgba(0,0,0,0.06);
+    --shadow-hover:0 6px 18px rgba(0,31,143,0.12);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: "Inter", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--ensosp);
+    color: white;
+    padding: 18px 24px;
+    display: flex;
+    text-align: center;
+    align-items: center;
+    gap: 16px;
+  }
+  .header-logo {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    border: 1px solid rgba(255,255,255,0.4);
+    padding: 4px 10px;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+  .header-titles { flex: 1; }
+  .header-titles h1 {
+    font-size: clamp(16px, 2.5vw, 22px);
+    font-weight: 700;
+    color: white;
+    text-align: center;
+  }
+  .header-subtitle {
+    font-size: 11px;
+    color: rgba(255,255,255,0.65);
+    margin-top: 2px;
+    letter-spacing: 0.3px;
+    text-align: center;
+  }
+
+  /* ── CONTAINER ── */
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 24px 20px;
+  }
+
+  /* ── STATS ── */
+  .stats {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    border-radius: 12px;
+    padding: 14px 20px;
+    text-align: center;
+    box-shadow: var(--shadow);
+    min-width: 90px;
+  }
+  .stat-val {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--ensosp);
+    line-height: 1;
+  }
+  .stat-label {
+    font-size: 10px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-top: 4px;
+  }
+
+  /* ── LÉGENDE ── */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-dim);
+  }
+  .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+  /* ── RECHERCHE ── */
+  .search-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+    padding: 10px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .search-bar:focus-within {
+    border-color: var(--ensosp);
+    box-shadow: 0 0 0 3px rgba(0,31,143,0.08);
+  }
+  .search-icon { color: var(--ensosp); font-size: 15px; flex-shrink: 0; }
+  .search-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-family: "Inter", sans-serif;
+    font-size: 14px;
+    color: var(--text);
+  }
+  .search-input::placeholder { color: #aab; }
+  .search-clear {
+    background: transparent;
+    border: none;
+    color: var(--text-dim);
+    cursor: pointer;
+    font-size: 14px;
+    padding: 0 4px;
+    display: none;
+    line-height: 1;
+    border-radius: 50%;
+  }
+  .search-clear:hover { color: var(--ensosp); background: var(--ensosp-light); }
+  .search-count { font-size: 11px; color: var(--text-dim); white-space: nowrap; flex-shrink: 0; }
+
+  
+  /* ── FILTRES ── */
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 28px;
+    align-items: center;
+  }
+  .filter-label {
+    font-size: 11px;
+    color: var(--text-dim);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-right: 4px;
+  }
+  .filter-btn {
+    font-family: "Inter", sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 6px 14px;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    background: var(--surface);
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all 0.18s;
+  }
+  .filter-btn:hover {
+    border-color: var(--ensosp);
+    color: var(--ensosp);
+    background: var(--ensosp-light);
+  }
+  .filter-btn.active {
+    background: var(--ensosp);
+    color: white;
+    border-color: var(--ensosp);
+    font-weight: 600;
+  }
+  .filter-conv { border-color: #92400e; color: #92400e; }
+  .filter-conv:hover { background: #fef3c7; border-color: #92400e; color: #92400e; }
+  .filter-conv.active { background: #b45309; color: white; border-color: #b45309; }
+
+  .filter-nrbce { border-color: #5b21b6; color: #5b21b6; }
+  .filter-nrbce:hover { background: #ede9fe; border-color: #5b21b6; color: #5b21b6; }
+  .filter-nrbce.active { background: #6d28d9; color: white; border-color: #6d28d9; }
+
+  /* ── SECTIONS ── */
+  .section { margin-bottom: 36px; }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--border-light);
+  }
+  .section-tag {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    padding: 3px 10px;
+    border-radius: 6px;
+    text-transform: uppercase;
+  }
+  .section-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--ensosp);
+  }
+  .section-count {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-left: auto;
+    font-weight: 500;
+  }
+
+  /* ── GRILLE ── */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+    gap: 14px;
+  }
+
+  /* ── CARTES ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    border-radius: 14px;
+    padding: 16px 18px;
+    position: relative;
+    transition: box-shadow 0.2s, transform 0.2s;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    border-radius: 14px 14px 0 0;
+  }
+  .card:hover {
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-2px);
+  }
+  .card.hidden { display: none; }
+
+  .card.chim::before  { background: var(--C); }
+  .card.rn::before    { background: var(--R); }
+  .card.bio::before   { background: var(--B); }
+  .card.nrbc::before  { background: linear-gradient(90deg, var(--C), var(--R), var(--B)); }
+
+  .card-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 6px;
+    margin-top: 4px;
+  }
+  .card-acronym {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--ensosp);
+    flex: 1;
+    line-height: 1.3;
+  }
+  .card-tags { display: flex; gap: 4px; flex-wrap: wrap; align-items: center; }
+
+  .tag {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    padding: 2px 7px;
+    border-radius: 4px;
+    text-transform: uppercase;
+  }
+  .tag.C  { background: var(--C-bg);  color: var(--C); }
+  .tag.R  { background: var(--R-bg);  color: var(--R); }
+  .tag.B  { background: var(--B-bg);  color: var(--B); }
+  .tag.NR { background: var(--M-bg);  color: var(--M); }
+
+  .card-name {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+    line-height: 1.4;
+  }
+  .card-specialty {
+    font-size: 12px;
+    color: #333;
+    line-height: 1.55;
+    margin-bottom: 12px;
+  }
+  .card-contact {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    padding: 7px 10px;
+    background: var(--ensosp-light);
+    border-radius: 8px;
+    border: 1px solid #d0d8f5;
+  }
+  .contact-icon { font-size: 12px; flex-shrink: 0; }
+  .contact-val  { color: var(--ensosp); font-weight: 700; }
+  .contact-via  { color: var(--text-dim); font-style: italic; }
+
+  .h24-badge {
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: #dcfce7;
+    color: #15803d;
+    border: 1px solid #bbf7d0;
+    margin-left: auto;
+  }
+
+  .card-badges {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+  }
+  .conv-badge {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: var(--C-bg);
+    color: var(--C);
+    border: 1px solid #fde68a;
+  }
+  .nrbce-badge {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: var(--M-bg);
+    color: var(--M);
+    border: 1px solid #ddd6fe;
+  }
+
+  /* ── HIGHLIGHT ── */
+  .highlight {
+    background: #fef08a;
+    color: #713f12;
+    border-radius: 2px;
+    padding: 0 1px;
+  }
+
+  /* ── PAS DE RÉSULTATS ── */
+  .no-results {
+    text-align: center;
+    padding: 48px;
+    color: var(--text-dim);
+    font-size: 14px;
+    display: none;
+    background: var(--surface);
+    border-radius: 14px;
+    border: 1px solid var(--border-light);
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    text-align: center;
+    padding: 20px;
+    font-size: 12px;
+    color: var(--text-dim);
+    border-top: 1px solid var(--border-light);
+    margin-top: 20px;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 600px) {
+    header { flex-direction: column; align-items: flex-start; gap: 8px; }
+    .stats { gap: 8px; }
+    .stat-card { min-width: 70px; padding: 10px 14px; }
+  }
+</style>
+</head>
+<body>
+
 <header style="background:#001F8F;padding:20px;text-align:center;color:white;font-size:22px;font-weight:700;letter-spacing:0.5px;justify-content:center;">
   Mémento Opérationnel IA – ENSOSP
 </header>
