@@ -493,7 +493,7 @@ const experts = [
     name: "Cellule d'Appui aux Situations d'Urgence — INERIS",
     domain: ["C","M"],
     specialty: "Appui opérationnel toxicologique, dimensionnement des effets d'un rejet chimique, modélisation en temps réel — cadre : circulaire du 15 juillet 2005 — convention d'activation via préfecture/DREAL",
-    contact: "03.44.55.69.99", via: null, h24: true,
+    contact: "03.44.55.69.99", via: null, h24: true,formulaire:"https://www.ineris.fr/fr/ineris/institut-bref/cellule-appui-situations-urgence-casu",
     tags: ["tox","id","conv"], section: "chimique"
   },
   {
@@ -857,7 +857,7 @@ const contactHtml = e.contact
   : `<span class="contact-via">${e.via}</span>`;
 
   const siteHtml = e.formulaire
-    ? `<a href="${e.formulaire}" target="_blank" style="color:#001F8F;font-size:11px;margin-left:auto;font-weight:600;text-decoration:none;">📋 Formulaire</a>`
+    ? `<a href="${e.formulaire}" target="_blank" style="color:#001F8F;font-size:11px;margin-left:auto;font-weight:600;text-decoration:none;">📋 Formulaire /Lien</a>`
     : '';
 
   card.innerHTML = `
