@@ -33,7 +33,6 @@ export function addVariableUI() {
       <option value="number">number</option>
       <option value="choice">choice</option>
       <option value="geoloc">geoloc</option>
-      <option value="meteo">meteo 🌤 (météo NRBC automatique)</option>
     </select>
 
     <div id="var_choice_options_${varCount}" class="choiceOptions hidden">
@@ -157,7 +156,6 @@ export function setVariablesToUI(variables) {
               <option value="number" ${variable.type === 'number' ? 'selected' : ''}>number</option>
               <option value="choice" ${variable.type === 'choice' ? 'selected' : ''}>choice</option>
               <option value="geoloc" ${variable.type === 'geoloc' ? 'selected' : ''}>geoloc</option>
-              <option value="meteo" ${variable.type === 'meteo' ? 'selected' : ''}>meteo 🌤 (météo NRBC automatique)</option>
             </select>
 
             <div id="var_choice_options_${varCount}" class="choiceOptions ${variable.type === 'choice' ? '' : 'hidden'}">
