@@ -51,30 +51,6 @@
     align-items: center;
     gap: 16px;
   }
-  .header-logo {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    border: 1px solid rgba(255,255,255,0.4);
-    padding: 4px 10px;
-    border-radius: 4px;
-    white-space: nowrap;
-  }
-  .header-titles { flex: 1; }
-  .header-titles h1 {
-    font-size: clamp(16px, 2.5vw, 22px);
-    font-weight: 700;
-    color: white;
-    text-align: center;
-  }
-  .header-subtitle {
-    font-size: 11px;
-    color: rgba(255,255,255,0.65);
-    margin-top: 2px;
-    letter-spacing: 0.3px;
-    text-align: center;
-  }
 
   /* ── CONTAINER ── */
   .container {
@@ -176,7 +152,6 @@
   .search-clear:hover { color: var(--ensosp); background: var(--ensosp-light); }
   .search-count { font-size: 11px; color: var(--text-dim); white-space: nowrap; flex-shrink: 0; }
 
-  
   /* ── FILTRES ── */
   .filters {
     display: flex;
@@ -231,7 +206,6 @@
   .filter-nrbce:hover { background: #ede9fe; border-color: #5b21b6; color: #5b21b6; }
   .filter-nrbce.active { background: #6d28d9; color: white; border-color: #6d28d9; }
 
-  /* ── FILTRES DOMAINE ── */
   .filter-chim { border-color: #92400e; color: #92400e; }
   .filter-chim:hover { background: var(--C-bg); border-color: #b45309; color: #b45309; }
   .filter-chim.active { background: #b45309; color: white; border-color: #b45309; }
@@ -257,6 +231,10 @@
     margin-bottom: 14px;
     padding-bottom: 10px;
     border-bottom: 2px solid var(--border-light);
+  }
+  .section-header.multi-header {
+    border-bottom: 3px solid transparent;
+    border-image: linear-gradient(90deg, #b45309, #b91c1c, #15803d, #6d28d9) 1;
   }
   .section-tag {
     font-size: 11px;
@@ -312,7 +290,7 @@
   .card.chim::before  { background: var(--C); }
   .card.rn::before    { background: var(--R); }
   .card.bio::before   { background: var(--B); }
-  .card.nrbc::before  { background: linear-gradient(90deg, var(--C), var(--R), var(--B)); }
+  .card.multi::before { background: linear-gradient(90deg, var(--C) 0%, var(--R) 33%, var(--B) 66%, var(--M) 100%); }
 
   .card-header {
     display: flex;
@@ -425,16 +403,6 @@
     border: 1px solid var(--border-light);
   }
 
-  /* ── FOOTER ── */
-  footer {
-    text-align: center;
-    padding: 20px;
-    font-size: 12px;
-    color: var(--text-dim);
-    border-top: 1px solid var(--border-light);
-    margin-top: 20px;
-  }
-
   /* ── RESPONSIVE ── */
   @media (max-width: 600px) {
     header { flex-direction: column; align-items: flex-start; gap: 8px; }
@@ -445,12 +413,10 @@
 </head>
 <body>
 
-<!-- ── TITRE PRINCIPAL centré ── -->
 <header style="background:#001F8F;padding:20px;text-align:center;color:white;font-size:22px;font-weight:700;letter-spacing:0.5px;justify-content:center;">
   Mémento Opérationnel IA – ENSOSP
 </header>
 
-<!-- ── BARRE DE NAVIGATION centrée ── -->
 <div style="background:#e9ecf5;padding:10px 20px;display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:12px;border-bottom:1px solid #ccd2e3;text-align:center;">
   <a href="index.html" style="color:#001F8F;text-decoration:none;font-weight:600;font-size:14px;">← Accueil</a>
   <span style="color:#aab;font-size:13px;">|</span>
@@ -460,13 +426,14 @@
 
 <div class="container">
 
-<div class="stats" style="align-items:center;">
+  <div class="stats" style="align-items:center;">
     <div class="stat-card"><div class="stat-val" id="total-count">0</div><div class="stat-label">Experts</div></div>
     <div class="stat-card"><div class="stat-val" id="h24-count">0</div><div class="stat-label">H24</div></div>
     <div class="stat-card"><div class="stat-val" id="chim-count" style="color:var(--C)">0</div><div class="stat-label">Chimique</div></div>
     <div class="stat-card"><div class="stat-val" id="rad-count"  style="color:var(--R)">0</div><div class="stat-label">Radio/Nuc</div></div>
     <div class="stat-card"><div class="stat-val" id="bio-count"  style="color:var(--B)">0</div><div class="stat-label">Biologique</div></div>
-    <a href=https://forms.office.com/e/m1BckbZReX
+    <div class="stat-card"><div class="stat-val" id="multi-count" style="color:var(--M)">0</div><div class="stat-label">Multi</div></div>
+    <a href="https://forms.office.com/e/m1BckbZReX"
        target="_blank"
        style="margin-left:auto;display:inline-block;padding:10px 20px;background:white;color:#001F8F;border:2px solid #001F8F;border-radius:12px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;text-decoration:none;white-space:nowrap;"
        onmouseover="this.style.background='#f0f3ff'"
@@ -479,7 +446,7 @@
     <div class="legend-item"><div class="dot" style="background:var(--C)"></div>Chimique</div>
     <div class="legend-item"><div class="dot" style="background:var(--R)"></div>Radiologique / Nucléaire</div>
     <div class="legend-item"><div class="dot" style="background:var(--B)"></div>Biologique</div>
-    <div class="legend-item"><div class="dot" style="background:var(--M)"></div>Multi-risques</div>
+    <div class="legend-item"><div class="dot" style="background:linear-gradient(90deg,var(--C),var(--R),var(--B),var(--M));width:24px;border-radius:3px;"></div>Multi-risques</div>
   </div>
 
   <div class="search-bar">
@@ -491,43 +458,45 @@
     <span class="search-count" id="search-count"></span>
   </div>
 
-  <!-- ── LIGNE 1 : filtres spéciaux ── -->
+  <!-- Ligne 1 : filtres spéciaux -->
   <div class="filters">
     <span class="filter-label">Filtre :</span>
-    <button class="filter-btn active"        onclick="filterSpecial('all', this)">Tous</button>
-    <button class="filter-btn"               onclick="filterSpecial('h24', this)">24H/24H</button>
-    <button class="filter-btn"               onclick="filterSpecial('tox', this)">Toxicologie</button>
-    <button class="filter-btn"               onclick="filterSpecial('id', this)">Identification</button>
-    <button class="filter-btn"               onclick="filterSpecial('env', this)">Environnement</button>
-    <button class="filter-btn"               onclick="filterSpecial('retex', this)">RETEX</button>
-    <button class="filter-btn"               onclick="filterSpecial('tmd', this)">TMD</button>
-    <button class="filter-btn filter-conv"   onclick="filterSpecial('convention', this)">⚖ Convention</button>
-    <button class="filter-btn filter-nrbce"  onclick="filterSpecial('nrbce', this)">☣ NRBCe</button>
+    <button class="filter-btn active"       onclick="filterSpecial('all', this)">Tous</button>
+    <button class="filter-btn"              onclick="filterSpecial('h24', this)">24H/24H</button>
+    <button class="filter-btn"              onclick="filterSpecial('tox', this)">Toxicologie</button>
+    <button class="filter-btn"              onclick="filterSpecial('id', this)">Identification</button>
+    <button class="filter-btn"              onclick="filterSpecial('env', this)">Environnement</button>
+    <button class="filter-btn"              onclick="filterSpecial('retex', this)">RETEX</button>
+    <button class="filter-btn"              onclick="filterSpecial('tmd', this)">TMD</button>
+    <button class="filter-btn filter-conv"  onclick="filterSpecial('convention', this)">⚖ Convention</button>
+    <button class="filter-btn filter-nrbce" onclick="filterSpecial('nrbce', this)">☣ NRBCe</button>
   </div>
 
-  <!-- ── LIGNE 2 : filtres domaine NRBC ── -->
+  <!-- Ligne 2 : filtres domaine -->
   <div class="filters-domain">
     <span class="filter-label">Domaine :</span>
     <button class="filter-btn filter-chim"  onclick="filterDomain('C', this)">🟠 Chimique</button>
     <button class="filter-btn filter-rad"   onclick="filterDomain('R', this)">🔴 Radiologique / Nucléaire</button>
     <button class="filter-btn filter-bio"   onclick="filterDomain('B', this)">🟢 Biologique</button>
-    <button class="filter-btn filter-multi" onclick="filterDomain('M', this)">🟣 Multi-risques</button>
+    <button class="filter-btn filter-multi" onclick="filterDomain('MULTI', this)">🟣 Multi-risques</button>
   </div>
 
   <div id="cards-container"></div>
   <div class="no-results" id="no-results">Aucun expert ne correspond aux filtres sélectionnés.</div>
-<div style="text-align:center;margin:32px 0 8px;">
-  </div>
+  <div style="text-align:center;margin:32px 0 8px;"></div>
+
 </div>
 
 <script>
 const experts = [
+  // ── CHIMIQUE (domaine réel unique = C) ────────────────────────────────────
   {
     acronym: "CASU",
     name: "Cellule d'Appui aux Situations d'Urgence — INERIS",
     domain: ["C","M"],
     specialty: "Appui opérationnel toxicologique, dimensionnement des effets d'un rejet chimique, modélisation en temps réel — cadre : circulaire du 15 juillet 2005 — convention d'activation via préfecture/DREAL",
-    contact: "03.44.55.69.99", via: null, h24: true, formulaire: "https://www.ineris.fr/fr/ineris/institut-bref/cellule-appui-situations-urgence-casu",
+    contact: "03.44.55.69.99", via: null, h24: true,
+    formulaire: "https://www.ineris.fr/fr/ineris/institut-bref/cellule-appui-situations-urgence-casu",
     tags: ["tox","id","conv"], section: "chimique"
   },
   {
@@ -535,7 +504,8 @@ const experts = [
     name: "Union des Industries Chimiques",
     domain: ["C"],
     specialty: "Expertise filière chimique industrielle, appui technique sur produits et procédés",
-    contact: "02.99.36.47.20", via: null, h24: false, formulaire: "https://www.francechimie.fr/espace-adherents",
+    contact: "02.99.36.47.20", via: null, h24: false,
+    formulaire: "https://www.francechimie.fr/espace-adherents",
     tags: ["tox"], section: "chimique"
   },
   {
@@ -543,7 +513,8 @@ const experts = [
     name: "Groupe d'Étude de Sécurité des Industries Pétrolières et Chimiques",
     domain: ["C"],
     specialty: "Liquides inflammables hydrocarbures UNIQUEMENT — expertise sécurité industrielle pétrolière",
-    contact: "01.44.82.72.74", via: null, h24: false, formulaire: "https://gesip.com/?cmplz-force-reload=1774450486101#",
+    contact: "01.44.82.72.74", via: null, h24: false,
+    formulaire: "https://gesip.com/?cmplz-force-reload=1774450486101#",
     tags: ["tmd"], section: "chimique"
   },
   {
@@ -560,15 +531,16 @@ const experts = [
     domain: ["C"],
     specialty: "GPL (butane/propane) UNIQUEMENT — comportement gaz inflammables, sécurité stockages — convention d'assistance formalisée avec formulaire de sollicitation disponible sur site",
     contact: "01.41.97.09.92", via: "Mdp : SDISGPL", h24: false,
-    tags: ["conv","tmd"], formulaire: "https://www.francegazliquides.fr/accedez-a-espace-pro/securite-pompier/",
-    section: "chimique"
+    formulaire: "https://www.francegazliquides.fr/accedez-a-espace-pro/securite-pompier/",
+    tags: ["conv","tmd"], section: "chimique"
   },
   {
     acronym: "Air Liquide",
     name: "Air Liquide Assistance",
     domain: ["C"],
     specialty: "Gaz industriels (O₂, N₂, Cl₂, NH₃…) — expertise comportement, neutralisation, stockage",
-    contact: "0.825.887.913", via: null, h24: true, formulaire: "https://fr.airliquide.com/a-propos/nous-contacter/urgence-securite-et-assistance-technique",
+    contact: "0.825.887.913", via: null, h24: true,
+    formulaire: "https://fr.airliquide.com/a-propos/nous-contacter/urgence-securite-et-assistance-technique",
     tags: ["tox","id"], section: "chimique"
   },
   {
@@ -576,57 +548,27 @@ const experts = [
     name: "TRANSAID — Appui TMD Route",
     domain: ["C"],
     specialty: "TMD route — transfert produits dangereux, colmatage fuites, spécialistes produits — protocole formalisé : formulaire de recueil + localisation centres d'appui par zone de défense disponibles sur transaid.fr",
-    contact:null, via: "voir formulaire", h24: true,
-    tags: ["tmd","id","conv"], formulaire: "https://www.transaid.fr",
-    section: "chimique"
-  },
-  {
-    acronym: "CAP",
-    name: "Centres Antipoison ORFILA",
-    domain: ["C","B"],
-    specialty: "Toxicologie médicale, prise en charge intoxications aiguës, conseil médical H24",
-    contact: "01.45.42.59.59", via: null, h24: true, formulaire: "https://centres-antipoison.net/",
-    tags: ["tox"], section: "chimique"
+    contact: null, via: "voir formulaire", h24: true,
+    formulaire: "https://www.transaid.fr",
+    tags: ["tmd","id","conv"], section: "chimique"
   },
   {
     acronym: "CEDRE",
     name: "Centre de Documentation, de Recherche et d'Expérimentations sur les Pollutions Accidentelles des Eaux",
     domain: ["C","M"],
     specialty: "Données risques littoraux et maritimes, plans de prévention des risques naturels et technologiques côtiers, coordination avec DREAL pour sites ICPE en zone côtière",
-    contact: "02.98.33.10.10", via: null, h24: true, formulaire: "https://cedre.fr/",
+    contact: "02.98.33.10.10", via: null, h24: true,
+    formulaire: "https://cedre.fr/",
     tags: ["env","conv"], section: "chimique"
-  },
-  {
-    acronym: "Météo France",
-    name: "Météo France — Service Prévision",
-    domain: ["C","R","B","M"],
-    specialty: "Modélisation dispersion atmosphérique panache toxique, données vent/stabilité",
-    contact: "04.26.79.73.24", via: null, h24: true, formulaire: "https://meteofrance.com/",
-    tags: ["tox","env"], section: "chimique"
   },
   {
     acronym: "LCPP",
     name: "Laboratoire Central de la Préfecture de Police de Paris",
     domain: ["C","M"],
     specialty: "Identification et analyse de produits chimiques, appui terrain IDF, expertise judiciaire",
-    contact: "01.55.76.22.33", via: null, h24: false, formulaire: "https://www.prefecturedepolice.interieur.gouv.fr/presentation/les-directions-et-services/directions-de-securite-civile/le-laboratoire-central-de-la-prefecture-de-police",
+    contact: "01.55.76.22.33", via: null, h24: false,
+    formulaire: "https://www.prefecturedepolice.interieur.gouv.fr/presentation/les-directions-et-services/directions-de-securite-civile/le-laboratoire-central-de-la-prefecture-de-police",
     tags: ["id"], section: "chimique"
-  },
-  {
-    acronym: "VDIP",
-    name: "Véhicule de Détection, d'Identification et de Prélèvement — UIISC",
-    domain: ["C","R","B","M"],
-    specialty: "Détection, identification et prélèvement NRBC terrain toutes menaces",
-    contact: null, via: "via COZ", h24: true,
-    tags: ["id","tox"], section: "chimique"
-  },
-  {
-    acronym: "RADART",
-    name: "Réseau d'Alerte et de Détection Atmosphérique en Temps Réel — COGIC",
-    domain: ["C","R","M"],
-    specialty: "Modélisation dispersion atmosphérique temps réel, appui COS pour périmètres — déclenchement via formulaire spécifique de recueil (circulaire 2010) transmis au COGIC",
-    contact: null, via: "via COGIC", h24: true,
-    tags: ["tox","env","conv"], section: "chimique"
   },
   {
     acronym: "DREAL",
@@ -649,7 +591,8 @@ const experts = [
     name: "Institut Français de Recherche pour l'Exploitation de la Mer",
     domain: ["C","M"],
     specialty: "Pollutions maritimes — expertise milieu marin, dispersion de polluants en mer, impact environnemental, appui scientifique aux opérations de dépollution côtière",
-    contact: "04.94.30.48.00", via: null, h24: false, formulaire: "https://ccem.ifremer.fr/Risque-Chimique/Que-faire-en-cas-de-deversement-chimique-accidentel",
+    contact: "04.94.30.48.00", via: null, h24: false,
+    formulaire: "https://ccem.ifremer.fr/Risque-Chimique/Que-faire-en-cas-de-deversement-chimique-accidentel",
     tags: ["env"], section: "chimique"
   },
   {
@@ -657,16 +600,9 @@ const experts = [
     name: "Bureau d'Analyse des Risques et Pollutions Industrielles — Base ARIA",
     domain: ["C","M"],
     specialty: "Retex accidents industriels, scénarios accidentels connus, aide à l'anticipation",
-    contact: null, via: "aria.developpement-durable.gouv.fr", h24: false, formulaire: "https://www.aria.developpement-durable.gouv.fr/le-barpi/",
+    contact: null, via: "aria.developpement-durable.gouv.fr", h24: false,
+    formulaire: "https://www.aria.developpement-durable.gouv.fr/le-barpi/",
     tags: ["retex"], section: "chimique"
-  },
-  {
-    acronym: "SAMU/SMUR",
-    name: "Service d'Aide Médicale Urgente",
-    domain: ["C","R","B","M"],
-    specialty: "Prise en charge médicale des victimes, décontamination médicale, référent toxicologie",
-    contact: "15", via: null, h24: true,
-    tags: ["tox"], section: "chimique"
   },
   {
     acronym: "NaTran (ex GRT Gaz)",
@@ -681,7 +617,8 @@ const experts = [
     name: "Démineurs — COGIC (plis/colis suspects)",
     domain: ["C","M"],
     specialty: "Colis suspects, engins improvisés, appui sur matières chimiques/biologiques non identifiées",
-    contact: "01.56.04.74.74", via: null, h24: true, formulaire: "https://www.securite-civile.interieur.gouv.fr/nous-connaitre/notre-organisation/acteurs-de-securite-civile/demineurs",
+    contact: "01.56.04.74.74", via: null, h24: true,
+    formulaire: "https://www.securite-civile.interieur.gouv.fr/nous-connaitre/notre-organisation/acteurs-de-securite-civile/demineurs",
     tags: ["id"], section: "chimique"
   },
   {
@@ -698,14 +635,16 @@ const experts = [
     domain: ["C","M"],
     specialty: "Référent national risques technologiques — modélisation dispersion toxique, explosion, incendie (BLEVE, UVCE), toxicologie industrielle, études de dangers Seveso",
     contact: "03.44.55.69.99", via: null, h24: true,
-    tags: ["tox","id","retex","env"], section: "chimique", formulaire: "https://www.ineris.fr/fr",
+    formulaire: "https://www.ineris.fr/fr",
+    tags: ["tox","id","retex","env"], section: "chimique"
   },
   {
     acronym: "INRS",
     name: "Institut National de Recherche et de Sécurité",
     domain: ["C","M"],
     specialty: "Analyse toxiques industriels, atmosphères dangereuses, explosifs — expertise hygiène industrielle et prévention risques chimiques professionnels",
-    contact: null, via: "inrs.fr", h24: false, formulaire:"https://www.inrs.fr/",
+    contact: null, via: "inrs.fr", h24: false,
+    formulaire: "https://www.inrs.fr/",
     tags: ["tox","id"], section: "chimique"
   },
   {
@@ -713,7 +652,8 @@ const experts = [
     name: "USINAID — Entraide inter-industrielle",
     domain: ["C"],
     specialty: "Entraide entre plateformes industrielles voisines — moyens de pompage lourds, transfert de produits, ressources matérielles mutualisées entre sites Seveso",
-    contact: null, via: "à vérifier", h24: false, formulaire: "https://www.chimie-mediterranee.fr/usinaid",
+    contact: null, via: "à vérifier", h24: false,
+    formulaire: "https://www.chimie-mediterranee.fr/usinaid",
     tags: ["tmd","env"], section: "chimique"
   },
   {
@@ -721,24 +661,28 @@ const experts = [
     name: "SNCF — Vigie Fret / Appui Ferroviaire TMD",
     domain: ["C"],
     specialty: "Incidents TMD ferroviaires — expertise wagons-citernes, mise à disposition trains de secours/levage, données chargement matières dangereuses",
-    contact: null, via: "à vérifier", h24: true, formulaire: "https://vigiexpress.sncf.fr/",
+    contact: null, via: "à vérifier", h24: true,
+    formulaire: "https://vigiexpress.sncf.fr/",
     tags: ["tmd"], section: "chimique"
   },
   {
-  acronym: "FERAID",
-  name: "Fédération d'Entraide pour les Accidents ferroviaires Impliquant des matières Dangereuses — France Chimie",
-  domain: ["C","M"],
-  specialty: "Accidents TMD ferroviaires impliquant des marchandises dangereuses — réseau de coopération volontaire entre industriels chimie/pétrole — demande d'assistance par téléphone puis confirmation via formulaire en ligne",
-  contact: null, via: "feraid.francechimie.fr", h24: false,
-  tags: ["tmd","conv"], formulaire: "https://feraid.francechimie.fr/accident",
-  section: "chimique"
-},
+    acronym: "FERAID",
+    name: "Fédération d'Entraide pour les Accidents ferroviaires Impliquant des matières Dangereuses — France Chimie",
+    domain: ["C","M"],
+    specialty: "Accidents TMD ferroviaires impliquant des marchandises dangereuses — réseau de coopération volontaire entre industriels chimie/pétrole — demande d'assistance par téléphone puis confirmation via formulaire en ligne",
+    contact: null, via: "feraid.francechimie.fr", h24: false,
+    formulaire: "https://feraid.francechimie.fr/accident",
+    tags: ["tmd","conv"], section: "chimique"
+  },
+
+  // ── RADIOLOGIQUE / NUCLÉAIRE (domaine réel unique = R) ───────────────────
   {
     acronym: "ASNR (ex-ASN)",
     name: "Autorité de Sûreté Nucléaire et de Radioprotection — fusion ASN+IRSN en cours depuis 2024",
     domain: ["R"],
     specialty: "Sûreté nucléaire, autorisation de transport, appui réglementaire en urgence radiologique — ⚠️ numéro maintenu ASN, vérifier mise à jour ASNR",
-    contact: "0.800.804.135", via: null, h24: true, formulaire: "https://reglementation-controle.asnr.fr/",
+    contact: "0.800.804.135", via: null, h24: true,
+    formulaire: "https://reglementation-controle.asnr.fr/",
     tags: ["id","retex"], section: "radio"
   },
   {
@@ -746,8 +690,64 @@ const experts = [
     name: "Institut de Radioprotection et de Sûreté Nucléaire",
     domain: ["R","M"],
     specialty: "Radioprotection, dosimétrie, modélisation dispersion radioactive, appui technique H24",
-    contact: "06.07.31.56.63", via: null, h24: true, formulaire:"https://recherche-expertise.asnr.fr/",
+    contact: "06.07.31.56.63", via: null, h24: true,
+    formulaire: "https://recherche-expertise.asnr.fr/",
     tags: ["tox","id","env"], section: "radio"
+  },
+
+  // ── BIOLOGIQUE (domaine réel unique = B) ─────────────────────────────────
+  {
+    acronym: "CIBU",
+    name: "Cellule d'Intervention Biologique d'Urgence — Institut Pasteur",
+    domain: ["B","M"],
+    specialty: "Identification agents biologiques, appui expertise en cas de menace NRBC biologique",
+    contact: "01.40.61.33.54", via: "via préfecture", h24: true,
+    formulaire: "https://www.pasteur.fr/fr/sante-publique/cibu",
+    tags: ["id","tox","nrbce"], section: "bio"
+  },
+
+  // ── MULTI-RISQUES (≥ 2 domaines réels distincts) ──────────────────────────
+  {
+    acronym: "CAP",
+    name: "Centres Antipoison ORFILA",
+    domain: ["C","B"],
+    specialty: "Toxicologie médicale, prise en charge intoxications aiguës, conseil médical H24",
+    contact: "01.45.42.59.59", via: null, h24: true,
+    formulaire: "https://centres-antipoison.net/",
+    tags: ["tox"], section: "multi"
+  },
+  {
+    acronym: "Météo France",
+    name: "Météo France — Service Prévision",
+    domain: ["C","R","B","M"],
+    specialty: "Modélisation dispersion atmosphérique panache toxique, données vent/stabilité",
+    contact: "04.26.79.73.24", via: null, h24: true,
+    formulaire: "https://meteofrance.com/",
+    tags: ["tox","env"], section: "multi"
+  },
+  {
+    acronym: "VDIP",
+    name: "Véhicule de Détection, d'Identification et de Prélèvement — UIISC",
+    domain: ["C","R","B","M"],
+    specialty: "Détection, identification et prélèvement NRBC terrain toutes menaces",
+    contact: null, via: "via COZ", h24: true,
+    tags: ["id","tox"], section: "multi"
+  },
+  {
+    acronym: "RADART",
+    name: "Réseau d'Alerte et de Détection Atmosphérique en Temps Réel — COGIC",
+    domain: ["C","R","M"],
+    specialty: "Modélisation dispersion atmosphérique temps réel, appui COS pour périmètres — déclenchement via formulaire spécifique de recueil (circulaire 2010) transmis au COGIC",
+    contact: null, via: "via COGIC", h24: true,
+    tags: ["tox","env","conv"], section: "multi"
+  },
+  {
+    acronym: "SAMU/SMUR",
+    name: "Service d'Aide Médicale Urgente",
+    domain: ["C","R","B","M"],
+    specialty: "Prise en charge médicale des victimes, décontamination médicale, référent toxicologie",
+    contact: "15", via: null, h24: true,
+    tags: ["tox"], section: "multi"
   },
   {
     acronym: "CEA",
@@ -755,54 +755,53 @@ const experts = [
     domain: ["R","B","M"],
     specialty: "Recherche NRBC, contre-mesures médicales radiologiques et biologiques, détection avancée, coordinateur projets européens NRBC (ex. COUNTERACT)",
     contact: null, via: "cea.fr", h24: false,
-    tags: ["id","tox","retex"], section: "radio"
-  },
-  {
-    acronym: "CIBU",
-    name: "Cellule d'Intervention Biologique d'Urgence — Institut Pasteur",
-    domain: ["B","M"],
-    specialty: "Identification agents biologiques, appui expertise en cas de menace NRBC biologique",
-    contact: "01.40.61.33.54", via: "via préfecture", h24: true, formulaire: "https://www.pasteur.fr/fr/sante-publique/cibu",
-    tags: ["id","tox","nrbce"], section: "bio"
+    tags: ["id","tox","retex"], section: "multi"
   },
   {
     acronym: "BIOTOX/PIRATOX",
     name: "Plans BIOTOX et PIRATOX — DGS/DGA",
     domain: ["B","C","M"],
     specialty: "Activation plans gouvernementaux menace biologique/chimique, coordination interministérielle",
-    contact: null, via: "via préfecture", h24: true, formulaire: "https://www.inrs.fr/publications/bdd/biotox.html",
-    tags: ["tox","nrbce"], section: "bio"
+    contact: null, via: "via préfecture", h24: true,
+    formulaire: "https://www.inrs.fr/publications/bdd/biotox.html",
+    tags: ["tox","nrbce"], section: "multi"
   },
   {
     acronym: "CMVOA",
     name: "Cellule Ministérielle de Veille Opérationnelle et d'Alerte — Agriculture/Environnement",
     domain: ["B","C","M"],
     specialty: "Veille et alerte sur risques biologiques et chimiques environnementaux, appui interministériel",
-    contact: null, via: "via préfecture", h24: false, formulaire:"https://www.vie-publique.fr/rapport/29038-cellule-ministerielle-de-veille-operationnelle-et-dalerte-cmvoa",
-    tags: ["env","retex"], section: "bio"
+    contact: null, via: "via préfecture", h24: false,
+    formulaire: "https://www.vie-publique.fr/rapport/29038-cellule-ministerielle-de-veille-operationnelle-et-dalerte-cmvoa",
+    tags: ["env","retex"], section: "multi"
   },
   {
     acronym: "ANSES",
     name: "Agence Nationale de Sécurité Sanitaire de l'Alimentation, de l'Environnement et du Travail",
     domain: ["B","C","M"],
     specialty: "Évaluation risques sanitaires agents biologiques et chimiques, zoonoses, contamination environnementale, appui scientifique aux autorités",
-    contact: null, via: "anses.fr", h24: false, formulaire: "https://www.anses.fr/fr",
-    tags: ["tox","env","retex"], section: "bio"
+    contact: null, via: "anses.fr", h24: false,
+    formulaire: "https://www.anses.fr/fr",
+    tags: ["tox","env","retex"], section: "multi"
   },
   {
     acronym: "SSA",
     name: "Service de Santé des Armées",
     domain: ["B","R","C","M"],
     specialty: "Expertise NRBC militaire, contre-mesures médicales, détection avancée, prise en charge victimes en environnement contaminé",
-    contact: null, via: "via COGIC / chaîne défense", h24: true, formulaire: "https://www.defense.gouv.fr/sante",
-    tags: ["tox","id","nrbce"], section: "bio"
+    contact: null, via: "via COGIC / chaîne défense", h24: true,
+    formulaire: "https://www.defense.gouv.fr/sante",
+    tags: ["tox","id","nrbce"], section: "multi"
   },
+
+  // ── RETEX & BASES DOCUMENTAIRES ───────────────────────────────────────────
   {
     acronym: "CANUTEC",
     name: "Centre canadien d'urgence transport — Transport Canada",
     domain: ["C","M"],
     specialty: "Guide nord-américain des mesures d'urgence (GNAMU) — réponse opérationnelle par familles de produits dangereux, base de données toxicologiques",
-    contact: null, via: "canutec.tc.gc.ca", h24: false, formulaire: "https://tc.canada.ca/fr/marchandises-dangereuses/canutec/guide-mesures-urgence#Obtenez_une_copie2024",
+    contact: null, via: "canutec.tc.gc.ca", h24: false,
+    formulaire: "https://tc.canada.ca/fr/marchandises-dangereuses/canutec/guide-mesures-urgence#Obtenez_une_copie2024",
     tags: ["retex","tox","id","tmd"], section: "retex"
   },
   {
@@ -810,7 +809,8 @@ const experts = [
     name: "Conseil Européen de l'Industrie Chimique — Emergency Response Intervention Cards",
     domain: ["C","M"],
     specialty: "Cartes de réponse opérationnelle par produit chimique — guide européen des premières mesures d'urgence TMD",
-    contact: null, via: "ericards.net", h24: false, formulaire: "https://www.ericards.net/psp/ericards.psp_search?p_lang=2",
+    contact: null, via: "ericards.net", h24: false,
+    formulaire: "https://www.ericards.net/psp/ericards.psp_search?p_lang=2",
     tags: ["retex","tmd","id"], section: "retex"
   },
   {
@@ -818,7 +818,8 @@ const experts = [
     name: "Agence Nationale de Sécurité du Médicament (ex-AFSSAPS)",
     domain: ["B","C","M"],
     specialty: "Fiches toxiques de guerre et agents biologiques de guerre — données médicales et thérapeutiques pour toxiques NRBC",
-    contact: null, via: "ansm.sante.fr", h24: false, formulaire: "https://ansm.sante.fr/",
+    contact: null, via: "ansm.sante.fr", h24: false,
+    formulaire: "https://ansm.sante.fr/",
     tags: ["retex","tox","nrbce"], section: "retex"
   },
   {
@@ -826,7 +827,8 @@ const experts = [
     name: "Base RISCAD — Retex accidents chimiques",
     domain: ["C","M"],
     specialty: "Base de données retex accidents chimiques industriels — scénarios accidentels, causes, conséquences, enseignements",
-    contact: null, via: "à vérifier", h24: false, formulaire: "https://www.researchgate.net/publication/266470754_Relational_Information_System_for_Chemical_Accidents_Database_RISCAD_improved_by_addition_of_Thermal_Hazard_Data",
+    contact: null, via: "à vérifier", h24: false,
+    formulaire: "https://www.researchgate.net/publication/266470754_Relational_Information_System_for_Chemical_Accidents_Database_RISCAD_improved_by_addition_of_Thermal_Hazard_Data",
     tags: ["retex"], section: "retex"
   },
   {
@@ -834,16 +836,18 @@ const experts = [
     name: "Bases RETEX internationales — eMARS (EU), CSB (USA), NTSB (USA)",
     domain: ["C","M"],
     specialty: "Bases de données accidents industriels et TMD internationales — eMARS (Europe), CSB Chemical Safety Board (USA), NTSB (transport USA) — analyses approfondies et enseignements",
-    contact: null, via: "emars.jrc.ec.europa.eu / csb.gov / ntsb.gov", h24: false, formulaire: "https://www.aria.developpement-durable.gouv.fr/le-barpi/liens-utiles/bases-de-donnees/",
+    contact: null, via: "emars.jrc.ec.europa.eu / csb.gov / ntsb.gov", h24: false,
+    formulaire: "https://www.aria.developpement-durable.gouv.fr/le-barpi/liens-utiles/bases-de-donnees/",
     tags: ["retex"], section: "retex"
   }
 ];
 
 const sections = [
-  { id: "chimique", label: "Chimique",                    tag: "C",   tagClass: "C" },
-  { id: "radio",    label: "Radiologique / Nucléaire",    tag: "R/N", tagClass: "R" },
-  { id: "bio",      label: "Biologique",                  tag: "B",   tagClass: "B" },
-  { id: "retex",    label: "RETEX & Bases Documentaires", tag: "REX", tagClass: "M" }
+  { id: "chimique", label: "Chimique",                    tag: "C",    tagClass: "C" },
+  { id: "radio",    label: "Radiologique / Nucléaire",    tag: "R/N",  tagClass: "R" },
+  { id: "bio",      label: "Biologique",                  tag: "B",    tagClass: "B" },
+  { id: "multi",    label: "Multi-risques",               tag: "MULTI",tagClass: "M" },
+  { id: "retex",    label: "RETEX & Bases Documentaires", tag: "REX",  tagClass: "M" }
 ];
 
 const tagStyles = {
@@ -853,7 +857,6 @@ const tagStyles = {
   M: { bg: "#ede9fe", color: "#6d28d9" }
 };
 
-// État des filtres : spécial (ancienne ligne) + domaine (nouvelle ligne)
 let activeFilters = { special: 'all', domain: null };
 
 function buildUI() {
@@ -865,11 +868,12 @@ function buildUI() {
     secDiv.className = 'section';
     secDiv.dataset.section = sec.id;
     const ts = tagStyles[sec.tagClass] || tagStyles.C;
+    const headerClass = sec.id === 'multi' ? 'section-header multi-header' : 'section-header';
     secDiv.innerHTML = `
-      <div class="section-header">
+      <div class="${headerClass}">
         <div class="section-tag" style="background:${ts.bg};color:${ts.color}">${sec.tag}</div>
         <div class="section-title">${sec.label}</div>
-        <div class="section-count">${secExperts.length} experts</div>
+        <div class="section-count" id="count-${sec.id}">${secExperts.length} expert${secExperts.length > 1 ? 's' : ''}</div>
       </div>
       <div class="cards-grid" id="grid-${sec.id}"></div>
     `;
@@ -882,16 +886,17 @@ function buildUI() {
 
 function buildCard(e, idx) {
   const card = document.createElement('div');
-  const domClass = e.domain.length > 1 ? 'nrbc' :
-    e.domain[0] === 'C' ? 'chim' :
-    e.domain[0] === 'R' ? 'rn' :
-    e.domain[0] === 'B' ? 'bio' : 'chim';
+  const domClass = e.section === 'multi' ? 'multi'
+    : e.section === 'radio' ? 'rn'
+    : e.section === 'bio'   ? 'bio'
+    : 'chim';
 
   card.className = `card ${domClass}`;
-  card.dataset.domain = e.domain.join(',');
-  card.dataset.tags   = e.tags.join(',');
-  card.dataset.h24    = e.h24;
-  card.dataset.search = [e.acronym, e.name, e.specialty, e.contact||'', e.via||'', e.tags.join(' ')].join(' ').toLowerCase();
+  card.dataset.domain    = e.domain.join(',');
+  card.dataset.tags      = e.tags.join(',');
+  card.dataset.h24       = e.h24;
+  card.dataset.section   = e.section;
+  card.dataset.search    = [e.acronym, e.name, e.specialty, e.contact||'', e.via||'', e.tags.join(' ')].join(' ').toLowerCase();
   card.dataset.expertIdx = idx;
 
   const domTags = e.domain.map(d => {
@@ -900,12 +905,12 @@ function buildCard(e, idx) {
     return `<span class="tag ${cls}">${label}</span>`;
   }).join('');
 
-const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
-const contactHtml = e.contact
-  ? isMobile
-    ? `<a href="tel:${e.contact.replace(/\./g, '')}" class="contact-val" style="text-decoration:none;">${e.contact}</a>`
-    : `<span class="contact-val">${e.contact}</span>`
-  : `<span class="contact-via">${e.via}</span>`;
+  const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+  const contactHtml = e.contact
+    ? isMobile
+      ? `<a href="tel:${e.contact.replace(/\./g,'')}" class="contact-val" style="text-decoration:none;">${e.contact}</a>`
+      : `<span class="contact-val">${e.contact}</span>`
+    : `<span class="contact-via">${e.via || '—'}</span>`;
 
   const siteHtml = e.formulaire
     ? `<a href="${e.formulaire}" target="_blank" style="color:#001F8F;font-size:11px;margin-left:auto;font-weight:600;text-decoration:none;">📋 Formulaire /Lien</a>`
@@ -961,8 +966,8 @@ function highlight(text, query) {
 
 function applyHighlights(card, e, query) {
   if (!query) {
-    card.querySelector('.card-acronym').textContent  = e.acronym;
-    card.querySelector('.card-name').textContent     = e.name;
+    card.querySelector('.card-acronym').textContent   = e.acronym;
+    card.querySelector('.card-name').textContent      = e.name;
     card.querySelector('.card-specialty').textContent = e.specialty;
   } else {
     card.querySelector('.card-acronym').innerHTML   = highlight(e.acronym, query);
@@ -971,12 +976,11 @@ function applyHighlights(card, e, query) {
   }
 }
 
-// Filtre ligne 1 (spécial) — toggle si déjà actif
 function filterSpecial(type, btn) {
   const isAlreadyActive = btn.classList.contains('active');
   document.querySelectorAll('.filters .filter-btn').forEach(b => b.classList.remove('active'));
   if (isAlreadyActive && type !== 'all') {
-    document.querySelector('.filters .filter-btn').classList.add('active'); // "Tous"
+    document.querySelector('.filters .filter-btn').classList.add('active');
     activeFilters.special = 'all';
   } else {
     btn.classList.add('active');
@@ -985,12 +989,11 @@ function filterSpecial(type, btn) {
   applyFilters();
 }
 
-// Filtre ligne 2 (domaine) — toggle si déjà actif
 function filterDomain(type, btn) {
   const isAlreadyActive = btn.classList.contains('active');
   document.querySelectorAll('.filters-domain .filter-btn').forEach(b => b.classList.remove('active'));
   if (isAlreadyActive) {
-    activeFilters.domain = null; // désactivé
+    activeFilters.domain = null;
   } else {
     btn.classList.add('active');
     activeFilters.domain = type;
@@ -1001,11 +1004,8 @@ function filterDomain(type, btn) {
 function matchesDomain(card) {
   if (!activeFilters.domain) return true;
   const d = activeFilters.domain;
-  // "M" = Multi-risques = experts ayant 2+ domaines ou domain contient explicitement "M"
-  if (d === 'M') {
-    const domains = card.dataset.domain.split(',');
-    return domains.length > 1 || domains.includes('M');
-  }
+  if (d === 'MULTI') return card.dataset.section === 'multi';
+  // Pour C, R, B : inclure aussi les cartes de la section multi qui portent ce domaine
   return card.dataset.domain.split(',').includes(d);
 }
 
@@ -1016,28 +1016,29 @@ function applyFilters() {
     const e = experts[parseInt(card.dataset.expertIdx)];
     let show = true;
 
-    // Filtres spéciaux (ligne 1)
-    if (activeFilters.special === 'h24'        && card.dataset.h24 !== 'true')           show = false;
-    if (activeFilters.special === 'tox'        && !card.dataset.tags.includes('tox'))    show = false;
-    if (activeFilters.special === 'id'         && !card.dataset.tags.includes('id'))     show = false;
-    if (activeFilters.special === 'env'        && !card.dataset.tags.includes('env'))    show = false;
-    if (activeFilters.special === 'retex'      && !card.dataset.tags.includes('retex'))  show = false;
-    if (activeFilters.special === 'tmd'        && !card.dataset.tags.includes('tmd'))    show = false;
-    if (activeFilters.special === 'convention' && !card.dataset.tags.includes('conv'))   show = false;
-    if (activeFilters.special === 'nrbce'      && !card.dataset.tags.includes('nrbce'))  show = false;
+    if (activeFilters.special === 'h24'        && card.dataset.h24 !== 'true')          show = false;
+    if (activeFilters.special === 'tox'        && !card.dataset.tags.includes('tox'))   show = false;
+    if (activeFilters.special === 'id'         && !card.dataset.tags.includes('id'))    show = false;
+    if (activeFilters.special === 'env'        && !card.dataset.tags.includes('env'))   show = false;
+    if (activeFilters.special === 'retex'      && !card.dataset.tags.includes('retex')) show = false;
+    if (activeFilters.special === 'tmd'        && !card.dataset.tags.includes('tmd'))   show = false;
+    if (activeFilters.special === 'convention' && !card.dataset.tags.includes('conv'))  show = false;
+    if (activeFilters.special === 'nrbce'      && !card.dataset.tags.includes('nrbce')) show = false;
 
-    // Filtre domaine (ligne 2)
     if (!matchesDomain(card)) show = false;
-
-    // Recherche texte
     if (currentSearch && !card.dataset.search.includes(currentSearch)) show = false;
 
     card.classList.toggle('hidden', !show);
     if (show) { visible++; applyHighlights(card, e, currentSearch); }
   });
+
   document.querySelectorAll('.section').forEach(sec => {
-    sec.style.display = sec.querySelectorAll('.card:not(.hidden)').length > 0 ? '' : 'none';
+    const n = sec.querySelectorAll('.card:not(.hidden)').length;
+    sec.style.display = n > 0 ? '' : 'none';
+    const countEl = document.getElementById(`count-${sec.dataset.section}`);
+    if (countEl) countEl.textContent = `${n} expert${n > 1 ? 's' : ''}`;
   });
+
   document.getElementById('no-results').style.display = visible === 0 ? 'block' : 'none';
   document.getElementById('search-count').textContent = currentSearch
     ? `${visible} résultat${visible > 1 ? 's' : ''}` : '';
@@ -1045,11 +1046,13 @@ function applyFilters() {
 }
 
 function updateStats() {
-  document.getElementById('total-count').textContent = document.querySelectorAll('.card:not(.hidden)').length;
-  document.getElementById('h24-count').textContent   = document.querySelectorAll('.card:not(.hidden)[data-h24="true"]').length;
-  document.getElementById('chim-count').textContent  = document.querySelectorAll('.card:not(.hidden)[data-domain*="C"]').length;
-  document.getElementById('rad-count').textContent   = document.querySelectorAll('.card:not(.hidden)[data-domain*="R"]').length;
-  document.getElementById('bio-count').textContent   = document.querySelectorAll('.card:not(.hidden)[data-domain*="B"]').length;
+  const vis = sel => document.querySelectorAll(`.card:not(.hidden)${sel}`).length;
+  document.getElementById('total-count').textContent  = vis('');
+  document.getElementById('h24-count').textContent    = vis('[data-h24="true"]');
+  document.getElementById('chim-count').textContent   = vis('[data-domain*="C"]');
+  document.getElementById('rad-count').textContent    = vis('[data-domain*="R"]');
+  document.getElementById('bio-count').textContent    = vis('[data-domain*="B"]');
+  document.getElementById('multi-count').textContent  = vis('[data-section="multi"]');
 }
 
 buildUI();
