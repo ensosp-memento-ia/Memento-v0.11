@@ -182,6 +182,13 @@
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
+    margin-bottom: 10px;
+    align-items: center;
+  }
+  .filters-domain {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
     margin-bottom: 28px;
     align-items: center;
   }
@@ -223,6 +230,23 @@
   .filter-nrbce { border-color: #5b21b6; color: #5b21b6; }
   .filter-nrbce:hover { background: #ede9fe; border-color: #5b21b6; color: #5b21b6; }
   .filter-nrbce.active { background: #6d28d9; color: white; border-color: #6d28d9; }
+
+  /* ── FILTRES DOMAINE ── */
+  .filter-chim { border-color: #92400e; color: #92400e; }
+  .filter-chim:hover { background: var(--C-bg); border-color: #b45309; color: #b45309; }
+  .filter-chim.active { background: #b45309; color: white; border-color: #b45309; }
+
+  .filter-rad { border-color: #991b1b; color: #991b1b; }
+  .filter-rad:hover { background: var(--R-bg); border-color: #b91c1c; color: #b91c1c; }
+  .filter-rad.active { background: #b91c1c; color: white; border-color: #b91c1c; }
+
+  .filter-bio { border-color: #166534; color: #166534; }
+  .filter-bio:hover { background: var(--B-bg); border-color: #15803d; color: #15803d; }
+  .filter-bio.active { background: #15803d; color: white; border-color: #15803d; }
+
+  .filter-multi { border-color: #5b21b6; color: #5b21b6; }
+  .filter-multi:hover { background: var(--M-bg); border-color: #6d28d9; color: #6d28d9; }
+  .filter-multi.active { background: #6d28d9; color: white; border-color: #6d28d9; }
 
   /* ── SECTIONS ── */
   .section { margin-bottom: 36px; }
@@ -467,17 +491,27 @@
     <span class="search-count" id="search-count"></span>
   </div>
 
+  <!-- ── LIGNE 1 : filtres spéciaux ── -->
   <div class="filters">
     <span class="filter-label">Filtre :</span>
-    <button class="filter-btn active"        onclick="filterDomain('all')">Tous</button>
-    <button class="filter-btn"               onclick="filterDomain('h24')">24H/24H</button>
-    <button class="filter-btn"               onclick="filterDomain('tox')">Toxicologie</button>
-    <button class="filter-btn"               onclick="filterDomain('id')">Identification</button>
-    <button class="filter-btn"               onclick="filterDomain('env')">Environnement</button>
-    <button class="filter-btn"               onclick="filterDomain('retex')">RETEX</button>
-    <button class="filter-btn"               onclick="filterDomain('tmd')">TMD</button>
-    <button class="filter-btn filter-conv"   onclick="filterDomain('convention')"> Convention</button>
-    <button class="filter-btn filter-nrbce"  onclick="filterDomain('nrbce')">NRBCe</button>
+    <button class="filter-btn active"        onclick="filterSpecial('all', this)">Tous</button>
+    <button class="filter-btn"               onclick="filterSpecial('h24', this)">24H/24H</button>
+    <button class="filter-btn"               onclick="filterSpecial('tox', this)">Toxicologie</button>
+    <button class="filter-btn"               onclick="filterSpecial('id', this)">Identification</button>
+    <button class="filter-btn"               onclick="filterSpecial('env', this)">Environnement</button>
+    <button class="filter-btn"               onclick="filterSpecial('retex', this)">RETEX</button>
+    <button class="filter-btn"               onclick="filterSpecial('tmd', this)">TMD</button>
+    <button class="filter-btn filter-conv"   onclick="filterSpecial('convention', this)">⚖ Convention</button>
+    <button class="filter-btn filter-nrbce"  onclick="filterSpecial('nrbce', this)">☣ NRBCe</button>
+  </div>
+
+  <!-- ── LIGNE 2 : filtres domaine NRBC ── -->
+  <div class="filters-domain">
+    <span class="filter-label">Domaine :</span>
+    <button class="filter-btn filter-chim"  onclick="filterDomain('C', this)">🟠 Chimique</button>
+    <button class="filter-btn filter-rad"   onclick="filterDomain('R', this)">🔴 Radiologique / Nucléaire</button>
+    <button class="filter-btn filter-bio"   onclick="filterDomain('B', this)">🟢 Biologique</button>
+    <button class="filter-btn filter-multi" onclick="filterDomain('M', this)">🟣 Multi-risques</button>
   </div>
 
   <div id="cards-container"></div>
@@ -819,7 +853,8 @@ const tagStyles = {
   M: { bg: "#ede9fe", color: "#6d28d9" }
 };
 
-let activeFilters = { special: 'all' };
+// État des filtres : spécial (ancienne ligne) + domaine (nouvelle ligne)
+let activeFilters = { special: 'all', domain: null };
 
 function buildUI() {
   const container = document.getElementById('cards-container');
@@ -936,12 +971,12 @@ function applyHighlights(card, e, query) {
   }
 }
 
-function filterDomain(type) {
-  const btn = event.target;
+// Filtre ligne 1 (spécial) — toggle si déjà actif
+function filterSpecial(type, btn) {
   const isAlreadyActive = btn.classList.contains('active');
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.filters .filter-btn').forEach(b => b.classList.remove('active'));
   if (isAlreadyActive && type !== 'all') {
-    document.querySelector('.filter-btn').classList.add('active');
+    document.querySelector('.filters .filter-btn').classList.add('active'); // "Tous"
     activeFilters.special = 'all';
   } else {
     btn.classList.add('active');
@@ -950,12 +985,38 @@ function filterDomain(type) {
   applyFilters();
 }
 
+// Filtre ligne 2 (domaine) — toggle si déjà actif
+function filterDomain(type, btn) {
+  const isAlreadyActive = btn.classList.contains('active');
+  document.querySelectorAll('.filters-domain .filter-btn').forEach(b => b.classList.remove('active'));
+  if (isAlreadyActive) {
+    activeFilters.domain = null; // désactivé
+  } else {
+    btn.classList.add('active');
+    activeFilters.domain = type;
+  }
+  applyFilters();
+}
+
+function matchesDomain(card) {
+  if (!activeFilters.domain) return true;
+  const d = activeFilters.domain;
+  // "M" = Multi-risques = experts ayant 2+ domaines ou domain contient explicitement "M"
+  if (d === 'M') {
+    const domains = card.dataset.domain.split(',');
+    return domains.length > 1 || domains.includes('M');
+  }
+  return card.dataset.domain.split(',').includes(d);
+}
+
 function applyFilters() {
   const cards = document.querySelectorAll('.card');
   let visible = 0;
   cards.forEach(card => {
     const e = experts[parseInt(card.dataset.expertIdx)];
     let show = true;
+
+    // Filtres spéciaux (ligne 1)
     if (activeFilters.special === 'h24'        && card.dataset.h24 !== 'true')           show = false;
     if (activeFilters.special === 'tox'        && !card.dataset.tags.includes('tox'))    show = false;
     if (activeFilters.special === 'id'         && !card.dataset.tags.includes('id'))     show = false;
@@ -964,7 +1025,13 @@ function applyFilters() {
     if (activeFilters.special === 'tmd'        && !card.dataset.tags.includes('tmd'))    show = false;
     if (activeFilters.special === 'convention' && !card.dataset.tags.includes('conv'))   show = false;
     if (activeFilters.special === 'nrbce'      && !card.dataset.tags.includes('nrbce'))  show = false;
-    if (currentSearch && !card.dataset.search.includes(currentSearch))                   show = false;
+
+    // Filtre domaine (ligne 2)
+    if (!matchesDomain(card)) show = false;
+
+    // Recherche texte
+    if (currentSearch && !card.dataset.search.includes(currentSearch)) show = false;
+
     card.classList.toggle('hidden', !show);
     if (show) { visible++; applyHighlights(card, e, currentSearch); }
   });
