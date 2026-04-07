@@ -120,8 +120,8 @@ async function onGenerate() {
         return;
     }
 
-    if (prompt.length > 4000) {
-        alert("❌ Le prompt dépasse 4000 caractères !");
+    if (prompt.length > 8000) {
+        alert("❌ Le prompt dépasse 8000 caractères !");
         return;
     }
 
@@ -143,11 +143,11 @@ async function onGenerate() {
         encoded = encodeFiche(fiche);
         console.log("📊 Stats compression :", encoded.stats);
 
-        // ⚠️ Vérification taille finale
-        if (encoded.stats.base64 > 2900) {
+        // ⚠️ Vérification taille finale (seuil relevé à 5000 car usage URL prioritaire)
+        if (encoded.stats.base64 > 5000) {
             const confirm = window.confirm(
-                `⚠️ Attention : QR volumineux (${encoded.stats.base64} caractères).\n` +
-                `Il pourrait être difficile à scanner.\n\n` +
+                `⚠️ Attention : fiche volumineuse (${encoded.stats.base64} caractères compressés).\n` +
+                `Le QR Code sera très dense — préférez l'URL cliquable pour partager.\n\n` +
                 `Voulez-vous continuer ?`
             );
             if (!confirm) return;
@@ -183,30 +183,19 @@ async function onGenerate() {
             urlContainer.style.display = "block";
         }
         
-        // ✅ NOUVEAU : Avertissement si URL très longue
-        if (ficheUrl.length > 2500) {
-            console.warn("⚠️ URL très longue:", ficheUrl.length, "caractères");
-            
-            // ✅ CORRECTION : Calculer le nombre de variables
-            const nbVariables = Array.isArray(vars) ? vars.length : 0;
+        // Avertissement si URL très longue (seuil relevé — usage URL prioritaire sur QR)
+        if (ficheUrl.length > 4500) {
+            console.warn("⚠️ URL longue:", ficheUrl.length, "caractères");
             
             const continueGeneration = confirm(
-                `⚠️ ATTENTION : URL VOLUMINEUSE\n\n` +
-                `Longueur : ${ficheUrl.length} caractères\n` +
-                `Limite recommandée : 2000 caractères\n\n` +
-                `Le QR Code généré risque d'être :\n` +
-                `• Très dense et difficile à scanner\n` +
-                `• Impossible à lire avec certains smartphones\n\n` +
-                `RECOMMANDATIONS :\n` +
-                `• Réduire le prompt (actuellement ${prompt.length} caractères)\n` +
-                (nbVariables > 0 ? `• Limiter les variables (actuellement ${nbVariables})\n` : '') +
-                `• Simplifier les métadonnées\n\n` +
-                `Voulez-vous continuer malgré tout ?`
+                `ℹ️ URL volumineuse (${ficheUrl.length} caractères)\n\n` +
+                `L'URL cliquable fonctionne normalement.\n` +
+                `Le QR Code sera dense — préférez l'URL pour partager.\n\n` +
+                `Continuer ?`
             );
             
             if (!continueGeneration) {
-                console.log("❌ Génération annulée par l'utilisateur");
-                // On garde l'URL affichée pour qu'ils puissent l'utiliser
+                console.log("Génération annulée par l'utilisateur");
                 return;
             }
         }
@@ -229,14 +218,17 @@ async function onGenerate() {
         try {
             console.log("📱 Génération du QR Code avec l'URL...");
             
-            // ✅ NOUVEAU : Taille adaptative selon longueur URL
+            // Taille adaptative selon longueur URL (seuils mis à jour)
             let qrSize = 512; // Taille par défaut
-            
-            if (ficheUrl.length > 2500) {
-                qrSize = 1024; // Grande taille pour URLs longues
-                console.log("  - URL longue détectée, taille QR augmentée à", qrSize, "px");
-            } else if (ficheUrl.length > 2000) {
-                qrSize = 768; // Taille intermédiaire
+
+            if (ficheUrl.length > 6000) {
+                qrSize = 1024;
+                console.log("  - URL très longue, taille QR:", qrSize, "px");
+            } else if (ficheUrl.length > 4000) {
+                qrSize = 800;
+                console.log("  - URL longue, taille QR:", qrSize, "px");
+            } else if (ficheUrl.length > 2500) {
+                qrSize = 650;
                 console.log("  - URL moyenne, taille QR:", qrSize, "px");
             }
             
@@ -252,21 +244,20 @@ async function onGenerate() {
             successMsg.style.fontWeight = "600";
             successMsg.style.marginTop = "15px";
             
-            if (ficheUrl.length > 2500) {
+            if (ficheUrl.length > 4500) {
                 successMsg.style.color = "#ff9f1c"; // Orange - Avertissement
                 successMsg.innerHTML = `
                     ⚠️ QR Code généré (${ficheUrl.length} car.)<br>
                     <small style="font-weight:400;">
-                        Densité élevée - Scan mobile difficile possible.<br>
-                        Préférez l'URL cliquable pour partager la fiche.
+                        Densité élevée — préférez l'URL cliquable pour partager.
                     </small>
                 `;
-            } else if (ficheUrl.length > 2000) {
+            } else if (ficheUrl.length > 3000) {
                 successMsg.style.color = "#ff9f1c"; // Orange
                 successMsg.innerHTML = `
                     ✅ QR Code généré (${ficheUrl.length} car.)<br>
                     <small style="font-weight:400;">
-                        Densité moyenne - Testez le scan sur votre mobile.
+                        Densité moyenne — testez le scan sur mobile si besoin.
                     </small>
                 `;
             } else {
@@ -289,7 +280,7 @@ async function onGenerate() {
                 <p style='color:#ff4d4d;font-weight:600;'>❌ Erreur lors de la génération du QR Code</p>
                 <p style='font-size:14px;margin-top:10px;'>
                     L'URL est probablement trop longue (${ficheUrl.length} caractères).<br>
-                    Limite maximale : ~2900 caractères
+                    Limite maximale du QR : ~4000 caractères (préférez l'URL pour les fiches longues)
                 </p>
                 <p style='font-size:14px;margin-top:10px;background:#fff3cd;padding:10px;border-radius:6px;'>
                     <strong>💡 Solution :</strong><br>
