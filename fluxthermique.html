@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8"/>
-  <title>Flux thermique — Pool Fire | Mémento IA ENSOSP</title>
+  <title>Calcul de Flux thermique | Mémento IA ENSOSP</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
   <style>
@@ -101,7 +101,7 @@
 
 <header>
   Mémento Opérationnel IA – ENSOSP
-  <div class="header-sub">Calculateur flux thermique — Pool fire · Méthode Mudan &amp; Croce (Point Source) · Données INERIS</div>
+  <div class="header-sub">Calcul flux thermique · Méthode Mudan &amp; Croce (Point Source) · Données INERIS</div>
 </header>
 
 <nav class="tabs">
@@ -143,7 +143,7 @@
         <td style="padding:5px 8px">χrad réel jusqu'à 3× la valeur tabulée</td>
       </tr>
       <tr>
-        <td style="padding:5px 8px">D hors 1–10 m · cible en hauteur</td>
+        <td style="padding:5px 8px">Cible en hauteur</td>
         <td style="padding:5px 8px;text-align:center;font-weight:700;color:#856404">⚠️ INCERTAIN</td>
         <td style="padding:5px 8px">χrad non validé · facteur de vue non corrigé</td>
       </tr>
@@ -664,7 +664,7 @@ function exporter(){
       '(Hypothèse : combustion complète, nappe stable)';
   }
   var txt=
-    '=== FLUX THERMIQUE — POOL FIRE ===\n'+
+    '=== FLUX THERMIQUE ===\n'+
     'Date/heure   : '+now+'\n'+
     'Modèle       : Point Source — Mudan & Croce (SFPE Handbook)\n'+
     'Données      : INERIS DRA-14-141478-03176A · SFPE Handbook 5e éd. · Babrauskas (2002)\n\n'+
