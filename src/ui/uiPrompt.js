@@ -3,7 +3,7 @@
 // Version corrigée : initialisation auto + validation temps réel + setPromptToUI
 // ======================================================================
 
-const MAX_PROMPT = 4000;
+const MAX_PROMPT = 8000;
 
 /**
  * Initialise le système de compteur de caractères
