@@ -10,8 +10,9 @@
     header{background:#001F8F;padding:12px 20px;text-align:center;color:white;font-size:16px;font-weight:700;letter-spacing:.5px}
     .header-sub{font-size:12px;font-weight:400;opacity:.8;margin-top:3px}
     .tabs{display:flex;background:#e9ecf5;padding:10px;gap:10px}
-    .tab{flex:1;text-align:center;padding:10px 12px;border-radius:25px;color:#001F8F;font-weight:600;font-size:13px;cursor:pointer;border:none;background:transparent;font-family:"Inter",sans-serif}
+    .tab{flex:1;text-align:center;padding:10px 12px;border-radius:25px;color:#001F8F;font-weight:600;font-size:13px;cursor:pointer;border:none;background:transparent;font-family:"Inter",sans-serif;text-decoration:none;display:inline-block;transition:.2s}
     .tab.active{background:#001F8F;color:white}
+    .tab:hover:not(.active){background:#d9dff5}
     main{max-width:900px;margin:0 auto;padding:20px;flex:1;width:100%;box-sizing:border-box}
 
     /* AVERTISSEMENT ÉTENDU */
@@ -103,11 +104,12 @@
   <div class="header-sub">Calculateur flux thermique — Pool fire · Méthode Mudan &amp; Croce (Point Source) · Données INERIS</div>
 </header>
 
-<div class="tabs">
-  <button class="tab active">🔥 Flux thermique</button>
-  <button class="tab" onclick="window.location.href='index.html'">🏠 Accueil</button>
-  <button class="tab" onclick="window.location.href='expert.html'">🗺️ Experts NRBC</button>
-</div>
+<nav class="tabs">
+  <a href="index.html" class="tab">🏠 Accueil</a>
+  <a href="scan.html" class="tab">📷 Lecture QR</a>
+  <a href="create.html" class="tab">📝 Création fiche</a>
+  <a href="nrbc.html" class="tab">⚗️ Espace NRBC</a>
+</nav>
 
 <main>
 
@@ -416,14 +418,6 @@
 <footer>© ENSOSP — Mémento IA NRBC · Cne Eddy Fischer – Cdt Anne Tirelle · V0.13 · Point Source Mudan &amp; Croce / Thomas · INERIS DRA-14-141478-03176A</footer>
 
 <script>
-// =============================================================
-// DONNÉES PRODUITS — MÉTHODE MUDAN POINT SOURCE
-// χrad : fraction radiative (—)         — INERIS DRA-09 / SFPE Handbook / Babrauskas 2002
-// m_bv : débit massique surfacique       — INERIS DRA-14 Tableau 1 / Babrauskas 2002
-//         (kg/m²·s) régime turbulent D≥1m
-// Hc   : chaleur nette de combustion     — NIST / NFPA (MJ/kg)
-// rho  : densité liquide à 15°C (kg/L)  — NIST DIPPR
-// =============================================================
 var PRODUITS = {
   essence:  { nom:'Essence (SP95/SP98)',      chi_r:0.13, m_bv:0.055, Hc:44.7, rho:0.750,
               src:'χrad=0,13 (SFPE/Babrauskas) · ṁ″=0,055 (INERIS DRA-14) · Hc=44,7 MJ/kg (NFPA)' },
@@ -447,7 +441,6 @@ var SEUILS = { SEI:3, SEL:5, SELS:8 };
 var forme = 'circulaire';
 var lastR = null;
 
-// Remplir tableau référence
 (function(){
   var tb = document.getElementById('table-produits');
   ['essence','gazole','kerosene','fuel','toluene','hexane','acetone','ethanol'].forEach(function(k,i){
@@ -465,14 +458,11 @@ var lastR = null;
 
 function onFamilleChange(){
   var k = document.getElementById('famille').value;
-  if(!k||k==='manuel'){
-    document.getElementById('ficheSource').style.display='none';
-    return;
-  }
+  if(!k||k==='manuel'){ document.getElementById('ficheSource').style.display='none'; return; }
   var p = PRODUITS[k];
-  document.getElementById('chi_r').value       = p.chi_r;
-  document.getElementById('m_bv').value        = p.m_bv;
-  document.getElementById('hc').value          = p.Hc;
+  document.getElementById('chi_r').value        = p.chi_r;
+  document.getElementById('m_bv').value         = p.m_bv;
+  document.getElementById('hc').value           = p.Hc;
   document.getElementById('densite_prod').value = p.rho;
   var src = document.getElementById('ficheSource');
   src.style.display = 'block';
@@ -495,30 +485,20 @@ function updateUnitLabel(){ document.getElementById('unit-label').textContent = 
 function updateSlider(){ var v=document.getElementById('distance').value; document.getElementById('dist-label').textContent=v+' m'; document.getElementById('dist-input').value=v; }
 function syncDist(){ var v=parseFloat(document.getElementById('dist-input').value)||30; document.getElementById('distance').value=Math.min(300,v); document.getElementById('dist-label').textContent=v+' m'; }
 
-// Corrélation de Thomas 1963
 function hfThomas(D, m_bv){
   var rhoA=1.2, g=9.81;
   return 42*D*Math.pow(m_bv/(rhoA*Math.sqrt(g*D)),0.61);
 }
 
-// =============================================================
-// CALCUL PRINCIPAL — MUDAN & CROCE POINT SOURCE
-// q = (χrad × ṁ_total × Hc × τ) / (4π × d²)
-// avec ṁ_total = ṁ″ × A  (kg/s)
-//      Hc en kJ/kg (= MJ/kg × 1000)
-//      q en kW/m²
-// =============================================================
 function calculer(){
   var chi_r = parseFloat(document.getElementById('chi_r').value) || 0.13;
   var m_bv  = parseFloat(document.getElementById('m_bv').value)  || 0.055;
   var Hc_MJ = parseFloat(document.getElementById('hc').value)    || 44.7;
   var rho   = parseFloat(document.getElementById('densite_prod').value) || 0.75;
   var d     = parseFloat(document.getElementById('dist-input').value) || 30;
-
   var tauCustom = document.getElementById('tau-custom').value;
   var tau = tauCustom ? parseFloat(tauCustom) : parseFloat(document.getElementById('tau').value);
 
-  // Géométrie
   var A, D_eq;
   if(forme==='circulaire'){
     var D=parseFloat(document.getElementById('diametre').value)||10;
@@ -532,28 +512,17 @@ function calculer(){
     D_eq=2*Math.sqrt(A/Math.PI);
   }
 
-  // Hauteur flamme Thomas
   var hfManuel=parseFloat(document.getElementById('hf').value);
   var Hf=(hfManuel>0)?hfManuel:hfThomas(D_eq,m_bv);
-
-  // Débit massique total (kg/s)
   var m_dot = m_bv * A;
-
-  // Puissances
-  var Hc_kJ = Hc_MJ * 1000;          // kJ/kg
-  var Q    = m_dot * Hc_kJ;          // kW — puissance thermique totale
-  var Qrad = chi_r * Q;              // kW — puissance rayonnée
-
-  // Flux thermique à distance d — Mudan Point Source
-  // q = (Qrad × τ) / (4π × d²)
+  var Hc_kJ = Hc_MJ * 1000;
+  var Q    = m_dot * Hc_kJ;
+  var Qrad = chi_r * Q;
   var q = (Qrad * tau) / (4 * Math.PI * d * d);
-
-  // Distances aux seuils (résolution numérique)
   var dSEI  = dSeuil(Qrad, tau, SEUILS.SEI);
   var dSEL  = dSeuil(Qrad, tau, SEUILS.SEL);
   var dSELS = dSeuil(Qrad, tau, SEUILS.SELS);
 
-  // Module durée
   var dd = null;
   if(document.getElementById('toggle-duree').checked){
     var qteRaw=parseFloat(document.getElementById('quantite').value)||0;
@@ -580,10 +549,7 @@ function calculer(){
   afficher(lastR);
 }
 
-// q(d) = Qrad×τ / (4π×d²) => d = sqrt(Qrad×τ / (4π×qs))
-function dSeuil(Qrad, tau, qs){
-  return Math.sqrt((Qrad*tau)/(4*Math.PI*qs));
-}
+function dSeuil(Qrad, tau, qs){ return Math.sqrt((Qrad*tau)/(4*Math.PI*qs)); }
 
 function couleur(q){
   if(q>=SEUILS.SELS) return {bg:'#f8d7da',txt:'#721c24',brd:'#cc1a00'};
@@ -601,32 +567,23 @@ function verdict(q){
 function afficher(r){
   document.getElementById('results').classList.add('visible');
   var c=couleur(r.q);
-
   document.getElementById('flux-hero').style.borderTopColor=c.brd;
   var fv=document.getElementById('res-flux'); fv.textContent=r.q.toFixed(2); fv.style.color=c.txt;
   document.getElementById('res-dist').textContent=r.d.toFixed(0);
   var ve=document.getElementById('res-verdict'); ve.textContent=verdict(r.q); ve.style.background=c.bg; ve.style.color=c.txt;
-
-  // Puissances
   document.getElementById('r-Q').textContent=(r.Q/1000).toFixed(2);
   document.getElementById('r-Qrad').textContent=(r.Qrad/1000).toFixed(2);
-
-  // Seuils — note: pour Point Source pur, la distance est indépendante de Hf
   [['sei',SEUILS.SEI,r.dSEI],['sel',SEUILS.SEL,r.dSEL],['sels',SEUILS.SELS,r.dSELS]].forEach(function(s){
     var ok=r.q>=s[1];
     var st=document.getElementById('st-'+s[0]);
     st.textContent=ok?'▲ ATTEINT — dist. depuis centre : '+s[2].toFixed(1)+' m':'✔ non atteint — dist. depuis centre : '+s[2].toFixed(1)+' m';
     st.className='ss '+(ok?'atteint':'ok');
   });
-
-  // Formule détaillée
   var fl=forme==='superficie'?'superficie directe':forme;
   document.getElementById('fpar').innerHTML=
     '<b>χrad</b> = '+r.chi_r+' &nbsp;·&nbsp; <b>ṁ″</b> = '+r.m_bv+' kg/m²·s &nbsp;·&nbsp; <b>A</b> = '+r.A.toFixed(1)+' m² &nbsp;·&nbsp; <b>D éq.</b> = '+r.D_eq.toFixed(2)+' m &nbsp;·&nbsp; Forme : '+fl+'<br>'+
     '<b>ṁ_total</b> = '+r.m_dot.toFixed(3)+' kg/s &nbsp;·&nbsp; <b>Hc</b> = '+r.Hc_MJ+' MJ/kg &nbsp;·&nbsp; <b>Q</b> = '+(r.Q/1000).toFixed(2)+' MW &nbsp;·&nbsp; <b>Qrad</b> = '+(r.Qrad/1000).toFixed(2)+' MW<br>'+
     '<b>τ</b> = '+r.tau+' &nbsp;·&nbsp; <b>d</b> = '+r.d+' m &nbsp;·&nbsp; <b>Hf</b> = '+r.Hf.toFixed(2)+' m (Thomas, informatif)';
-
-  // Durée
   var bd=document.getElementById('duree-res');
   if(r.dd){
     bd.classList.add('visible');
@@ -643,7 +600,6 @@ function afficher(r){
     if(dd.consoNote){cn.textContent=dd.consoNote;cn.style.display='';}
     else{cn.style.display='none';}
   } else { bd.classList.remove('visible'); }
-
   schema(r);
   document.getElementById('results').scrollIntoView({behavior:'smooth',block:'start'});
 }
@@ -656,13 +612,10 @@ function schema(r){
   var xSEI=nx+nw+r.dSEI*sc, xSEL=nx+nw+r.dSEL*sc, xSELS=nx+nw+r.dSELS*sc, xD=nx+nw+r.d*sc;
   var c=couleur(r.q);
   function vc(x){return Math.min(Math.max(x-nx-nw,0),W-nx-nw);}
-
-  // Distance bord = distance centre - rayon
   var rayon = r.D_eq/2;
   var dBordSEI  = Math.max(r.dSEI-rayon,0);
   var dBordSEL  = Math.max(r.dSEL-rayon,0);
   var dBordSELS = Math.max(r.dSELS-rayon,0);
-
   svg.innerHTML=
     '<defs><marker id="am" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M2 1L8 5L2 9" fill="none" stroke="#999" stroke-width="1.5"/></marker></defs>'+
     '<rect x="'+(nx+nw)+'" y="0" width="'+vc(xSELS)+'" height="'+(ny+12)+'" fill="rgba(204,26,0,.06)"/>'+
@@ -700,7 +653,6 @@ function exporter(){
   var prod=document.getElementById('famille').selectedOptions[0]?document.getElementById('famille').selectedOptions[0].text:'Manuel';
   var fl=forme==='superficie'?'superficie directe':forme;
   var rayon=r.D_eq/2;
-
   var ld='';
   if(r.dd){
     var dd=r.dd;
@@ -711,7 +663,6 @@ function exporter(){
       (dd.consoNote?dd.consoNote+'\n':'')+
       '(Hypothèse : combustion complète, nappe stable)';
   }
-
   var txt=
     '=== FLUX THERMIQUE — POOL FIRE ===\n'+
     'Date/heure   : '+now+'\n'+
@@ -739,7 +690,6 @@ function exporter(){
     ld+'\n\n'+
     '⚠ Modèle valide en champ lointain (d > 2-3×D). Surestimation possible en champ proche.\n'+
     'Mémento IA NRBC — SDIS 76 / ENSOSP — V0.13';
-
   navigator.clipboard.writeText(txt).then(function(){
     var btn=document.getElementById('btn-export');
     btn.textContent='✔ Copié dans le presse-papier';
