@@ -24,8 +24,9 @@ function computeQrSize(payloadLength) {
 
   // Ajustement selon complexité (desktop uniquement)
   if (!isMobile) {
-    if (payloadLength > 3500) size = 700;
+    if (payloadLength > 3000) size = 700;
     if (payloadLength > 4500) size = 800;
+    if (payloadLength > 6000) size = 1000;
   } else {
     // Mobile : on reste sur 300px même si QR complexe
     // (la lib QRCode.js gère la densité automatiquement)
