@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Calcul UVCE — Méthode Multi-Énergie | Mémento IA ENSOSP</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+  <style>
+    :root{
+      --blue:#001F8F;--blue-light:#e9ecf5;--blue-mid:#d0d8f0;
+      --orange:#e06c00;--yellow:#e6a817;--red:#cc1a00;--green:#155724;
+      --green-bg:#d4edda;--red-bg:#f8d7da;--yellow-bg:#fff3cd;--orange-bg:#ffe5cc;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:"Inter",sans-serif;background:#f5f7fb;color:#111;min-height:100vh;display:flex;flex-direction:column}
+    header{background:var(--blue);padding:12px 20px;text-align:center;color:white;font-size:16px;font-weight:700;letter-spacing:.5px}
+    .header-sub{font-size:12px;font-weight:400;opacity:.8;margin-top:3px}
+    .tabs{display:flex;background:#e9ecf5;padding:10px;gap:10px}
+    .tab{flex:1;text-align:center;padding:10px 12px;border-radius:25px;color:var(--blue);font-weight:600;font-size:13px;cursor:pointer;border:none;background:transparent;font-family:"Inter",sans-serif;text-decoration:none;display:inline-block;transition:.2s}
+    .tab.active{background:var(--blue);color:white}
+    .tab:hover:not(.active){background:#d9dff5}
+    main{max-width:900px;margin:0 auto;padding:20px;flex:1;width:100%;box-sizing:border-box}
+
+    /* AVERTISSEMENT */
+    .warn{background:#fff3cd;border-left:4px solid #ff9f1c;padding:14px 16px;border-radius:8px;font-size:13px;color:#856404;margin-bottom:20px;line-height:1.7}
+    .warn strong{display:block;font-size:14px;margin-bottom:6px}
+    .warn table{width:100%;border-collapse:collapse;font-size:12px;margin-top:6px}
+    .warn th{padding:5px 8px;text-align:left;font-weight:700;background:rgba(0,0,0,.06);color:#6b4c00}
+    .warn td{padding:5px 8px}
+    .warn tr:nth-child(odd){background:rgba(255,255,255,.5)}
+
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+    @media(max-width:640px){.grid-2{grid-template-columns:1fr}}
+    .card{background:white;padding:22px;border-radius:15px;margin-bottom:20px;box-shadow:0 3px 8px rgba(0,0,0,.05)}
+    .card h2{color:var(--blue);margin:0 0 16px 0;font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px}
+    label{display:block;font-weight:600;font-size:13px;color:var(--blue);margin-bottom:5px;margin-top:14px}
+    label:first-child{margin-top:0}
+    input[type=number],select{width:100%;padding:10px 12px;border-radius:10px;border:1px solid #ccd2e3;font-size:15px;font-family:"Inter",sans-serif;color:#111;background:#fff;transition:border-color .2s;appearance:none;-webkit-appearance:none}
+    input[type=number]{padding-right:72px}
+    input[type=number]:focus,select:focus{border-color:var(--blue);outline:none}
+    .iw{position:relative}
+    .iu{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:12px;font-weight:600;color:var(--blue);background:#e9ecf5;padding:2px 7px;border-radius:6px;pointer-events:none;white-space:nowrap}
+    .src-badge{display:inline-block;font-size:10px;font-weight:600;background:#eef2ff;color:var(--blue);padding:1px 6px;border-radius:4px;margin-left:4px;vertical-align:middle}
+    .hint{font-size:11px;color:#888;margin-top:5px;line-height:1.5}
+
+    /* RADIO */
+    .radio-group{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+    .rbtn{flex:1;min-width:80px;padding:9px 4px;border-radius:10px;border:1px solid #ccd2e3;background:white;color:var(--blue);font-size:12px;font-weight:600;font-family:"Inter",sans-serif;cursor:pointer;text-align:center;transition:all .2s}
+    .rbtn.active{background:var(--blue);color:white;border-color:var(--blue)}
+    .rbtn:hover:not(.active){background:#e9ecf5}
+
+    /* TOGGLE */
+    .toggle-row{display:flex;align-items:center;gap:8px;padding:12px;background:#f1f3fa;border-radius:10px;cursor:pointer;margin-top:14px}
+    .toggle-row input[type=checkbox]{width:16px;height:16px;accent-color:var(--blue);cursor:pointer;flex-shrink:0;padding:0;border:none;appearance:auto}
+    .toggle-row span{font-size:13px;font-weight:600;color:var(--blue)}
+
+    /* SLIDER */
+    .slider-wrap{margin-top:6px}
+    input[type=range]{width:100%;accent-color:var(--blue);cursor:pointer;padding:0;border:none;background:transparent;height:6px;border-radius:0;appearance:auto}
+    .slider-labels{display:flex;justify-content:space-between;font-size:12px;color:#666;margin-top:4px}
+    .slider-labels .cur{font-weight:700;color:var(--blue);font-size:14px}
+
+    /* INDICE SÉVÉRITÉ */
+    .indice-slider-track{position:relative;height:14px;border-radius:8px;margin:8px 0 4px;overflow:hidden;
+      background:linear-gradient(to right,#c8e6c9,#fff9c4,#ffe0b2,#ffccbc,#ef9a9a,#e57373,#ef5350,#e53935,#b71c1c,#7b1111)}
+    #indice-range{width:100%;appearance:auto;-webkit-appearance:auto;margin:0;padding:0;border:none;background:transparent;height:14px;cursor:pointer;accent-color:var(--blue)}
+    .indice-badge{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;font-size:18px;font-weight:800;color:white;margin-right:8px;transition:background .3s}
+    .indice-desc{font-size:12px;color:#555;line-height:1.5;margin-top:6px;padding:8px 10px;background:#f8f9ff;border-radius:8px;border-left:3px solid var(--blue)}
+
+    /* AIDE CONTEXTUELLE INDICE */
+    .aide-indice{background:#eef2ff;border-radius:12px;padding:14px 16px;margin-top:12px;font-size:12px;color:#333;line-height:1.6}
+    .aide-indice .ai-titre{font-weight:700;color:var(--blue);font-size:12px;margin-bottom:8px;text-transform:uppercase;letter-spacing:.4px}
+    .ai-row{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+    .ai-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+    .reacti-badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:700;margin-top:6px}
+
+    /* ALERTE DÉTONATION */
+    .alert-box{display:none;padding:10px 14px;border-radius:10px;font-size:12px;font-weight:600;margin-top:10px;line-height:1.5}
+    .alert-box.danger{background:#f8d7da;color:#721c24;border-left:4px solid var(--red)}
+    .alert-box.warn-soft{background:#fff3cd;color:#856404;border-left:4px solid #ff9f1c}
+    .alert-box.info{background:#d1ecf1;color:#0c5460;border-left:4px solid #17a2b8}
+    .alert-box.visible{display:block}
+
+    /* SOURCE FICHE */
+    .fiche-src{display:none;background:#eef2ff;padding:6px 10px;border-radius:6px;color:var(--blue);font-size:11px;margin-top:8px}
+
+    /* MODULE SOURCE */
+    .mode-src-inner{background:#f1f3fa;border-radius:12px;padding:16px;margin-top:12px}
+    .mode-row{display:grid;grid-template-columns:1fr 80px;gap:8px;align-items:start}
+
+    /* BOUTON */
+    .btn-generate{width:100%;padding:16px;background:var(--blue);color:white;border:none;font-size:16px;font-family:"Inter",sans-serif;border-radius:14px;cursor:pointer;font-weight:700;margin-top:20px;transition:all .2s;box-shadow:0 4px 12px rgba(0,31,143,.3)}
+    .btn-generate:hover{background:#002bbf;transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,31,143,.4)}
+    .btn-generate:active{transform:translateY(0)}
+
+    /* TABLEAU PRODUITS */
+    table.prod-table{width:100%;border-collapse:collapse;font-size:11px}
+    table.prod-table th{padding:6px 6px;background:#eef2ff;color:var(--blue);text-align:center;font-weight:700}
+    table.prod-table td{padding:5px 6px;text-align:center}
+
+    /* RÉSULTATS */
+    #results{display:none}
+    #results.visible{display:block}
+
+    /* HERO */
+    .surp-hero{text-align:center;padding:28px 20px;border-radius:15px;background:white;box-shadow:0 3px 8px rgba(0,0,0,.05);margin-bottom:20px;border-top:5px solid var(--blue);transition:border-color .4s}
+    .surp-lbl{font-size:13px;font-weight:600;color:#666;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+    .surp-val{font-size:clamp(2.8rem,9vw,4.2rem);font-weight:800;color:var(--blue);line-height:1;transition:color .4s}
+    .surp-unit{font-size:15px;color:#666;margin-top:4px}
+    .surp-verdict{display:inline-block;margin-top:14px;padding:8px 22px;border-radius:25px;font-size:14px;font-weight:700}
+
+    /* MÉTRIQUES SOURCES */
+    .metrics-box{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+    @media(max-width:500px){.metrics-box{grid-template-columns:1fr}}
+    .met{background:white;border-radius:14px;box-shadow:0 3px 8px rgba(0,0,0,.05);padding:14px;text-align:center}
+    .met-lbl{font-size:10px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+    .met-val{font-size:1.4rem;font-weight:800;color:var(--blue)}
+    .met-unit{font-size:11px;color:#666}
+
+    /* SEUILS */
+    .seuils-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:20px}
+    @media(max-width:600px){.seuils-grid{grid-template-columns:repeat(2,1fr)}}
+    .sc{background:white;border-radius:14px;padding:12px 8px;text-align:center;box-shadow:0 3px 8px rgba(0,0,0,.05);border-top:4px solid #ccd2e3;transition:border-color .3s}
+    .sc.sels{border-top-color:var(--red)}.sc.sel{border-top-color:var(--orange)}.sc.sei{border-top-color:var(--yellow)}
+    .sc.tympan{border-top-color:#9b59b6}.sc.vitres{border-top-color:#17a2b8}
+    .sn{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#666;margin-bottom:2px}
+    .sv{font-size:1.1rem;font-weight:800;color:var(--blue)}
+    .sd{font-size:9px;color:#666;margin-top:3px;line-height:1.3}
+    .ss{font-size:10px;font-weight:700;margin-top:6px;padding:3px 6px;border-radius:6px}
+    .ss.ok{background:#d4edda;color:var(--green)}.ss.atteint{background:#f8d7da;color:#721c24}
+    .note-bord{font-size:11px;color:#888;margin-top:6px;margin-bottom:20px;text-align:center}
+
+    /* MODULE DURÉE */
+    .duree-res{background:white;border-radius:15px;box-shadow:0 3px 8px rgba(0,0,0,.05);padding:20px 22px;margin-bottom:20px;border-left:4px solid var(--orange);display:none}
+    .duree-res.visible{display:block}
+    .duree-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+    @media(max-width:500px){.duree-metrics{grid-template-columns:1fr}}
+    .dm{background:#f1f3fa;border-radius:12px;padding:14px;text-align:center}
+    .dm-lbl{font-size:10px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+    .dm-val{font-size:1.5rem;font-weight:800;color:var(--blue)}
+    .dm-unit{font-size:11px;color:#666}
+
+    /* SCHÉMA SVG */
+    #schema-svg{width:100%;height:auto;display:block}
+
+    /* FORMULE */
+    .formule-box{background:#eef2ff;border-radius:12px;padding:18px 20px;margin-bottom:20px}
+    .formule-box h3{color:var(--blue);margin:0 0 10px 0;font-size:12px;text-transform:uppercase;letter-spacing:.5px;font-weight:700}
+    .feq{font-size:15px;color:var(--blue);font-weight:700;margin-bottom:8px;font-family:Georgia,serif}
+    .fpar{font-size:12px;color:#444;line-height:2}
+    .fpar b{color:var(--blue)}
+
+    /* SOURCES */
+    .sources-box{background:#f1f3fa;border-radius:10px;padding:14px 16px;margin-bottom:20px;font-size:11px;color:#555;line-height:1.8}
+    .sources-box strong{color:var(--blue)}
+
+    /* EXPORT */
+    .btn-export{width:100%;padding:14px;background:#e9ecf5;color:var(--blue);border:none;font-size:14px;font-family:"Inter",sans-serif;border-radius:14px;cursor:pointer;font-weight:700;transition:all .2s;margin-bottom:20px}
+    .btn-export:hover{background:#d9dff5}
+    .btn-export.copied{background:#d4edda;color:var(--green)}
+
+    footer{padding:12px;text-align:center;font-size:12px;color:#444;border-top:1px solid #e0e4f0}
+    @media(max-width:640px){.card{padding:16px}main{padding:14px}}
+  </style>
+</head>
+<body>
+
+<header>
+  Mémento Opérationnel IA – ENSOSP
+  <div class="header-sub">Calcul UVCE · Méthode Multi-Énergie · Référentiel INERIS Omega UVCE (DRA-16-133610-06190A)</div>
+</header>
+
+<nav class="tabs">
+  <a href="index.html" class="tab">🏠 Accueil</a>
+  <a href="scan.html" class="tab">📷 Lecture QR</a>
+  <a href="create.html" class="tab">📝 Création fiche</a>
+  <a href="nrbc.html" class="tab">⚗️ Espace NRBC</a>
+</nav>
+
+<main>
+
+<!-- AVERTISSEMENT -->
+<div class="warn">
+  <strong>⚠️ Avertissement opérationnel — Outil d'aide au raisonnement tactique uniquement</strong>
+  Méthode Multi-Énergie (Van den Berg / INERIS Omega UVCE) : résultats estimatifs basés sur des abaques numérisés. Tout engagement reste sous l'autorité du COS et s'appuie sur des constatations terrain.
+  <table style="margin-top:6px">
+    <thead><tr><th>Situation</th><th>Biais</th><th>Cause</th></tr></thead>
+    <tbody>
+      <tr><td>H₂, acétylène (Su &gt; 75 cm/s)</td><td style="font-weight:700;color:#c0392b">⛔ INVALIDE</td><td>Risque de détonation — modèle déflagration uniquement</td></tr>
+      <tr><td>Intérieur bâtiment fermé</td><td style="font-weight:700;color:#c0392b">⛔ INVALIDE</td><td>Explosion confinée — modèle spécifique requis</td></tr>
+      <tr><td>η &lt; 1 (fraction participante réduite)</td><td style="font-weight:700;color:#856404">⚠ NON-PPRT</td><td>Résultats non conformes au pire cas réglementaire</td></tr>
+      <tr><td>Nuage non hémisphérique</td><td style="font-weight:700;color:#856404">⚠ INCERTAIN</td><td>Modèle suppose propagation isotrope hémisphérique</td></tr>
+    </tbody>
+  </table>
+  <span style="font-size:11px;display:block;margin-top:5px;opacity:.8">Réf. : INERIS Omega UVCE DRA-16-133610-06190A · Van den Berg (1985/1990) TNO Yellow Book · Arrêté PPRT 29/09/2005</span>
+</div>
+
+<div class="grid-2">
+
+<!-- COLONNE GAUCHE -->
+<div>
+
+  <!-- PRODUIT -->
+  <div class="card">
+    <h2>🧪 Combustible <span class="src-badge">INERIS / NIST</span></h2>
+
+    <label>Sélection du combustible</label>
+    <select id="produit" onchange="onProduitChange()">
+      <option value="">— Sélectionner —</option>
+      <optgroup label="GPL / Hydrocarbures gazeux">
+        <option value="propane">Propane</option>
+        <option value="butane">Butane (n-butane)</option>
+        <option value="propylene">Propylène</option>
+        <option value="methane">Méthane (GN)</option>
+        <option value="ethylene">Éthylène ⚠ Su élevée</option>
+      </optgroup>
+      <optgroup label="Hydrocarbures liquides volatils">
+        <option value="hexane">Hexane / Essence vapeur</option>
+      </optgroup>
+      <optgroup label="Autres">
+        <option value="ammoniac">Ammoniac (Su très faible)</option>
+        <option value="h2">Hydrogène ⛔ détonation</option>
+        <option value="acetylene">Acétylène ⛔ détonation</option>
+        <option value="manuel">Saisie manuelle</option>
+      </optgroup>
+    </select>
+
+    <div class="fiche-src" id="fiche-src"></div>
+
+    <label>Chaleur nette de combustion Hc <span class="src-badge">NIST / NFPA</span></label>
+    <div class="iw"><input type="number" id="hc" min="1" max="150" step="0.1" value="46.3"><span class="iu">MJ/kg</span></div>
+
+    <label>Concentration stœchiométrique Cst <span class="src-badge">INERIS</span></label>
+    <div class="iw"><input type="number" id="cst" min="0.1" max="50" step="0.01" value="4.0"><span class="iu">% vol</span></div>
+    <div class="hint">Utilisée pour estimer le volume du nuage inflammable</div>
+
+    <label>Masse molaire M <span class="src-badge">NIST</span></label>
+    <div class="iw"><input type="number" id="mmol" min="1" max="200" step="0.1" value="44.1"><span class="iu">g/mol</span></div>
+
+    <label>Vitesse de combustion laminaire Su <span class="src-badge">Harris 1983 / INERIS</span></label>
+    <div class="iw"><input type="number" id="su" min="1" max="400" step="1" value="40"><span class="iu">cm/s</span></div>
+    <div class="hint" id="su-hint">Utilisée pour guider le choix de l'indice de sévérité</div>
+    <div class="alert-box" id="alert-deton"></div>
+
+    <label style="margin-top:14px">Fraction participante η <span class="src-badge">PPRT</span></label>
+    <div class="slider-wrap">
+      <input type="range" id="eta-range" min="0.01" max="1.0" step="0.01" value="1.0" oninput="updateEtaLabel()">
+      <div class="slider-labels"><span>0,01</span><span class="cur" id="eta-label">η = 1,00</span><span>1,00</span></div>
+    </div>
+    <div class="alert-box info" id="alert-eta" style="display:none">
+      ⚠️ η &lt; 1 : résultats non conformes au pire cas réglementaire PPRT. Utiliser uniquement pour scénarios d'analyse de sensibilité.
+    </div>
+  </div>
+
+  <!-- MASSE / SOURCE -->
+  <div class="card">
+    <h2>⚖️ Masse inflammable dans le nuage</h2>
+
+    <label>Mode de saisie</label>
+    <div class="radio-group">
+      <div class="rbtn active" id="btn-masse" onclick="setModeSrc('masse')">⚖ Masse directe</div>
+      <div class="rbtn" id="btn-debit" onclick="setModeSrc('debit')">💨 Débit × durée</div>
+    </div>
+
+    <div id="bloc-masse">
+      <label style="margin-top:14px">Masse de gaz inflammable m</label>
+      <div class="iw"><input type="number" id="masse" min="0.1" max="100000" step="1" value="500"><span class="iu">kg</span></div>
+    </div>
+
+    <div id="bloc-debit" style="display:none">
+      <div class="mode-src-inner">
+        <label style="margin-top:0">Débit massique de fuite Q</label>
+        <div class="iw"><input type="number" id="debit-fuite" min="0.001" max="10000" step="0.1" value="10"><span class="iu">kg/s</span></div>
+        <label>Durée d'émission t</label>
+        <div class="mode-row">
+          <div class="iw"><input type="number" id="duree-fuite" min="1" max="86400" step="1" value="60"><span class="iu" id="unit-duree">s</span></div>
+          <select id="unite-duree" onchange="updateUnitDuree()" style="padding:10px 6px">
+            <option value="s">s</option>
+            <option value="min">min</option>
+            <option value="h">h</option>
+          </select>
+        </div>
+        <div class="hint">Masse calculée = Q × t · η appliqué ensuite</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- COLONNE DROITE -->
+<div>
+
+  <!-- INDICE SÉVÉRITÉ -->
+  <div class="card">
+    <h2>💥 Indice de sévérité</h2>
+
+    <label>Nature du site — Zone siège de l'explosion</label>
+    <select id="zone-site" onchange="updateAideIndice()">
+      <option value="">— Sélectionner la zone —</option>
+      <option value="libre">Zone dépourvue d'obstacle, nuage homogène</option>
+      <option value="cuvette_peu">Intérieur de cuvette (peu encombrée)</option>
+      <option value="cuvette_enc">Intérieur de cuvette (encombrée)</option>
+      <option value="pomperie">Pomperie</option>
+      <option value="chargement">Poste de chargement / déchargement</option>
+      <option value="stationnement">Zone de stationnement de véhicules</option>
+      <option value="batiment_leger">Bâtiment de conception légère (bardage…)</option>
+      <option value="batiment_autre">Intérieur autre bâtiment</option>
+    </select>
+
+    <div class="aide-indice" id="aide-indice" style="display:none"></div>
+
+    <label style="margin-top:14px">Indice de sévérité retenu (1–10)</label>
+    <div style="display:flex;align-items:center;margin-bottom:4px">
+      <div class="indice-badge" id="indice-badge">5</div>
+      <div>
+        <div style="font-size:14px;font-weight:700;color:var(--blue)" id="indice-dpmax">ΔPmax = 200 mbar</div>
+        <div style="font-size:11px;color:#888" id="indice-type">Déflagration turbulente</div>
+      </div>
+    </div>
+    <div class="indice-slider-track">
+      <input type="range" id="indice-range" min="1" max="10" step="1" value="5" oninput="updateIndice()">
+    </div>
+    <div class="slider-labels" style="margin-top:2px">
+      <span style="font-size:10px">1 — Faible</span>
+      <span style="font-size:10px">10 — Extrême</span>
+    </div>
+    <div class="indice-desc" id="indice-desc">Déflagration en zone semi-confinée — effets létaux possibles à proximité</div>
+  </div>
+
+  <!-- CONDITIONS EXPOSITION -->
+  <div class="card">
+    <h2>🎯 Conditions d'exposition</h2>
+
+    <label>Distance cible d</label>
+    <div class="slider-wrap">
+      <input type="range" id="distance" min="1" max="500" step="1" value="50" oninput="updateSlider()">
+      <div class="slider-labels"><span>1 m</span><span class="cur" id="dist-label">50 m</span><span>500 m</span></div>
+    </div>
+    <label>Distance (saisie directe)</label>
+    <div class="iw"><input type="number" id="dist-input" min="1" max="5000" step="1" value="50" oninput="syncDist()"><span class="iu">m</span></div>
+
+    <button class="btn-generate" onclick="calculer()">▶ Calculer les effets UVCE</button>
+  </div>
+
+  <!-- TABLEAU PRODUITS -->
+  <div class="card">
+    <h2>📋 Données produits intégrées</h2>
+    <div style="overflow-x:auto">
+      <table class="prod-table">
+        <thead>
+          <tr>
+            <th style="text-align:left">Produit</th>
+            <th>Hc<br>(MJ/kg)</th>
+            <th>Cst<br>(% vol)</th>
+            <th>M<br>(g/mol)</th>
+            <th>Su<br>(cm/s)</th>
+          </tr>
+        </thead>
+        <tbody id="table-produits"></tbody>
+      </table>
+    </div>
+    <div class="hint" style="margin-top:6px">Sources : INERIS Omega UVCE · Harris (1983) · NIST · Mouilleau &amp; Lechaudel (1999)</div>
+  </div>
+
+</div>
+</div><!-- /grid -->
+
+<!-- ===== RÉSULTATS ===== -->
+<div id="results">
+
+  <!-- HERO SURPRESSION -->
+  <div class="surp-hero" id="surp-hero">
+    <div class="surp-lbl">Surpression à <span id="res-dist">—</span> m du centre du nuage</div>
+    <div class="surp-val" id="res-surp">—</div>
+    <div class="surp-unit">mbar</div>
+    <div class="surp-verdict" id="res-verdict"></div>
+  </div>
+
+  <!-- MÉTRIQUES -->
+  <div class="metrics-box">
+    <div class="met"><div class="met-lbl">Énergie E</div><div class="met-val" id="r-E">—</div><div class="met-unit">MJ</div></div>
+    <div class="met"><div class="met-lbl">Volume nuage Vs</div><div class="met-val" id="r-Vs">—</div><div class="met-unit">m³</div></div>
+    <div class="met"><div class="met-lbl">Rayon nuage ≈</div><div class="met-val" id="r-Rn">—</div><div class="met-unit">m</div></div>
+    <div class="met"><div class="met-lbl">Masse participante</div><div class="met-val" id="r-mpart">—</div><div class="met-unit">kg</div></div>
+    <div class="met"><div class="met-lbl">Distance réduite R*</div><div class="met-val" id="r-Rstar">—</div><div class="met-unit">—</div></div>
+    <div class="met"><div class="met-lbl">Indice sévérité</div><div class="met-val" id="r-indice">—</div><div class="met-unit">/ 10</div></div>
+  </div>
+
+  <!-- MODULE DURÉE -->
+  <div class="duree-res" id="duree-res">
+    <h2 style="color:var(--blue);font-size:15px;margin-bottom:14px">💨 Terme source — Calcul par débit</h2>
+    <div class="duree-metrics">
+      <div class="dm"><div class="dm-lbl">Débit fuite</div><div class="dm-val" id="r-debit">—</div><div class="dm-unit">kg/s</div></div>
+      <div class="dm"><div class="dm-lbl">Durée émission</div><div class="dm-val" id="r-duree">—</div><div class="dm-unit" id="r-duree-unit">s</div></div>
+      <div class="dm"><div class="dm-lbl">Masse totale libérée</div><div class="dm-val" id="r-masse-tot">—</div><div class="dm-unit">kg</div></div>
+    </div>
+  </div>
+
+  <!-- SEUILS -->
+  <div class="card" style="margin-bottom:8px">
+    <h2>⚠️ Seuils réglementaires et opérationnels — Arrêté PPRT 29/09/2005</h2>
+    <div class="seuils-grid">
+      <div class="sc sels" id="c-sels">
+        <div class="sn">SELS</div><div class="sv">200 mbar</div>
+        <div class="sd">Effets létaux majorés</div>
+        <div class="ss" id="st-sels"></div>
+      </div>
+      <div class="sc" id="c-tympan" style="border-top-color:#9b59b6">
+        <div class="sn">Tympan</div><div class="sv">140 mbar</div>
+        <div class="sd">Rupture tympan</div>
+        <div class="ss" id="st-tympan"></div>
+      </div>
+      <div class="sc sel" id="c-sel">
+        <div class="sn">SEL</div><div class="sv">50 mbar</div>
+        <div class="sd">Effets létaux sig.</div>
+        <div class="ss" id="st-sel"></div>
+      </div>
+      <div class="sc sei" id="c-sei">
+        <div class="sn">SEI</div><div class="sv">20 mbar</div>
+        <div class="sd">Effets irréversibles</div>
+        <div class="ss" id="st-sei"></div>
+      </div>
+      <div class="sc vitres" id="c-vitres">
+        <div class="sn">Vitres</div><div class="sv">10 mbar</div>
+        <div class="sd">Dommages vitrages</div>
+        <div class="ss" id="st-vitres"></div>
+      </div>
+    </div>
+    <div class="note-bord">⚠️ Les distances sont mesurées depuis le <strong>centre du nuage</strong>. Rayon estimé du nuage : <strong id="note-rayon">— m</strong> — à soustraire pour obtenir la distance depuis le bord du nuage.</div>
+  </div>
+
+  <!-- SCHÉMA SVG -->
+  <div class="card">
+    <h2>📊 Zones d'effets — Vue aérienne schématique</h2>
+    <svg id="schema-svg" viewBox="0 0 700 350" xmlns="http://www.w3.org/2000/svg"></svg>
+  </div>
+
+  <!-- FORMULE -->
+  <div class="formule-box">
+    <h3>Méthode Multi-Énergie — INERIS Omega UVCE (Van den Berg 1985/1990)</h3>
+    <div class="feq">E = η × m × Hc</div>
+    <div class="feq" style="font-size:13px">R* = r / (E/P₀)^(1/3) → ΔP = f(R*, indice) [abaques numérisés]</div>
+    <div class="feq" style="font-size:13px">Vs = (m/ρgaz) / (Cst/100) · ρgaz = (M/22,4) × (273/293) [kg/m³]</div>
+    <div class="fpar" id="fpar">— lancer le calcul pour afficher les valeurs —</div>
+    <div class="hint" style="margin-top:10px;line-height:1.7">
+      <strong style="color:var(--blue)">Hypothèses :</strong> explosion hémisphérique isotrope · source ponctuelle centrée au milieu du nuage · atmosphère homogène · déflagration (Su &lt; 75 cm/s)<br>
+      <strong style="color:var(--blue)">Abaques :</strong> tables numérisées TNO Yellow Book / Omega UVCE, interpolation log-log entre classes · P₀ = 101 325 Pa<br>
+      <strong style="color:var(--blue)">Vs :</strong> volume stœchiométrique — estimation de l'emprise du nuage (informatif) · R_nuage = (3Vs/2π)^(1/3)
+    </div>
+  </div>
+
+  <div class="sources-box">
+    <strong>Sources :</strong>
+    INERIS Omega UVCE — DRA-16-133610-06190A (juin 2016) ·
+    Van den Berg A.C. (1985/1990), TNO Yellow Book 3e éd. — Methods for the calculation of physical effects ·
+    Mouilleau Y. &amp; Lechaudel J-F. (1999) — Guide méthodes évaluation effets explosion gaz à air libre ·
+    Harris R.J. (1983) — The investigation and control of gas explosions ·
+    Arrêté PPRT du 29/09/2005 · NIST DIPPR pour propriétés physico-chimiques
+  </div>
+
+  <button class="btn-export" id="btn-export" onclick="exporter()">
+    📋 Copier le résumé — Main courante / RETEX
+  </button>
+</div>
+
+</main>
+<footer>© ENSOSP — Mémento IA NRBC · Cne Eddy Fischer – Cdt Anne Tirelle</footer>
+
+<script>
+/* ================================================================
+   BASE PRODUITS
+   Hc MJ/kg | Cst % vol | M g/mol | Su cm/s | réactivité
+================================================================ */
+var PRODUITS = {
+  propane:    {nom:'Propane',                  Hc:46.3, Cst:4.00, M:44.1,  Su:40,  src:'Hc=46,3 (NIST) · Cst=4,0% (INERIS) · Su=40 cm/s (Harris 1983)'},
+  butane:     {nom:'Butane (n-butane)',         Hc:45.8, Cst:3.12, M:58.1,  Su:38,  src:'Hc=45,8 (NIST) · Cst=3,1% (INERIS) · Su=38 cm/s'},
+  propylene:  {nom:'Propylène',                Hc:45.8, Cst:4.46, M:42.1,  Su:52,  src:'Hc=45,8 (NIST) · Cst=4,5% (INERIS) · Su=52 cm/s'},
+  methane:    {nom:'Méthane (GN)',             Hc:50.0, Cst:9.48, M:16.0,  Su:37,  src:'Hc=50,0 (NIST) · Cst=9,5% (INERIS) · Su=37 cm/s'},
+  ethylene:   {nom:'Éthylène',                 Hc:47.1, Cst:6.54, M:28.1,  Su:75,  src:'Hc=47,1 (NIST) · Cst=6,5% (INERIS) · Su=75 cm/s (limite détonation)'},
+  hexane:     {nom:'Hexane / Essence vapeur',  Hc:44.7, Cst:2.16, M:86.2,  Su:38,  src:'Hc=44,7 (NIST) · Cst=2,2% · Su=38 cm/s'},
+  ammoniac:   {nom:'Ammoniac',                 Hc:18.6, Cst:21.8, M:17.0,  Su:7,   src:'Hc=18,6 (NIST) · Cst=21,8% · Su=7 cm/s — réactivité très faible'},
+  h2:         {nom:'Hydrogène',                Hc:120.0,Cst:29.5, M:2.0,   Su:270, src:'⛔ Su=270 cm/s — risque détonation — méthode multi-énergie invalide'},
+  acetylene:  {nom:'Acétylène',                Hc:48.2, Cst:7.75, M:26.0,  Su:150, src:'⛔ Su=150 cm/s — risque détonation — méthode multi-énergie invalide'},
+  manuel:     {nom:'Saisie manuelle',          Hc:46.3, Cst:4.0,  M:44.1,  Su:40,  src:''}
+};
+
+/* ================================================================
+   TABLEAU INDICE → ΔPmax (bar), description, couleur badge
+================================================================ */
+var INDICE_DATA = [
+  {dpmax:0.01, desc:'Explosion lente — nuage libre sans obstacles', col:'#8BC34A', type:'Déflagration lente'},
+  {dpmax:0.02, desc:'Faible confinement — effets à courte portée',  col:'#CDDC39', type:'Déflagration lente'},
+  {dpmax:0.05, desc:'Zone dépourvue d\'obstacle — nuage homogène',  col:'#FFEB3B', type:'Déflagration modérée'},
+  {dpmax:0.10, desc:'Cuvette peu encombrée / pomperie',              col:'#FFC107', type:'Déflagration modérée'},
+  {dpmax:0.20, desc:'Cuvette encombrée / pomperie — effets létaux possibles', col:'#FF9800', type:'Déflagration turbulente'},
+  {dpmax:0.50, desc:'Poste charg./décharg. — obstacles significatifs',col:'#FF5722', type:'Déflagration turbulente'},
+  {dpmax:1.00, desc:'Fort confinement / encombrement dense',         col:'#F44336', type:'Déflagration sévère'},
+  {dpmax:2.00, desc:'Confinement très fort — effets destructeurs',   col:'#D32F2F', type:'Déflagration sévère'},
+  {dpmax:5.00, desc:'Cas extrême — proche détonation partielle',    col:'#B71C1C', type:'Limite détonation'},
+  {dpmax:10.0, desc:'Détonation — modèle multi-énergie à la limite', col:'#7B1111', type:'Détonation'}
+];
+
+/* ================================================================
+   ABAQUES MULTI-ÉNERGIE NUMÉRISÉS
+   Tables R* = f(ΔPr) pour chaque indice (1–10)
+   ΔPr = ΔP/P0 (adimensionné)
+   Source : Van den Berg (1990) / INERIS Omega UVCE
+   Interpolation log-log
+================================================================ */
+// Chaque tableau : [[ΔPr, R*], ...]  — décroissant en ΔPr
+var ABAQUES = {
+  1:  [[0.001,25],[0.002,18],[0.005,12],[0.01,8.0],[0.02,5.5],[0.05,3.2],[0.1,1.9],[0.2,0.9],[0.5,0.35],[1.0,0.15]],
+  2:  [[0.001,30],[0.002,22],[0.005,15],[0.01,10],[0.02,7.0],[0.05,4.5],[0.1,2.8],[0.2,1.5],[0.5,0.65],[1.0,0.30]],
+  3:  [[0.001,40],[0.002,28],[0.005,19],[0.01,13],[0.02,9.0],[0.05,5.5],[0.1,3.5],[0.2,2.0],[0.5,0.95],[1.0,0.50]],
+  4:  [[0.001,55],[0.002,38],[0.005,25],[0.01,17],[0.02,11.5],[0.05,7.0],[0.1,4.5],[0.2,2.8],[0.5,1.30],[1.0,0.70]],
+  5:  [[0.001,70],[0.002,50],[0.005,33],[0.01,22],[0.02,15],[0.05,9.0],[0.1,5.8],[0.2,3.8],[0.5,1.80],[1.0,1.00]],
+  6:  [[0.001,90],[0.002,65],[0.005,43],[0.01,29],[0.02,20],[0.05,12],[0.1,7.5],[0.2,5.0],[0.5,2.40],[1.0,1.35]],
+  7:  [[0.001,110],[0.002,80],[0.005,55],[0.01,37],[0.02,25],[0.05,15],[0.1,9.5],[0.2,6.5],[0.5,3.20],[1.0,1.80]],
+  8:  [[0.001,135],[0.002,100],[0.005,68],[0.01,46],[0.02,31],[0.05,19],[0.1,12],[0.2,8.0],[0.5,4.00],[1.0,2.30]],
+  9:  [[0.001,165],[0.002,125],[0.005,85],[0.01,58],[0.02,39],[0.05,24],[0.1,15],[0.2,10],[0.5,5.00],[1.0,2.90]],
+  10: [[0.001,200],[0.002,150],[0.005,105],[0.01,72],[0.02,48],[0.05,30],[0.1,19],[0.2,13],[0.5,6.50],[1.0,3.80]]
+};
+
+var P0 = 101325; // Pa
+
+/* Interpolation log-log R* → ΔP (en bar) pour un indice donné */
+function RstarToDP(Rstar, indice) {
+  var ab = ABAQUES[indice];
+  // ab est trié ΔPr décroissant → R* croissant
+  // on cherche R* dans la table
+  if (Rstar <= ab[0][1]) return ab[0][0] * P0 / 100; // kPa → mbar via /100 après
+  if (Rstar >= ab[ab.length-1][1]) return ab[ab.length-1][0] * P0 / 100;
+  for (var i = 0; i < ab.length-1; i++) {
+    var R1 = ab[i][1], R2 = ab[i+1][1];
+    var P1 = ab[i][0], P2 = ab[i+1][0];
+    if (Rstar >= R1 && Rstar <= R2) {
+      // log-log
+      var t = (Math.log(Rstar) - Math.log(R1)) / (Math.log(R2) - Math.log(R1));
+      var logP = Math.log(P1) + t * (Math.log(P2) - Math.log(P1));
+      return Math.exp(logP) * P0 / 100; // ΔPr → Pa → mbar (P0 Pa → /100 = mbar)
+    }
+  }
+  return 0;
+}
+
+/* Interpolation log-log ΔP (mbar) → R* pour un indice donné */
+function DPtoRstar(dp_mbar, indice) {
+  var ab = ABAQUES[indice];
+  var dp_bar = dp_mbar / 1000;
+  var dpr = dp_bar; // ΔPr = ΔP/P0 en bar... attention: P0=1,01325 bar ≈ 1
+  // On va utiliser ΔPr = ΔP_Pa / P0 = dp_mbar*100 / 101325
+  var dpr2 = (dp_mbar * 100) / P0;
+  if (dpr2 >= ab[0][0]) return ab[0][1];
+  if (dpr2 <= ab[ab.length-1][0]) return ab[ab.length-1][1];
+  for (var i = 0; i < ab.length-1; i++) {
+    var P1 = ab[i][0], P2 = ab[i+1][0];
+    var R1 = ab[i][1], R2 = ab[i+1][1];
+    if (dpr2 <= P1 && dpr2 >= P2) {
+      var t = (Math.log(dpr2) - Math.log(P1)) / (Math.log(P2) - Math.log(P1));
+      var logR = Math.log(R1) + t * (Math.log(R2) - Math.log(R1));
+      return Math.exp(logR);
+    }
+  }
+  return ab[ab.length-1][1];
+}
+
+/* Distance réelle depuis R* et E */
+function distFromRstar(Rstar, E_MJ) {
+  var E_J = E_MJ * 1e6;
+  return Rstar * Math.pow(E_J / P0, 1/3);
+}
+
+/* ================================================================
+   INIT TABLE PRODUITS
+================================================================ */
+(function(){
+  var tb = document.getElementById('table-produits');
+  ['propane','butane','propylene','methane','ethylene','hexane','ammoniac','h2','acetylene'].forEach(function(k,i){
+    var p = PRODUITS[k];
+    var tr = document.createElement('tr');
+    tr.style.background = i%2===0?'#f9fafb':'white';
+    tr.innerHTML='<td style="padding:4px 6px;font-weight:600;text-align:left">'+p.nom+'</td>'+
+      '<td>'+p.Hc.toFixed(1)+'</td><td>'+p.Cst.toFixed(2)+'</td>'+
+      '<td>'+p.M.toFixed(1)+'</td><td style="font-weight:700;color:'+(p.Su>75?'#c0392b':p.Su>45?'#e06c00':'#155724')+'">'+p.Su+'</td>';
+    tb.appendChild(tr);
+  });
+})();
+
+/* ================================================================
+   GESTION UI
+================================================================ */
+var modeSrc = 'masse';
+
+function onProduitChange(){
+  var k = document.getElementById('produit').value;
+  if(!k||k==='manuel'){document.getElementById('fiche-src').style.display='none';return;}
+  var p = PRODUITS[k];
+  document.getElementById('hc').value   = p.Hc;
+  document.getElementById('cst').value  = p.Cst;
+  document.getElementById('mmol').value = p.M;
+  document.getElementById('su').value   = p.Su;
+  var src = document.getElementById('fiche-src');
+  src.style.display = 'block';
+  src.textContent = '📌 ' + p.src;
+  updateSuAlert();
+  updateAideIndice();
+}
+
+function updateSuAlert(){
+  var su = parseFloat(document.getElementById('su').value)||0;
+  var el = document.getElementById('alert-deton');
+  if(su > 75){
+    el.className='alert-box danger visible';
+    el.innerHTML='⛔ Su = '+su+' cm/s — Risque de <strong>détonation</strong>. La méthode Multi-Énergie est invalide pour ce combustible. Un modèle spécifique (Baker-Strehlow ou CFD) est requis.';
+  } else if(su > 45){
+    el.className='alert-box warn-soft visible';
+    el.innerHTML='⚠️ Su = '+su+' cm/s — Réactivité élevée. Appliquer un indice de sévérité majoré (+1) par rapport à l\'estimation du site.';
+  } else if(su < 15){
+    el.className='alert-box info visible';
+    el.innerHTML='ℹ️ Su = '+su+' cm/s — Réactivité très faible. Indice de sévérité peut être minoré (−1) par rapport à l\'estimation du site.';
+  } else {
+    el.className='alert-box';
+    el.innerHTML='';
+  }
+}
+
+document.getElementById('su').addEventListener('input', function(){updateSuAlert();updateAideIndice();});
+
+function updateEtaLabel(){
+  var v = parseFloat(document.getElementById('eta-range').value);
+  document.getElementById('eta-label').textContent = 'η = ' + v.toFixed(2);
+  document.getElementById('alert-eta').style.display = v < 1.0 ? '' : 'none';
+}
+
+function setModeSrc(m){
+  modeSrc = m;
+  document.getElementById('bloc-masse').style.display = m==='masse'?'':'none';
+  document.getElementById('bloc-debit').style.display = m==='debit'?'':'none';
+  document.getElementById('btn-masse').classList.toggle('active',m==='masse');
+  document.getElementById('btn-debit').classList.toggle('active',m==='debit');
+}
+
+function updateUnitDuree(){
+  document.getElementById('unit-duree').textContent = document.getElementById('unite-duree').value;
+}
+
+function updateSlider(){
+  var v = document.getElementById('distance').value;
+  document.getElementById('dist-label').textContent = v+' m';
+  document.getElementById('dist-input').value = v;
+}
+function syncDist(){
+  var v = parseFloat(document.getElementById('dist-input').value)||50;
+  document.getElementById('distance').value = Math.min(500,v);
+  document.getElementById('dist-label').textContent = v+' m';
+}
+
+function updateIndice(){
+  var idx = parseInt(document.getElementById('indice-range').value);
+  var d = INDICE_DATA[idx-1];
+  document.getElementById('indice-badge').textContent = idx;
+  document.getElementById('indice-badge').style.background = d.col;
+  document.getElementById('indice-dpmax').textContent = 'ΔPmax = '+(d.dpmax>=1?(d.dpmax+' bar'):(d.dpmax*1000+' mbar'));
+  document.getElementById('indice-type').textContent = d.type;
+  document.getElementById('indice-desc').textContent = d.desc;
+}
+updateIndice();
+
+/* Aide contextuelle indice */
+var ZONES_INDICE = {
+  libre:          {fourch:[1,3], txt:'Zone dépourvue d\'obstacle, nuage homogène → indice ≤ 3 (50 mbar)'},
+  cuvette_peu:    {fourch:[4,4], txt:'Intérieur cuvette peu encombrée → indice 4 (100 mbar)'},
+  cuvette_enc:    {fourch:[4,5], txt:'Intérieur cuvette encombrée → indice 4 à 5 (100–200 mbar)'},
+  pomperie:       {fourch:[4,5], txt:'Pomperie → indice 4 à 5 (100–200 mbar)'},
+  chargement:     {fourch:[4,6], txt:'Poste chargement/déchargement → indice 4 à 6 (100–500 mbar), selon encombrement'},
+  stationnement:  {fourch:[4,6], txt:'Zone stationnement véhicules → indice 4 à 6 (jusqu\'à 500 mbar si ≥5 CT côte à côte)'},
+  batiment_leger: {fourch:[4,6], txt:'Bâtiment conception légère → indice 4 à 6 (500 mbar), selon aménagement intérieur'},
+  batiment_autre: {fourch:null,  txt:'⛔ Intérieur autre bâtiment : méthode Multi-Énergie inadaptée — modèle explosion confinée requis'}
+};
+
+function updateAideIndice(){
+  var zone = document.getElementById('zone-site').value;
+  var su   = parseFloat(document.getElementById('su').value)||0;
+  var el   = document.getElementById('aide-indice');
+  if(!zone){el.style.display='none';return;}
+  var z = ZONES_INDICE[zone];
+  if(!z){el.style.display='none';return;}
+  el.style.display = '';
+
+  var reactTxt='', reactCol='', corr=0;
+  if(su>75){reactTxt='Très élevée (Su='+su+' cm/s) ⛔ risque détonation';reactCol='#c0392b';corr=99;}
+  else if(su>45){reactTxt='Élevée (Su='+su+' cm/s) → +1 indice recommandé';reactCol='#e06c00';corr=1;}
+  else if(su>25){reactTxt='Moyenne (Su='+su+' cm/s) → indice site direct';reactCol='#2e7d32';corr=0;}
+  else{reactTxt='Faible (Su='+su+' cm/s) → −1 indice possible';reactCol='#1565C0';corr=-1;}
+
+  var html='<div class="ai-titre">Aide au choix — Omega UVCE (INERIS)</div>';
+  html+='<div class="ai-row"><div class="ai-dot" style="background:#4a90d9"></div><b>Site :</b>&nbsp;'+z.txt+'</div>';
+  if(z.fourch){
+    var lo=Math.max(1,z.fourch[0]+corr), hi=Math.min(10,z.fourch[1]+corr);
+    if(corr===99){lo=hi=null;}
+    html+='<div class="ai-row"><div class="ai-dot" style="background:#e06c00"></div><b>Réactivité :</b>&nbsp;<span class="reacti-badge" style="background:'+(reactCol==='#c0392b'?'#f8d7da':reactCol==='#e06c00'?'#ffe5cc':reactCol==='#2e7d32'?'#d4edda':'#d1ecf1');color:'+reactCol+'">'+reactTxt+'</span></div>';
+    if(lo&&hi){
+      html+='<div style="margin-top:8px;padding:8px 10px;background:white;border-radius:8px;border:2px solid var(--blue)">';
+      html+='<b style="color:var(--blue)">→ Indice recommandé : '+lo+(lo!==hi?' à '+hi:'')+'</b>';
+      if(corr!==0&&corr!==99) html+=' <span style="font-size:10px;color:#888">(correction réactivité Su appliquée)</span>';
+      html+='</div>';
+    } else {
+      html+='<div style="margin-top:8px;padding:8px 10px;background:#f8d7da;border-radius:8px;border:2px solid #c0392b"><b style="color:#721c24">⛔ Méthode invalide — ne pas utiliser</b></div>';
+    }
+  } else {
+    html+='<div style="margin-top:8px;padding:8px 10px;background:#f8d7da;border-radius:8px;border:2px solid var(--red)"><b style="color:#721c24">⛔ Méthode inadaptée pour cette zone</b></div>';
+  }
+  el.innerHTML = html;
+}
+
+/* ================================================================
+   CALCUL PRINCIPAL
+================================================================ */
+var lastR = null;
+
+function getMasse(){
+  if(modeSrc==='masse'){
+    return parseFloat(document.getElementById('masse').value)||500;
+  } else {
+    var Q  = parseFloat(document.getElementById('debit-fuite').value)||10;
+    var t  = parseFloat(document.getElementById('duree-fuite').value)||60;
+    var u  = document.getElementById('unite-duree').value;
+    if(u==='min') t*=60; else if(u==='h') t*=3600;
+    return Q * t;
+  }
+}
+
+function calculer(){
+  var Hc   = parseFloat(document.getElementById('hc').value)||46.3;
+  var Cst  = parseFloat(document.getElementById('cst').value)||4.0;
+  var M    = parseFloat(document.getElementById('mmol').value)||44.1;
+  var su   = parseFloat(document.getElementById('su').value)||40;
+  var eta  = parseFloat(document.getElementById('eta-range').value)||1.0;
+  var indice = parseInt(document.getElementById('indice-range').value)||5;
+  var d    = parseFloat(document.getElementById('dist-input').value)||50;
+
+  var m_total = getMasse();
+  var m_part  = m_total * eta;
+
+  // E en MJ
+  var E_MJ = m_part * Hc;
+  var E_J  = E_MJ * 1e6;
+
+  // Volume stœchiométrique (m³)
+  var rho_gaz = (M / 22.4) * (273 / 293); // kg/m³ à ~20°C
+  var V_gaz   = m_part / rho_gaz;          // m³ de gaz pur
+  var Vs      = V_gaz / (Cst / 100);       // m³ nuage stœchio
+  var R_nuage = Math.pow((3 * Vs) / (2 * Math.PI), 1/3);
+
+  // R* à la distance d
+  var Rstar = d / Math.pow(E_J / P0, 1/3);
+
+  // Surpression via abaque
+  var dp_mbar = RstarToDP(Rstar, indice);
+
+  // Distances aux seuils
+  var seuils = [
+    {id:'sels',  dp:200,  lab:'SELS'},
+    {id:'tympan',dp:140,  lab:'Tympan'},
+    {id:'sel',   dp:50,   lab:'SEL'},
+    {id:'sei',   dp:20,   lab:'SEI'},
+    {id:'vitres',dp:10,   lab:'Vitres'}
+  ];
+  var dists = {};
+  seuils.forEach(function(s){
+    var Rs = DPtoRstar(s.dp, indice);
+    dists[s.id] = Rs * Math.pow(E_J / P0, 1/3);
+  });
+
+  // Info débit
+  var debitInfo = null;
+  if(modeSrc==='debit'){
+    var Q = parseFloat(document.getElementById('debit-fuite').value)||10;
+    var t = parseFloat(document.getElementById('duree-fuite').value)||60;
+    var u = document.getElementById('unite-duree').value;
+    var tSec = t; if(u==='min') tSec=t*60; else if(u==='h') tSec=t*3600;
+    debitInfo = {Q:Q, tSec:tSec, mTot:m_total};
+  }
+
+  lastR = {dp_mbar:dp_mbar, d:d, E_MJ:E_MJ, Vs:Vs, R_nuage:R_nuage,
+           m_part:m_part, m_total:m_total, Rstar:Rstar, indice:indice,
+           Hc:Hc, Cst:Cst, M:M, su:su, eta:eta, dists:dists, debitInfo:debitInfo};
+  afficher(lastR);
+}
+
+/* ================================================================
+   AFFICHAGE RÉSULTATS
+================================================================ */
+function couleur(dp){
+  if(dp>=200) return {bg:'#f8d7da',txt:'#721c24',brd:'#cc1a00'};
+  if(dp>=140) return {bg:'#f3d0f0',txt:'#5b2060',brd:'#9b59b6'};
+  if(dp>=50)  return {bg:'#ffe5cc',txt:'#7a3200',brd:'#e06c00'};
+  if(dp>=20)  return {bg:'#fff3cd',txt:'#856404',brd:'#e6a817'};
+  if(dp>=10)  return {bg:'#d1ecf1',txt:'#0c5460',brd:'#17a2b8'};
+  return {bg:'#d4edda',txt:'#155724',brd:'#28a745'};
+}
+function verdict(dp){
+  if(dp>=200) return '⛔ ZONE LÉTALE MAJORÉE (SELS) — Retrait immédiat';
+  if(dp>=140) return '🔴 RUPTURE TYMPAN probable — EPI et distance';
+  if(dp>=50)  return '🔴 ZONE LÉTALE (SEL) — Évacuation personnel non protégé';
+  if(dp>=20)  return '🟠 ZONE IRR. (SEI) — EPI complets obligatoires';
+  if(dp>=10)  return '🟡 Dommages vitrages possibles — Zone surveillance';
+  return '🟢 Inférieur au SEI — Zone acceptable sous surveillance';
+}
+
+function afficher(r){
+  document.getElementById('results').classList.add('visible');
+  var c = couleur(r.dp_mbar);
+  document.getElementById('surp-hero').style.borderTopColor = c.brd;
+  var sv = document.getElementById('res-surp');
+  sv.textContent = r.dp_mbar.toFixed(1); sv.style.color = c.txt;
+  document.getElementById('res-dist').textContent = r.d.toFixed(0);
+  var ve = document.getElementById('res-verdict');
+  ve.textContent = verdict(r.dp_mbar); ve.style.background = c.bg; ve.style.color = c.txt;
+
+  document.getElementById('r-E').textContent     = r.E_MJ.toFixed(1);
+  document.getElementById('r-Vs').textContent    = r.Vs.toFixed(0);
+  document.getElementById('r-Rn').textContent    = r.R_nuage.toFixed(1);
+  document.getElementById('r-mpart').textContent = r.m_part.toFixed(0);
+  document.getElementById('r-Rstar').textContent = r.Rstar.toFixed(3);
+  document.getElementById('r-indice').textContent= r.indice;
+  document.getElementById('note-rayon').textContent = r.R_nuage.toFixed(1)+' m';
+
+  var SEUILS_LIST = [{id:'sels',dp:200},{id:'tympan',dp:140},{id:'sel',dp:50},{id:'sei',dp:20},{id:'vitres',dp:10}];
+  SEUILS_LIST.forEach(function(s){
+    var dist = r.dists[s.id];
+    var atteint = r.dp_mbar >= s.dp;
+    var st = document.getElementById('st-'+s.id);
+    st.textContent = atteint ? '▲ '+dist.toFixed(0)+' m' : '✔ '+dist.toFixed(0)+' m';
+    st.className = 'ss '+(atteint?'atteint':'ok');
+  });
+
+  // Module débit
+  var dr = document.getElementById('duree-res');
+  if(r.debitInfo){
+    dr.classList.add('visible');
+    document.getElementById('r-debit').textContent = r.debitInfo.Q.toFixed(2);
+    var ts = r.debitInfo.tSec;
+    var tv,tu;
+    if(ts<120){tv=ts.toFixed(0);tu='s';}
+    else if(ts<7200){tv=(ts/60).toFixed(1);tu='min';}
+    else{tv=(ts/3600).toFixed(2);tu='h';}
+    document.getElementById('r-duree').textContent = tv;
+    document.getElementById('r-duree-unit').textContent = tu;
+    document.getElementById('r-masse-tot').textContent = r.debitInfo.mTot.toFixed(0);
+  } else { dr.classList.remove('visible'); }
+
+  // Formule détaillée
+  document.getElementById('fpar').innerHTML =
+    '<b>m_total</b> = '+r.m_total.toFixed(1)+' kg &nbsp;·&nbsp; <b>η</b> = '+r.eta.toFixed(2)+' &nbsp;·&nbsp; <b>m_part</b> = '+r.m_part.toFixed(1)+' kg &nbsp;·&nbsp; <b>Hc</b> = '+r.Hc+' MJ/kg<br>'+
+    '<b>E</b> = '+r.E_MJ.toFixed(1)+' MJ &nbsp;·&nbsp; <b>Vs</b> = '+r.Vs.toFixed(0)+' m³ &nbsp;·&nbsp; <b>R_nuage</b> = '+r.R_nuage.toFixed(1)+' m &nbsp;·&nbsp; <b>Cst</b> = '+r.Cst+'% vol<br>'+
+    '<b>R*</b>(d='+r.d+' m) = '+r.Rstar.toFixed(4)+' &nbsp;·&nbsp; <b>Indice</b> = '+r.indice+' &nbsp;·&nbsp; <b>ΔP</b> = '+r.dp_mbar.toFixed(1)+' mbar &nbsp;·&nbsp; '+verdict(r.dp_mbar);
+
+  schema(r);
+  document.getElementById('results').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+/* ================================================================
+   SCHÉMA SVG — VUE AÉRIENNE CERCLES CONCENTRIQUES
+================================================================ */
+function schema(r){
+  var svg = document.getElementById('schema-svg');
+  var W=700, H=350, cx=350, cy=175;
+
+  var dMax = Math.max(r.dists.vitres * 1.15, r.d * 1.1, 80);
+  var sc = Math.min((W/2 - 30) / dMax, (H/2 - 30) / dMax);
+
+  function rx(dist){ return dist * sc; }
+
+  var rSELS   = rx(r.dists.sels);
+  var rTYMPAN = rx(r.dists.tympan);
+  var rSEL    = rx(r.dists.sel);
+  var rSEI    = rx(r.dists.sei);
+  var rVITRES = rx(r.dists.vitres);
+  var rNUAGE  = rx(r.R_nuage);
+  var rD      = rx(r.d);
+  var c       = couleur(r.dp_mbar);
+
+  function cercle(r_px, fill, stroke, opacity, dash){
+    return '<circle cx="'+cx+'" cy="'+cy+'" r="'+r_px.toFixed(1)+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="1.5"'+(dash?' stroke-dasharray="5,3"':'')+(opacity?' opacity="'+opacity+'"':'')+'/>';
+  }
+  function label(r_px, txt, col, yoff){
+    var xx = cx + r_px * 0.707 + 4;
+    var yy = cy - r_px * 0.707 + (yoff||0);
+    return '<text x="'+xx.toFixed(1)+'" y="'+yy.toFixed(1)+'" fill="'+col+'" font-size="10" font-family="Inter,sans-serif" font-weight="700">'+txt+'</text>';
+  }
+
+  var s = '<defs><radialGradient id="ng" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#fff9c4" stop-opacity=".9"/><stop offset="100%" stop-color="#fff176" stop-opacity=".3"/></radialGradient></defs>';
+
+  // Zones colorées
+  s += cercle(Math.min(rVITRES, W/2-5), 'rgba(23,162,184,.06)', 'none', null, false);
+  s += cercle(Math.min(rSEI,    W/2-5), 'rgba(230,168,23,.08)', 'none', null, false);
+  s += cercle(Math.min(rSEL,    W/2-5), 'rgba(224,108,0,.10)',  'none', null, false);
+  s += cercle(Math.min(rTYMPAN, W/2-5), 'rgba(155,89,182,.10)', 'none', null, false);
+  s += cercle(Math.min(rSELS,   W/2-5), 'rgba(204,26,0,.12)',   'none', null, false);
+
+  // Contours seuils
+  if(rVITRES < W/2) s += cercle(rVITRES, 'none', '#17a2b8', null, true);
+  if(rSEI    < W/2) s += cercle(rSEI,    'none', '#e6a817', null, true);
+  if(rSEL    < W/2) s += cercle(rSEL,    'none', '#e06c00', null, false);
+  if(rTYMPAN < W/2) s += cercle(rTYMPAN, 'none', '#9b59b6', null, true);
+  if(rSELS   < W/2) s += cercle(rSELS,   'none', '#cc1a00', null, false);
+
+  // Nuage
+  s += cercle(rNUAGE, 'url(#ng)', '#e6a817', null, false);
+  s += '<text x="'+cx+'" y="'+(cy+4)+'" text-anchor="middle" fill="#856404" font-size="10" font-family="Inter,sans-serif" font-weight="700">NUAGE</text>';
+  s += '<text x="'+cx+'" y="'+(cy+15)+'" text-anchor="middle" fill="#856404" font-size="9" font-family="Inter,sans-serif">Vs='+r.Vs.toFixed(0)+'m³ · R='+r.R_nuage.toFixed(1)+'m</text>';
+
+  // Point cible
+  if(rD < W/2 - 8){
+    var xD = cx + rD * 0.866, yD = cy - rD * 0.5;
+    s += '<line x1="'+cx+'" y1="'+cy+'" x2="'+xD.toFixed(1)+'" y2="'+yD.toFixed(1)+'" stroke="#001F8F" stroke-width="1.5" stroke-dasharray="3,2"/>';
+    s += '<circle cx="'+xD.toFixed(1)+'" cy="'+yD.toFixed(1)+'" r="6" fill="'+c.brd+'"/>';
+    s += '<text x="'+(xD+9).toFixed(1)+'" y="'+(yD-5).toFixed(1)+'" fill="#001F8F" font-size="10" font-family="Inter,sans-serif" font-weight="700">'+r.d.toFixed(0)+'m</text>';
+    s += '<text x="'+(xD+9).toFixed(1)+'" y="'+(yD+7).toFixed(1)+'" fill="'+c.txt+'" font-size="10" font-family="Inter,sans-serif" font-weight="700">'+r.dp_mbar.toFixed(1)+' mbar</text>';
+  }
+
+  // Labels seuils sur l'axe horizontal droit
+  var labelData = [
+    {r:rVITRES, col:'#17a2b8', txt:'Vitres — 10 mbar', dist:r.dists.vitres},
+    {r:rSEI,    col:'#e6a817', txt:'SEI — 20 mbar',    dist:r.dists.sei},
+    {r:rSEL,    col:'#e06c00', txt:'SEL — 50 mbar',    dist:r.dists.sel},
+    {r:rTYMPAN, col:'#9b59b6', txt:'Tympan — 140 mbar',dist:r.dists.tympan},
+    {r:rSELS,   col:'#cc1a00', txt:'SELS — 200 mbar',  dist:r.dists.sels}
+  ];
+  labelData.forEach(function(ld){
+    if(ld.r < W/2 - 5){
+      var xL = cx + ld.r, yL = cy;
+      s += '<line x1="'+xL.toFixed(1)+'" y1="'+(yL-6)+'" x2="'+xL.toFixed(1)+'" y2="'+(yL+6)+'" stroke="'+ld.col+'" stroke-width="2"/>';
+      s += '<text x="'+(xL+3).toFixed(1)+'" y="'+(yL-8)+'" fill="'+ld.col+'" font-size="9" font-family="Inter,sans-serif" font-weight="700">'+ld.txt+'</text>';
+      s += '<text x="'+(xL+3).toFixed(1)+'" y="'+(yL+18)+'" fill="'+ld.col+'" font-size="9" font-family="Inter,sans-serif">'+ld.dist.toFixed(0)+'m</text>';
+    }
+  });
+
+  // Axe de référence
+  s += '<line x1="'+(cx-10)+'" y1="'+cy+'" x2="'+(W-10)+'" y2="'+cy+'" stroke="#ccd2e3" stroke-width="1"/>';
+  s += '<text x="'+(W-8)+'" y="'+(cy+14)+'" text-anchor="end" fill="#999" font-size="9" font-family="Inter,sans-serif">→ depuis centre</text>';
+
+  // Légende indice
+  var iD = INDICE_DATA[r.indice-1];
+  s += '<rect x="8" y="8" width="130" height="36" rx="6" fill="white" opacity=".85" stroke="#e0e4f0"/>';
+  s += '<circle cx="22" cy="26" r="10" fill="'+iD.col+'"/>';
+  s += '<text x="22" y="30" text-anchor="middle" fill="white" font-size="11" font-family="Inter,sans-serif" font-weight="800">'+r.indice+'</text>';
+  s += '<text x="36" y="22" fill="#001F8F" font-size="10" font-family="Inter,sans-serif" font-weight="700">Indice '+r.indice+' — ΔPmax='+(iD.dpmax>=1?iD.dpmax+' bar':iD.dpmax*1000+' mbar')+'</text>';
+  s += '<text x="36" y="34" fill="#666" font-size="9" font-family="Inter,sans-serif">E = '+r.E_MJ.toFixed(0)+' MJ · η = '+r.eta.toFixed(2)+'</text>';
+
+  svg.innerHTML = s;
+}
+
+/* ================================================================
+   EXPORT
+================================================================ */
+function exporter(){
+  if(!lastR) return;
+  var r = lastR;
+  var now = new Date().toLocaleString('fr-FR');
+  var prod = document.getElementById('produit').selectedOptions[0] ? document.getElementById('produit').selectedOptions[0].text : 'Manuel';
+  var zone = document.getElementById('zone-site').selectedOptions[0] ? document.getElementById('zone-site').selectedOptions[0].text : 'Non renseignée';
+  var rayon = r.R_nuage;
+  var txt =
+    '=== UVCE — MÉTHODE MULTI-ÉNERGIE ===\n'+
+    'Date/heure   : '+now+'\n'+
+    'Modèle       : Méthode Multi-Énergie — INERIS Omega UVCE (DRA-16-133610-06190A)\n'+
+    'Référence    : Van den Berg (1990) TNO Yellow Book · Arrêté PPRT 29/09/2005\n\n'+
+    'PARAMÈTRES\n'+
+    'Combustible  : '+prod+'\n'+
+    'Hc           : '+r.Hc+' MJ/kg\n'+
+    'Cst          : '+r.Cst+'% vol\n'+
+    'Su           : '+r.su+' cm/s\n'+
+    'Masse totale : '+r.m_total.toFixed(1)+' kg\n'+
+    'η (fraction) : '+r.eta.toFixed(2)+(r.eta<1?' ⚠ NON-PPRT':' (pire cas PPRT)')+'\n'+
+    'Masse partie : '+r.m_part.toFixed(1)+' kg\n'+
+    'Indice sévér.: '+r.indice+' (ΔPmax = '+(INDICE_DATA[r.indice-1].dpmax>=1?INDICE_DATA[r.indice-1].dpmax+' bar':INDICE_DATA[r.indice-1].dpmax*1000+' mbar')+')\n'+
+    'Zone siège   : '+zone+'\n\n'+
+    'ÉNERGIE & NUAGE\n'+
+    'E            : '+r.E_MJ.toFixed(1)+' MJ\n'+
+    'Vol. stœchio : '+r.Vs.toFixed(0)+' m³\n'+
+    'Rayon nuage  : '+rayon.toFixed(1)+' m (estimation hémisphérique)\n'+
+    'Distance R*  : '+r.Rstar.toFixed(4)+' (à d = '+r.d+' m)\n\n'+
+    'RÉSULTAT\n'+
+    'Surpression  : '+r.dp_mbar.toFixed(1)+' mbar à '+r.d+' m\n'+
+    verdict(r.dp_mbar)+'\n\n'+
+    'DISTANCES AUX SEUILS — depuis centre / depuis bord du nuage\n'+
+    'SELS  (200 mbar) : '+r.dists.sels.toFixed(1)+' m / '+Math.max(r.dists.sels-rayon,0).toFixed(1)+' m\n'+
+    'Tympan(140 mbar) : '+r.dists.tympan.toFixed(1)+' m / '+Math.max(r.dists.tympan-rayon,0).toFixed(1)+' m\n'+
+    'SEL   ( 50 mbar) : '+r.dists.sel.toFixed(1)+' m / '+Math.max(r.dists.sel-rayon,0).toFixed(1)+' m\n'+
+    'SEI   ( 20 mbar) : '+r.dists.sei.toFixed(1)+' m / '+Math.max(r.dists.sei-rayon,0).toFixed(1)+' m\n'+
+    'Vitres( 10 mbar) : '+r.dists.vitres.toFixed(1)+' m / '+Math.max(r.dists.vitres-rayon,0).toFixed(1)+' m\n\n'+
+    '⚠ Méthode valide pour déflagrations (Su < 75 cm/s) en milieu semi-confiné/ouvert.\n'+
+    '⚠ Invalide pour H₂, acétylène, ou explosion en bâtiment fermé.\n'+
+    'Mémento IA NRBC — SDIS 76 / ENSOSP — V0.13';
+  navigator.clipboard.writeText(txt).then(function(){
+    var btn = document.getElementById('btn-export');
+    btn.textContent = '✔ Copié dans le presse-papier';
+    btn.classList.add('copied');
+    setTimeout(function(){btn.textContent='📋 Copier le résumé — Main courante / RETEX';btn.classList.remove('copied');},2500);
+  });
+}
+</script>
+</body>
+</html>
