@@ -571,9 +571,9 @@ function distFromRstar(Rstar, E_MJ) {
 }
 
 /* ================================================================
-   INIT TABLE PRODUITS
+   INIT TABLE PRODUITS + UI — exécuté après chargement DOM
 ================================================================ */
-(function(){
+document.addEventListener('DOMContentLoaded', function(){
   var tb = document.getElementById('table-produits');
   ['propane','butane','propylene','methane','ethylene','hexane','ammoniac','h2','acetylene'].forEach(function(k,i){
     var p = PRODUITS[k];
@@ -584,7 +584,9 @@ function distFromRstar(Rstar, E_MJ) {
       '<td>'+p.M.toFixed(1)+'</td><td style="font-weight:700;color:'+(p.Su>75?'#c0392b':p.Su>45?'#e06c00':'#155724')+'">'+p.Su+'</td>';
     tb.appendChild(tr);
   });
-})();
+  updateIndice();
+  updateEtaLabel();
+});
 
 /* ================================================================
    GESTION UI
@@ -664,7 +666,6 @@ function updateIndice(){
   document.getElementById('indice-type').textContent = d.type;
   document.getElementById('indice-desc').textContent = d.desc;
 }
-updateIndice();
 
 /* Aide contextuelle indice */
 var ZONES_INDICE = {
