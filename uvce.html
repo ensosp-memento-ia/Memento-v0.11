@@ -205,10 +205,10 @@
     <h2>🧪 Combustible <span class="src-badge">INERIS / NIST</span></h2>
 
     <label>Sélection du combustible</label>
-    <select id="produit">
+    <select id="produit" onchange="onProduitChange()">
       <option value="">— Sélectionner —</option>
       <optgroup label="GPL / Hydrocarbures gazeux">
-        <option value="propane">Propane</option>
+        <option value="propane" selected>Propane</option>
         <option value="butane">Butane (n-butane)</option>
         <option value="propylene">Propylène</option>
         <option value="methane">Méthane (GN)</option>
@@ -238,13 +238,13 @@
     <div class="iw"><input type="number" id="mmol" min="1" max="200" step="0.1" value="44.1"><span class="iu">g/mol</span></div>
 
     <label>Vitesse de combustion laminaire Su <span class="src-badge">Harris 1983 / INERIS</span></label>
-    <div class="iw"><input type="number" id="su" min="1" max="400" step="1" value="40"><span class="iu">cm/s</span></div>
+    <div class="iw"><input type="number" id="su" min="1" max="400" step="1" value="40" oninput="updateSuAlert();updateAideIndice()"><span class="iu">cm/s</span></div>
     <div class="hint" id="su-hint">Utilisée pour guider le choix de l'indice de sévérité</div>
     <div class="alert-box" id="alert-deton"></div>
 
     <label style="margin-top:14px">Fraction participante η <span class="src-badge">PPRT</span></label>
     <div class="slider-wrap">
-      <input type="range" id="eta-range" min="0.01" max="1.0" step="0.01" value="1.0">
+      <input type="range" id="eta-range" min="0.01" max="1.0" step="0.01" value="1.0" oninput="updateEtaLabel()">
       <div class="slider-labels"><span>0,01</span><span class="cur" id="eta-label">η = 1,00</span><span>1,00</span></div>
     </div>
     <div class="alert-box info" id="alert-eta" style="display:none">
@@ -274,7 +274,7 @@
         <label>Durée d'émission t</label>
         <div class="mode-row">
           <div class="iw"><input type="number" id="duree-fuite" min="1" max="86400" step="1" value="60"><span class="iu" id="unit-duree">s</span></div>
-          <select id="unite-duree" style="padding:10px 6px">
+          <select id="unite-duree" onchange="updateUnitDuree()" style="padding:10px 6px">
             <option value="s">s</option>
             <option value="min">min</option>
             <option value="h">h</option>
@@ -295,7 +295,7 @@
     <h2>💥 Indice de sévérité</h2>
 
     <label>Nature du site — Zone siège de l'explosion</label>
-    <select id="zone-site">
+    <select id="zone-site" onchange="updateAideIndice()">
       <option value="">— Sélectionner la zone —</option>
       <option value="libre">Zone dépourvue d'obstacle, nuage homogène</option>
       <option value="cuvette_peu">Intérieur de cuvette (peu encombrée)</option>
@@ -318,7 +318,7 @@
       </div>
     </div>
     <div class="indice-slider-track">
-      <input type="range" id="indice-range" min="1" max="10" step="1" value="5">
+      <input type="range" id="indice-range" min="1" max="10" step="1" value="5" oninput="updateIndice()">
     </div>
     <div class="slider-labels" style="margin-top:2px">
       <span style="font-size:10px">1 — Faible</span>
@@ -333,11 +333,11 @@
 
     <label>Distance cible d</label>
     <div class="slider-wrap">
-      <input type="range" id="distance" min="1" max="500" step="1" value="50">
+      <input type="range" id="distance" min="1" max="500" step="1" value="50" oninput="updateSlider()">
       <div class="slider-labels"><span>1 m</span><span class="cur" id="dist-label">50 m</span><span>500 m</span></div>
     </div>
     <label>Distance (saisie directe)</label>
-    <div class="iw"><input type="number" id="dist-input" min="1" max="5000" step="1" value="50"><span class="iu">m</span></div>
+    <div class="iw"><input type="number" id="dist-input" min="1" max="5000" step="1" value="50" oninput="syncDist()"><span class="iu">m</span></div>
 
     <button class="btn-generate" onclick="calculer()">▶ Calculer les effets UVCE</button>
   </div>
@@ -584,54 +584,9 @@ function distFromRstar(Rstar, E_MJ) {
    INIT TABLE PRODUITS + UI — exécuté après chargement DOM
 ================================================================ */
 function initPage(){
+  onProduitChange();
   updateIndice();
   updateEtaLabel();
-
-  // Listener select produit
-  var selProduit = document.getElementById('produit');
-  if(selProduit) selProduit.addEventListener('change', onProduitChange);
-
-  // Listener select zone site
-  var selZone = document.getElementById('zone-site');
-  if(selZone) selZone.addEventListener('change', updateAideIndice);
-
-  // Listener Su (input)
-  var inSu = document.getElementById('su');
-  if(inSu){ inSu.addEventListener('input', function(){ updateSuAlert(); updateAideIndice(); }); }
-
-  // Listener slider indice
-  var slIndice = document.getElementById('indice-range');
-  if(slIndice) slIndice.addEventListener('input', updateIndice);
-
-  // Listener slider eta
-  var slEta = document.getElementById('eta-range');
-  if(slEta) slEta.addEventListener('input', updateEtaLabel);
-
-  // Listener slider distance
-  var slDist = document.getElementById('distance');
-  if(slDist) slDist.addEventListener('input', updateSlider);
-
-  // Listener input distance directe
-  var inDist = document.getElementById('dist-input');
-  if(inDist) inDist.addEventListener('input', syncDist);
-
-  // Listener unite-duree
-  var selUniteDuree = document.getElementById('unite-duree');
-  if(selUniteDuree) selUniteDuree.addEventListener('change', updateUnitDuree);
-
-  // Boutons radio source masse/debit
-  var btnMasse = document.getElementById('btn-masse');
-  var btnDebit = document.getElementById('btn-debit');
-  if(btnMasse) btnMasse.addEventListener('click', function(){ setModeSrc('masse'); });
-  if(btnDebit) btnDebit.addEventListener('click', function(){ setModeSrc('debit'); });
-
-  // Bouton calculer
-  var btnCalc = document.querySelector('.btn-generate');
-  if(btnCalc) btnCalc.addEventListener('click', calculer);
-
-  // Bouton export
-  var btnExp = document.getElementById('btn-export');
-  if(btnExp) btnExp.addEventListener('click', exporter);
 }
 
 /* ================================================================
