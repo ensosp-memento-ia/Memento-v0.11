@@ -205,7 +205,7 @@
     <h2>🧪 Combustible <span class="src-badge">INERIS / NIST</span></h2>
 
     <label>Sélection du combustible</label>
-    <select id="produit" onchange="onProduitChange()">
+    <select id="produit">
       <option value="">— Sélectionner —</option>
       <optgroup label="GPL / Hydrocarbures gazeux">
         <option value="propane">Propane</option>
@@ -244,7 +244,7 @@
 
     <label style="margin-top:14px">Fraction participante η <span class="src-badge">PPRT</span></label>
     <div class="slider-wrap">
-      <input type="range" id="eta-range" min="0.01" max="1.0" step="0.01" value="1.0" oninput="updateEtaLabel()">
+      <input type="range" id="eta-range" min="0.01" max="1.0" step="0.01" value="1.0">
       <div class="slider-labels"><span>0,01</span><span class="cur" id="eta-label">η = 1,00</span><span>1,00</span></div>
     </div>
     <div class="alert-box info" id="alert-eta" style="display:none">
@@ -274,7 +274,7 @@
         <label>Durée d'émission t</label>
         <div class="mode-row">
           <div class="iw"><input type="number" id="duree-fuite" min="1" max="86400" step="1" value="60"><span class="iu" id="unit-duree">s</span></div>
-          <select id="unite-duree" onchange="updateUnitDuree()" style="padding:10px 6px">
+          <select id="unite-duree" style="padding:10px 6px">
             <option value="s">s</option>
             <option value="min">min</option>
             <option value="h">h</option>
@@ -295,7 +295,7 @@
     <h2>💥 Indice de sévérité</h2>
 
     <label>Nature du site — Zone siège de l'explosion</label>
-    <select id="zone-site" onchange="updateAideIndice()">
+    <select id="zone-site">
       <option value="">— Sélectionner la zone —</option>
       <option value="libre">Zone dépourvue d'obstacle, nuage homogène</option>
       <option value="cuvette_peu">Intérieur de cuvette (peu encombrée)</option>
@@ -318,7 +318,7 @@
       </div>
     </div>
     <div class="indice-slider-track">
-      <input type="range" id="indice-range" min="1" max="10" step="1" value="5" oninput="updateIndice()">
+      <input type="range" id="indice-range" min="1" max="10" step="1" value="5">
     </div>
     <div class="slider-labels" style="margin-top:2px">
       <span style="font-size:10px">1 — Faible</span>
@@ -333,11 +333,11 @@
 
     <label>Distance cible d</label>
     <div class="slider-wrap">
-      <input type="range" id="distance" min="1" max="500" step="1" value="50" oninput="updateSlider()">
+      <input type="range" id="distance" min="1" max="500" step="1" value="50">
       <div class="slider-labels"><span>1 m</span><span class="cur" id="dist-label">50 m</span><span>500 m</span></div>
     </div>
     <label>Distance (saisie directe)</label>
-    <div class="iw"><input type="number" id="dist-input" min="1" max="5000" step="1" value="50" oninput="syncDist()"><span class="iu">m</span></div>
+    <div class="iw"><input type="number" id="dist-input" min="1" max="5000" step="1" value="50"><span class="iu">m</span></div>
 
     <button class="btn-generate" onclick="calculer()">▶ Calculer les effets UVCE</button>
   </div>
@@ -356,7 +356,17 @@
             <th>Su<br>(cm/s)</th>
           </tr>
         </thead>
-        <tbody id="table-produits"></tbody>
+        <tbody id="table-produits">
+<tr style="background:#f9fafb"><td style="padding:4px 6px;font-weight:600;text-align:left">Propane</td><td>46.3</td><td>4.00</td><td>44.1</td><td style="font-weight:700;color:#155724">40</td></tr>
+<tr style="background:white"><td style="padding:4px 6px;font-weight:600;text-align:left">Butane (n-butane)</td><td>45.8</td><td>3.12</td><td>58.1</td><td style="font-weight:700;color:#155724">38</td></tr>
+<tr style="background:#f9fafb"><td style="padding:4px 6px;font-weight:600;text-align:left">Propylène</td><td>45.8</td><td>4.46</td><td>42.1</td><td style="font-weight:700;color:#e06c00">52</td></tr>
+<tr style="background:white"><td style="padding:4px 6px;font-weight:600;text-align:left">Méthane (GN)</td><td>50.0</td><td>9.48</td><td>16.0</td><td style="font-weight:700;color:#155724">37</td></tr>
+<tr style="background:#f9fafb"><td style="padding:4px 6px;font-weight:600;text-align:left">Éthylène</td><td>47.1</td><td>6.54</td><td>28.1</td><td style="font-weight:700;color:#c0392b">75</td></tr>
+<tr style="background:white"><td style="padding:4px 6px;font-weight:600;text-align:left">Hexane / Essence vapeur</td><td>44.7</td><td>2.16</td><td>86.2</td><td style="font-weight:700;color:#155724">38</td></tr>
+<tr style="background:#f9fafb"><td style="padding:4px 6px;font-weight:600;text-align:left">Ammoniac</td><td>18.6</td><td>21.8</td><td>17.0</td><td style="font-weight:700;color:#155724">7</td></tr>
+<tr style="background:white"><td style="padding:4px 6px;font-weight:600;text-align:left">Hydrogène ⛔</td><td>120.0</td><td>29.5</td><td>2.0</td><td style="font-weight:700;color:#c0392b">270</td></tr>
+<tr style="background:#f9fafb"><td style="padding:4px 6px;font-weight:600;text-align:left">Acétylène ⛔</td><td>48.2</td><td>7.75</td><td>26.0</td><td style="font-weight:700;color:#c0392b">150</td></tr>
+</tbody>
       </table>
     </div>
     <div class="hint" style="margin-top:6px">Sources : INERIS Omega UVCE · Harris (1983) · NIST · Mouilleau &amp; Lechaudel (1999)</div>
@@ -574,19 +584,54 @@ function distFromRstar(Rstar, E_MJ) {
    INIT TABLE PRODUITS + UI — exécuté après chargement DOM
 ================================================================ */
 function initPage(){
-  var tb = document.getElementById('table-produits');
-  if(!tb) return;
-  ['propane','butane','propylene','methane','ethylene','hexane','ammoniac','h2','acetylene'].forEach(function(k,i){
-    var p = PRODUITS[k];
-    var tr = document.createElement('tr');
-    tr.style.background = i%2===0?'#f9fafb':'white';
-    tr.innerHTML='<td style="padding:4px 6px;font-weight:600;text-align:left">'+p.nom+'</td>'+
-      '<td>'+p.Hc.toFixed(1)+'</td><td>'+p.Cst.toFixed(2)+'</td>'+
-      '<td>'+p.M.toFixed(1)+'</td><td style="font-weight:700;color:'+(p.Su>75?'#c0392b':p.Su>45?'#e06c00':'#155724')+'">'+p.Su+'</td>';
-    tb.appendChild(tr);
-  });
   updateIndice();
   updateEtaLabel();
+
+  // Listener select produit
+  var selProduit = document.getElementById('produit');
+  if(selProduit) selProduit.addEventListener('change', onProduitChange);
+
+  // Listener select zone site
+  var selZone = document.getElementById('zone-site');
+  if(selZone) selZone.addEventListener('change', updateAideIndice);
+
+  // Listener Su (input)
+  var inSu = document.getElementById('su');
+  if(inSu){ inSu.addEventListener('input', function(){ updateSuAlert(); updateAideIndice(); }); }
+
+  // Listener slider indice
+  var slIndice = document.getElementById('indice-range');
+  if(slIndice) slIndice.addEventListener('input', updateIndice);
+
+  // Listener slider eta
+  var slEta = document.getElementById('eta-range');
+  if(slEta) slEta.addEventListener('input', updateEtaLabel);
+
+  // Listener slider distance
+  var slDist = document.getElementById('distance');
+  if(slDist) slDist.addEventListener('input', updateSlider);
+
+  // Listener input distance directe
+  var inDist = document.getElementById('dist-input');
+  if(inDist) inDist.addEventListener('input', syncDist);
+
+  // Listener unite-duree
+  var selUniteDuree = document.getElementById('unite-duree');
+  if(selUniteDuree) selUniteDuree.addEventListener('change', updateUnitDuree);
+
+  // Boutons radio source masse/debit
+  var btnMasse = document.getElementById('btn-masse');
+  var btnDebit = document.getElementById('btn-debit');
+  if(btnMasse) btnMasse.addEventListener('click', function(){ setModeSrc('masse'); });
+  if(btnDebit) btnDebit.addEventListener('click', function(){ setModeSrc('debit'); });
+
+  // Bouton calculer
+  var btnCalc = document.querySelector('.btn-generate');
+  if(btnCalc) btnCalc.addEventListener('click', calculer);
+
+  // Bouton export
+  var btnExp = document.getElementById('btn-export');
+  if(btnExp) btnExp.addEventListener('click', exporter);
 }
 
 /* ================================================================
