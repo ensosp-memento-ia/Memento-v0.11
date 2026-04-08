@@ -573,8 +573,9 @@ function distFromRstar(Rstar, E_MJ) {
 /* ================================================================
    INIT TABLE PRODUITS + UI — exécuté après chargement DOM
 ================================================================ */
-document.addEventListener('DOMContentLoaded', function(){
+function initPage(){
   var tb = document.getElementById('table-produits');
+  if(!tb) return;
   ['propane','butane','propylene','methane','ethylene','hexane','ammoniac','h2','acetylene'].forEach(function(k,i){
     var p = PRODUITS[k];
     var tr = document.createElement('tr');
@@ -586,7 +587,7 @@ document.addEventListener('DOMContentLoaded', function(){
   });
   updateIndice();
   updateEtaLabel();
-});
+}
 
 /* ================================================================
    GESTION UI
@@ -1002,6 +1003,13 @@ function exporter(){
     setTimeout(function(){btn.textContent='📋 Copier le résumé — Main courante / RETEX';btn.classList.remove('copied');},2500);
   });
 }
+/* ---- Init : appel direct (DOM déjà présent) + fallback ---- */
+if(document.readyState === 'loading'){
+  document.addEventListener('DOMContentLoaded', initPage);
+} else {
+  initPage();
+}
+
 </script>
 </body>
 </html>
