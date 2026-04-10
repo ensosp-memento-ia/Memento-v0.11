@@ -218,6 +218,10 @@
   .filter-bio:hover { background: var(--B-bg); border-color: #15803d; color: #15803d; }
   .filter-bio.active { background: #15803d; color: white; border-color: #15803d; }
 
+  .filter-prive { border-color: #166534; color: #166534; }
+  .filter-prive:hover { background: #f0fdf4; border-color: #166534; color: #166534; }
+  .filter-prive.active { background: #166534; color: white; border-color: #166534; }
+
   .filter-multi { border-color: #5b21b6; color: #5b21b6; }
   .filter-multi:hover { background: var(--M-bg); border-color: #6d28d9; color: #6d28d9; }
   .filter-multi.active { background: #6d28d9; color: white; border-color: #6d28d9; }
@@ -382,6 +386,15 @@
     color: var(--M);
     border: 1px solid #ddd6fe;
   }
+  .prive-badge {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: #f0fdf4;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+  }
 
   /* ── HIGHLIGHT ── */
   .highlight {
@@ -459,7 +472,6 @@
     <span class="search-count" id="search-count"></span>
   </div>
 
-  <!-- Ligne 1 : filtres spéciaux -->
   <div class="filters">
     <span class="filter-label">Filtre :</span>
     <button class="filter-btn active"       onclick="filterSpecial('all', this)">Tous</button>
@@ -471,9 +483,9 @@
     <button class="filter-btn"              onclick="filterSpecial('tmd', this)">TMD</button>
     <button class="filter-btn filter-conv"  onclick="filterSpecial('convention', this)">⚖ Convention</button>
     <button class="filter-btn filter-nrbce" onclick="filterSpecial('nrbce', this)">☣ NRBCe</button>
+    <button class="filter-btn filter-prive" onclick="filterSpecial('prive', this)">🏭 Partenaire privé</button>
   </div>
 
-  <!-- Ligne 2 : filtres domaine -->
   <div class="filters-domain">
     <span class="filter-label">Domaine :</span>
     <button class="filter-btn filter-chim"  onclick="filterDomain('C', this)">🟠 Chimique</button>
@@ -484,13 +496,12 @@
 
   <div id="cards-container"></div>
   <div class="no-results" id="no-results">Aucun expert ne correspond aux filtres sélectionnés.</div>
-  <div style="text-align:center;margin:32px 0 8px;"></div>
 
 </div>
 
 <script>
 const experts = [
-  // ── CHIMIQUE (domaine réel unique = C) ────────────────────────────────────
+  // ── CHIMIQUE ──────────────────────────────────────────────────────────────
   {
     acronym: "CASU",
     name: "Cellule d'Appui aux Situations d'Urgence — INERIS",
@@ -628,7 +639,7 @@ const experts = [
     domain: ["C"],
     specialty: "Collecte et traitement déchets dangereux, eaux d'extinction, résidus d'intervention",
     contact: null, via: "à vérifier", h24: false,
-    tags: ["env"], section: "chimique"
+    tags: ["env","prive"], section: "chimique"
   },
   {
     acronym: "INERIS",
@@ -684,7 +695,7 @@ const experts = [
     tags: ["id","tox"], section: "chimique"
   },
 
-  // ── RADIOLOGIQUE / NUCLÉAIRE (domaine réel unique = R) ───────────────────
+  // ── RADIOLOGIQUE / NUCLÉAIRE ──────────────────────────────────────────────
   {
     acronym: "ASNR (ex-ASN)",
     name: "Autorité de Sûreté Nucléaire et de Radioprotection — fusion ASN+IRSN en cours depuis 2024",
@@ -704,7 +715,7 @@ const experts = [
     tags: ["tox","id","env"], section: "radio"
   },
 
-  // ── BIOLOGIQUE (domaine réel unique = B) ─────────────────────────────────
+  // ── BIOLOGIQUE ────────────────────────────────────────────────────────────
   {
     acronym: "CIBU",
     name: "Cellule d'Intervention Biologique d'Urgence — Institut Pasteur",
@@ -715,7 +726,7 @@ const experts = [
     tags: ["id","tox","nrbce"], section: "bio"
   },
 
-  // ── MULTI-RISQUES (≥ 2 domaines réels distincts) ──────────────────────────
+  // ── MULTI-RISQUES ─────────────────────────────────────────────────────────
   {
     acronym: "CAP",
     name: "Centres Antipoison ORFILA",
@@ -941,11 +952,13 @@ function buildCard(e, idx) {
 
   const hasConv  = e.tags.includes('conv');
   const hasNrbce = e.tags.includes('nrbce');
-  if (hasConv || hasNrbce) {
+  const hasPrive = e.tags.includes('prive');
+  if (hasConv || hasNrbce || hasPrive) {
     const bd = document.createElement('div');
     bd.className = 'card-badges';
-    if (hasConv)  { const b = document.createElement('span'); b.className = 'conv-badge';  b.textContent = '⚖ Convention'; bd.appendChild(b); }
-    if (hasNrbce) { const b = document.createElement('span'); b.className = 'nrbce-badge'; b.textContent = '☣ NRBCe';     bd.appendChild(b); }
+    if (hasConv)  { const b = document.createElement('span'); b.className = 'conv-badge';  b.textContent = '⚖ Convention';     bd.appendChild(b); }
+    if (hasNrbce) { const b = document.createElement('span'); b.className = 'nrbce-badge'; b.textContent = '☣ NRBCe';          bd.appendChild(b); }
+    if (hasPrive) { const b = document.createElement('span'); b.className = 'prive-badge'; b.textContent = '🏭 Partenaire privé'; bd.appendChild(b); }
     card.appendChild(bd);
   }
   return card;
@@ -1014,7 +1027,6 @@ function matchesDomain(card) {
   if (!activeFilters.domain) return true;
   const d = activeFilters.domain;
   if (d === 'MULTI') return card.dataset.section === 'multi';
-  // Pour C, R, B : inclure aussi les cartes de la section multi qui portent ce domaine
   return card.dataset.domain.split(',').includes(d);
 }
 
@@ -1033,6 +1045,7 @@ function applyFilters() {
     if (activeFilters.special === 'tmd'        && !card.dataset.tags.includes('tmd'))   show = false;
     if (activeFilters.special === 'convention' && !card.dataset.tags.includes('conv'))  show = false;
     if (activeFilters.special === 'nrbce'      && !card.dataset.tags.includes('nrbce')) show = false;
+    if (activeFilters.special === 'prive'      && !card.dataset.tags.includes('prive'))  show = false;
 
     if (!matchesDomain(card)) show = false;
     if (currentSearch && !card.dataset.search.includes(currentSearch)) show = false;
