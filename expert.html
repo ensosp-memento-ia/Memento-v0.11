@@ -934,11 +934,16 @@ function buildCard(e, idx) {
   }).join('');
 
   const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
-  const contactHtml = e.contact
-    ? isMobile
-      ? `<a href="tel:${e.contact.replace(/\./g,'')}" class="contact-val" style="text-decoration:none;">${e.contact}</a>`
-      : `<span class="contact-val">${e.contact}</span>`
-    : `<span class="contact-via">${e.via || '—'}</span>`;
+const contactHtml = [
+    e.contact
+      ? isMobile
+        ? `<a href="tel:${e.contact.replace(/\./g,'')}" class="contact-val" style="text-decoration:none;">${e.contact}</a>`
+        : `<span class="contact-val">${e.contact}</span>`
+      : null,
+    e.via
+      ? `<span class="contact-via">${e.via}</span>`
+      : null
+  ].filter(Boolean).join('<span style="color:var(--border);margin:0 4px;">·</span>');
 
   const siteHtml = e.formulaire
     ? `<a href="${e.formulaire}" target="_blank" style="color:#001F8F;font-size:11px;margin-left:auto;font-weight:600;text-decoration:none;">📋 Formulaire /Lien</a>`
