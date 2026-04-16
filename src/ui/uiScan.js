@@ -321,10 +321,12 @@ function buildAIButtons(fiche, prompt, aiButtonsContainer) {
   if (!prompt.trim()) return;
 
   // Récupération des indices IA (avec support NC)
-  const levels = fiche.ai || {
-    chatgpt: 3,
-    perplexity: 3,
-    mistral: 3,
+  // Compatibilité ascendante : claude absent dans les anciennes fiches → NC
+  const levels = {
+    chatgpt:   (fiche.ai?.chatgpt   !== undefined) ? fiche.ai.chatgpt   : 3,
+    perplexity:(fiche.ai?.perplexity!== undefined) ? fiche.ai.perplexity: 3,
+    mistral:   (fiche.ai?.mistral   !== undefined) ? fiche.ai.mistral   : 3,
+    claude:    (fiche.ai?.claude    !== undefined) ? fiche.ai.claude    : "NC",
   };
 
   // Fonction pour déterminer le style selon l'indice
@@ -400,10 +402,11 @@ function buildAIButtons(fiche, prompt, aiButtonsContainer) {
     aiButtonsContainer.appendChild(btn);
   };
 
-  // Création des 3 boutons avec URLs correctes
+  // Création des 4 boutons avec URLs correctes
   mkBtn("ChatGPT",   levels.chatgpt,   "https://chat.openai.com/?q=");
   mkBtn("Perplexity",levels.perplexity,"https://www.perplexity.ai/search?q=");
   mkBtn("Mistral",   levels.mistral,   "https://chat.mistral.ai/chat?q=");
+  mkBtn("Claude",    levels.claude,    "https://claude.ai/new?q=");
   
   console.log("✅ Boutons IA générés avec codes couleur et transmission prompt");
 }
