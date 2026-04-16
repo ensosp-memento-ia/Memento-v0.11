@@ -119,7 +119,7 @@
 
 <header>
   Mémento Opérationnel IA – ENSOSP
-  <div class="header-sub">Dimensionnement surpression — UVCE Multi-Énergie · INERIS Omega 32 · Van den Berg 1985</div>
+  <div class="header-sub">Dimensionnement surpression — UVCE Multi-Énergie </div>
 </header>
 
 <nav class="tabs">
@@ -133,8 +133,8 @@
 
 <div class="warn">
   <strong>⚠️ Outil d'aide au dimensionnement — Méthode Multi-Énergie</strong>
-  Résultats estimatifs basés sur les abaques INERIS Omega 32 / Van den Berg 1985. Tout engagement reste sous l'autorité du COS et s'appuie sur les constatations terrain.
-  Base substances : CASU — Mémoire RCH4 2018 — Mémento Dimensionnement RCH · Distances réduites R̄ d'après lecture d'abaque INERIS OMEGA 32.
+  Résultats estimatifs basés sur les abaques INERIS Omega 32. Tout engagement reste sous l'autorité du COS et s'appuie sur les constatations terrain.
+  Base substances : CASU — Mémoire RCH4 2018 — Mémento Dimensionnement RCH
 </div>
 
 <div class="grid-2">
@@ -291,33 +291,7 @@
       </div>
       <div style="display:none"><span id="alphaEffective">1.0</span></div>
     </div>
-<!-- FORMULES -->
-<div class="formule-box">
-  <h3>Formules clés — Méthode Multi-Énergie · INERIS Omega 32 · Van den Berg 1985</h3>
-  <div class="feq-row">
-    <span class="feq-sym">E</span><span class="feq-eq">=</span>
-    <span class="feq-sym">α</span><span class="feq-eq">·</span>
-    <span class="feq-sym"><em>m</em></span><span class="feq-eq">·</span>
-    <span class="feq-sym">PCI</span>
-    <span class="feq-warn" style="font-size:12px">&nbsp;[J] — énergie effective</span>
-  </div>
-  <div class="feq-row">
-    <span class="feq-sym">R̃</span><span class="feq-eq">=</span>
-    <span class="feq-sym"><em>R</em></span><span class="feq-eq">·</span>
-    <span class="feq-frac"><span style="color:#001F8F">P₀</span><span style="color:#001F8F">E</span></span>
-    <sup style="font-size:11px;color:#001F8F">1/3</sup>
-    <span class="feq-warn" style="font-size:12px">&nbsp;[—] — distance réduite</span>
-  </div>
-  <div class="feq-row">
-    <span class="feq-sym">P<sub>s</sub></span><span class="feq-eq">=</span>
-    <span class="feq-sym">P̃<sub style="font-size:.7em">s</sub></span><span class="feq-eq">·</span>
-    <span class="feq-sym">P₀</span>
-    <span class="feq-warn" style="font-size:12px">&nbsp;[Pa] — surpression absolue</span>
-  </div>
-  <div style="font-size:12px;color:#555;margin-top:10px;line-height:1.8">
-    <strong style="color:#001F8F">Calcul des distances :</strong> R = R̄ × (E/P₀)^(1/3) &nbsp;·&nbsp; R̄ = distance réduite lue sur abaque (Omega 32 - INERIS Fig. 43)<br>
-  </div>
-</div>
+
   </div>
 
   <!-- COLONNE DROITE -->
@@ -387,15 +361,43 @@
         </table>
       </div>
     </div>
+
+  </div>
 </div>
 
-
+<!-- FORMULES -->
+<div class="formule-box">
+  <h3>Formules clés — Méthode Multi-Énergie · INERIS Omega 32 · Van den Berg 1985</h3>
+  <div class="feq-row">
+    <span class="feq-sym">E</span><span class="feq-eq">=</span>
+    <span class="feq-sym">α</span><span class="feq-eq">·</span>
+    <span class="feq-sym"><em>m</em></span><span class="feq-eq">·</span>
+    <span class="feq-sym">PCI</span>
+    <span class="feq-warn" style="font-size:12px">&nbsp;[J] — énergie effective</span>
+  </div>
+  <div class="feq-row">
+    <span class="feq-sym">R̃</span><span class="feq-eq">=</span>
+    <span class="feq-sym"><em>R</em></span><span class="feq-eq">·</span>
+    <span class="feq-frac"><span style="color:#001F8F">P₀</span><span style="color:#001F8F">E</span></span>
+    <sup style="font-size:11px;color:#001F8F">1/3</sup>
+    <span class="feq-warn" style="font-size:12px">&nbsp;[—] — distance réduite</span>
+  </div>
+  <div class="feq-row">
+    <span class="feq-sym">P<sub>s</sub></span><span class="feq-eq">=</span>
+    <span class="feq-sym">P̃<sub style="font-size:.7em">s</sub></span><span class="feq-eq">·</span>
+    <span class="feq-sym">P₀</span>
+    <span class="feq-warn" style="font-size:12px">&nbsp;[Pa] — surpression absolue</span>
+  </div>
+  <div style="font-size:12px;color:#555;margin-top:10px;line-height:1.8">
+    <strong style="color:#001F8F">Calcul des distances :</strong> R = R̄ × (E/P₀)^(1/3) &nbsp;·&nbsp; R̄ = distance réduite lue sur abaque (INERIS Omega 32 - Fig. 43)<br>
+  </div>
+</div>
 
 <!-- RÉSULTATS -->
 <div id="results">
 
   <div id="flux-hero" style="text-align:center;padding:28px 20px;border-radius:15px;background:white;box-shadow:0 3px 8px rgba(0,0,0,.05);margin-bottom:20px;border-top:5px solid #001F8F">
-    <div style="font-size:13px;font-weight:600;color:#666;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Surpression à la cible : R_interest m</div>
+    <div style="font-size:13px;font-weight:600;color:#666;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Surpression à la cible</div>
     <div id="kpi-Ps" style="font-size:clamp(2.5rem,8vw,4rem);font-weight:800;color:#001F8F;line-height:1">—</div>
     <div style="font-size:14px;color:#666;margin-top:4px">mbar</div>
     <div id="res-verdict" style="display:inline-block;margin-top:12px;padding:8px 22px;border-radius:25px;font-size:14px;font-weight:700"></div>
@@ -405,6 +407,16 @@
     <div class="km"><div class="km-lbl">Énergie effective E</div><div class="km-val" id="kpi-E">—</div><div class="km-unit">MJ</div></div>
     <div class="km"><div class="km-lbl">Distance réduite R̃</div><div class="km-val" id="kpi-R">—</div><div class="km-unit">sans dim.</div></div>
     <div class="km"><div class="km-lbl">Classification</div><div class="km-val" id="kpi-class" style="font-size:1rem;line-height:1.3;margin-top:4px">—</div><div class="km-unit">&nbsp;</div></div>
+  </div>
+
+  <div class="card" style="margin-bottom:20px">
+    <h2>⚠️ Seuils réglementaires — Arrêté PPRT du 29/09/2005</h2>
+    <div class="seuils">
+      <div class="sc sel"><div class="sn">SEL</div><div class="sv">200 mbar</div><div class="sd">Rupture tympan, lésions pulmonaires</div><div class="ss" id="st-sel"></div></div>
+      <div class="sc sels"><div class="sn">SELS</div><div class="sv">140 mbar</div><div class="sd">Dommages pulmonaires, projection</div><div class="ss" id="st-sels"></div></div>
+      <div class="sc sei"><div class="sn">SEI</div><div class="sv">50 mbar</div><div class="sd">Projection bris de vitre</div><div class="ss" id="st-sei"></div></div>
+      <div class="sc bris"><div class="sn">Bris vitres</div><div class="sv">20 mbar</div><div class="sd">Rupture vitrages, dégâts légers</div><div class="ss" id="st-bris"></div></div>
+    </div>
   </div>
 
   <div class="card" style="margin-bottom:20px;padding:0;overflow:hidden">
@@ -423,9 +435,8 @@
   </div>
 
   <div class="sources-box">
-    <strong>Références :</strong> INERIS Omega 32 — DRA-06-50798-16173A (2006) · Baker et al. (1983) · Van den Berg (1985) ·
+    <strong>Références :</strong> INERIS Omega 32 — DRA-06-50798-16173A (2006)
     <strong>Base substances :</strong> CASU — Mémoire RCH4 2018 — Mémento Dimensionnement RCH ·
-    <strong>Validation R̄ :</strong> Cdt Anne — SDIS 76 / CASU — avril 2026
   </div>
 
   <button class="btn-export" id="btn-export" onclick="exporter()">📋 Copier le résumé — Main courante / RETEX</button>
@@ -438,24 +449,27 @@
 <script>
 // ══════════════════════════════════════════════════════════
 //  BASE SUBSTANCES — CASU / Mémento RCH4 2018
+//  Su (cm/s) : INERIS Omega 32 Tableau 5 — NFPA 68, 2002
+//  Référence propane : 46 cm/s (Omega 32) — corrigé avril 2026
 // ══════════════════════════════════════════════════════════
-const SU_PROPANE = 43;
+const SU_PROPANE = 46; // Omega 32 Tableau 5 — NFPA 68, 2002 (46 cm/s)
 const substancesDB = {
-  ammonia:    {name:"Ammoniac",    form:"NH₃",   rho:0.77, c:21.8, rxc:0.167, pci:18.6,  lii:15.0,lsi:28.0,  su:7  },
-  butane:     {name:"Butane",      form:"C₄H₁₀", rho:2.7,  c:4.0,  rxc:0.108, pci:45.8,  lii:1.5, lsi:8.5,   su:40 },
-  methane:    {name:"Méthane",     form:"CH₄",   rho:0.68, c:9.5,  rxc:0.065, pci:50.1,  lii:5.0, lsi:15.0,  su:37 },
-  propane:    {name:"Propane",     form:"C₃H₈",  rho:2.0,  c:5.0,  rxc:0.100, pci:46.4,  lii:1.8, lsi:9.5,   su:43 },
-  acetylene:  {name:"Acétylène",   form:"C₂H₂",  rho:1.17, c:13.0, rxc:0.152, pci:48.2,  lii:2.3, lsi:82.0,  su:155},
-  benzene:    {name:"Benzène",     form:"C₆H₆",  rho:0.9,  c:4.0,  rxc:0.036, pci:40.1,  lii:1.2, lsi:8.0,   su:40 },
-  butylene:   {name:"Butylène",    form:"C₄H₈",  rho:2.44, c:3.5,  rxc:0.085, pci:45.3,  lii:1.6, lsi:10.0,  su:44 },
-  cyclohexane:{name:"Cyclohexane", form:"C₆H₁₂", rho:4.02, c:3.0,  rxc:0.120, pci:43.5,  lii:1.3, lsi:8.4,   su:33 },
-  ethane:     {name:"Éthane",      form:"C₂H₆",  rho:1.28, c:7.0,  rxc:0.090, pci:47.5,  lii:3.0, lsi:12.5,  su:43 },
-  ethylene:   {name:"Éthylène",    form:"C₂H₄",  rho:1.2,  c:8.0,  rxc:0.096, pci:47.2,  lii:2.3, lsi:36.0,  su:75 },
-  nhexane:    {name:"n-Hexane",    form:"C₆H₁₄", rho:4.17, c:2.5,  rxc:0.104, pci:44.8,  lii:1.0, lsi:7.5,   su:39 },
-  nheptane:   {name:"n-Heptane",   form:"C₇H₁₆", rho:5.01, c:1.87, rxc:0.093, pci:44.6,  lii:1.0, lsi:6.7,   su:37 },
-  hydrogen:   {name:"Hydrogène",   form:"H₂",    rho:0.09, c:29.0, rxc:0.026, pci:120.0, lii:4.0, lsi:75.0,  su:295},
-  pentane:    {name:"Pentane",     form:"C₅H₁₂", rho:2.41, c:2.6,  rxc:0.063, pci:44.8,  lii:1.3, lsi:7.8,   su:39 },
-  propylene:  {name:"Propylène",   form:"C₃H₆",  rho:1.8,  c:4.3,  rxc:0.077, pci:45.8,  lii:2.0, lsi:11.7,  su:52 },
+  //           ρ_gaz   C%    ρ×C    PCI    LII   LSI   Su(cm/s) ← Omega32 Tableau5
+  ammonia:    {name:"Ammoniac",    form:"NH₃",   rho:0.77, c:21.8, rxc:0.167, pci:18.6,  lii:15.0,lsi:28.0,  su:7  }, // 0.07 m/s → 7 cm/s  ✓
+  butane:     {name:"Butane",      form:"C₄H₁₀", rho:2.7,  c:4.0,  rxc:0.108, pci:45.8,  lii:1.5, lsi:8.5,   su:45 }, // 0.45 m/s → 45 cm/s  corrigé (était 40)
+  methane:    {name:"Méthane",     form:"CH₄",   rho:0.68, c:9.5,  rxc:0.065, pci:50.1,  lii:5.0, lsi:15.0,  su:40 }, // 0.40 m/s → 40 cm/s  ✓
+  propane:    {name:"Propane",     form:"C₃H₈",  rho:2.0,  c:5.0,  rxc:0.100, pci:46.4,  lii:1.8, lsi:9.5,   su:46 }, // 0.46 m/s → 46 cm/s  corrigé (était 43 — référence)
+  acetylene:  {name:"Acétylène",   form:"C₂H₂",  rho:1.17, c:13.0, rxc:0.152, pci:48.2,  lii:2.3, lsi:82.0,  su:166}, // 1.66 m/s → 166 cm/s corrigé (était 155)
+  benzene:    {name:"Benzène",     form:"C₆H₆",  rho:0.9,  c:4.0,  rxc:0.036, pci:40.1,  lii:1.2, lsi:8.0,   su:48 }, // 0.48 m/s → 48 cm/s  corrigé (était 40)
+  butylene:   {name:"Butylène",    form:"C₄H₈",  rho:2.44, c:3.5,  rxc:0.085, pci:45.3,  lii:1.6, lsi:10.0,  su:51 }, // 0.51 m/s → 51 cm/s  corrigé (était 44)
+  cyclohexane:{name:"Cyclohexane", form:"C₆H₁₂", rho:4.02, c:3.0,  rxc:0.120, pci:43.5,  lii:1.3, lsi:8.4,   su:46 }, // 0.46 m/s → 46 cm/s  corrigé (était 33)
+  ethane:     {name:"Éthane",      form:"C₂H₆",  rho:1.28, c:7.0,  rxc:0.090, pci:47.5,  lii:3.0, lsi:12.5,  su:47 }, // 0.47 m/s → 47 cm/s  corrigé (était 43)
+  ethylene:   {name:"Éthylène",    form:"C₂H₄",  rho:1.2,  c:8.0,  rxc:0.096, pci:47.2,  lii:2.3, lsi:36.0,  su:80 }, // 0.80 m/s → 80 cm/s  corrigé (était 75)
+  nhexane:    {name:"n-Hexane",    form:"C₆H₁₄", rho:4.17, c:2.5,  rxc:0.104, pci:44.8,  lii:1.0, lsi:7.5,   su:46 }, // 0.46 m/s → 46 cm/s  corrigé (était 39)
+  nheptane:   {name:"n-Heptane",   form:"C₇H₁₆", rho:5.01, c:1.87, rxc:0.093, pci:44.6,  lii:1.0, lsi:6.7,   su:46 }, // 0.46 m/s → 46 cm/s  corrigé (était 37)
+  hydrogen:   {name:"Hydrogène",   form:"H₂",    rho:0.09, c:29.0, rxc:0.026, pci:120.0, lii:4.0, lsi:75.0,  su:330}, // 3.30 m/s → 330 cm/s corrigé (était 295)
+  pentane:    {name:"Pentane",     form:"C₅H₁₂", rho:2.41, c:2.6,  rxc:0.063, pci:44.8,  lii:1.3, lsi:7.8,   su:46 }, // 0.46 m/s → 46 cm/s  corrigé (était 39)
+  propylene:  {name:"Propylène",   form:"C₃H₆",  rho:1.8,  c:4.3,  rxc:0.077, pci:45.8,  lii:2.0, lsi:11.7,  su:66 }, // 0.66 m/s → 66 cm/s  corrigé (était 52)
 };
 
 // ══════════════════════════════════════════════════════════
