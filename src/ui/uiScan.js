@@ -368,15 +368,15 @@ function buildAIButtons(fiche, prompt, aiButtonsContainer) {
     // Texte du bouton avec badge indice
     const lvlLabel = getLabelForLevel(lvl);
     btn.innerHTML = `
-      🤖 ${label}
-      <span style="background:rgba(255,255,255,0.3);padding:2px 8px;border-radius:12px;margin-left:8px;font-size:12px;">
-        ${lvlLabel}
+      <span style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+        <span>🤖 ${label}</span>
+        <span style="background:rgba(255,255,255,0.3);padding:2px 8px;border-radius:12px;font-size:11px;white-space:nowrap;">${lvlLabel}</span>
       </span>
     `;
     
     // Style de base
     btn.style = styleForLevel(lvl)
-      + "padding:10px 14px;border:none;border-radius:8px;font-weight:600;cursor:pointer;flex:1;min-width:0;";
+      + "padding:10px 8px;border:none;border-radius:8px;font-weight:600;cursor:pointer;flex:1;min-width:0;";
 
     // Gestion selon l'indice
     const lvlStr = String(lvl);
