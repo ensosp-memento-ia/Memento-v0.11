@@ -317,6 +317,8 @@ function buildAIButtons(fiche, prompt, aiButtonsContainer) {
   
   aiButtonsContainer.innerHTML = "";
   aiButtonsContainer.style.display = "flex";
+  aiButtonsContainer.style.flexWrap = "nowrap";
+  aiButtonsContainer.style.gap = "8px";
   
   if (!prompt.trim()) return;
 
@@ -374,7 +376,7 @@ function buildAIButtons(fiche, prompt, aiButtonsContainer) {
     
     // Style de base
     btn.style = styleForLevel(lvl)
-      + "padding:12px 20px;margin-right:10px;margin-bottom:10px;border:none;border-radius:8px;font-weight:600;cursor:pointer;";
+      + "padding:10px 14px;border:none;border-radius:8px;font-weight:600;cursor:pointer;flex:1;min-width:0;";
 
     // Gestion selon l'indice
     const lvlStr = String(lvl);
