@@ -117,6 +117,7 @@ function setAIIndicesToUI(ai) {
     const chatgpt = document.getElementById("aiChatGPT");
     const perplexity = document.getElementById("aiPerplexity");
     const mistral = document.getElementById("aiMistral");
+    const claude = document.getElementById("aiClaude");
     
     if (chatgpt && ai.chatgpt !== undefined) {
         chatgpt.value = String(ai.chatgpt);
@@ -128,5 +129,10 @@ function setAIIndicesToUI(ai) {
     
     if (mistral && ai.mistral !== undefined) {
         mistral.value = String(ai.mistral);
+    }
+
+    // Compatibilité ascendante : fiches sans champ claude → NC par défaut
+    if (claude) {
+        claude.value = ai.claude !== undefined ? String(ai.claude) : "NC";
     }
 }
