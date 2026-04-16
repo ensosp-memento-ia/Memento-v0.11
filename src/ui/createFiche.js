@@ -60,6 +60,7 @@ function getAIIndicesFromUI() {
     const chatgpt = document.getElementById("aiChatGPT");
     const perplexity = document.getElementById("aiPerplexity");
     const mistral = document.getElementById("aiMistral");
+    const claude = document.getElementById("aiClaude");
 
     // Fonction helper pour gérer NC et les valeurs numériques
     function parseIndexValue(element, defaultValue = 3) {
@@ -89,7 +90,8 @@ function getAIIndicesFromUI() {
     return {
         chatgpt: parseIndexValue(chatgpt),
         perplexity: parseIndexValue(perplexity),
-        mistral: parseIndexValue(mistral)
+        mistral: parseIndexValue(mistral),
+        claude: parseIndexValue(claude)
     };
 }
 
