@@ -26,6 +26,7 @@ const MAP = {
 
   // AI confidence levels
   ai: "A",
+  claude: "CL",
 
   // Versionning optional
   version: "v"
