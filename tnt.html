@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<title>Équivalent TNT — Méthode TNT Equivalency | Mémento IA ENSOSP</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<style>
+  body{font-family:"Inter",sans-serif;background:#f5f7fb;margin:0;padding:0;color:#111;min-height:100vh;display:flex;flex-direction:column}
+  header{background:#001F8F;padding:12px 20px;text-align:center;color:white;font-size:16px;font-weight:700;letter-spacing:.5px}
+  .header-sub{font-size:12px;font-weight:400;opacity:.8;margin-top:3px}
+  .tabs{display:flex;background:#e9ecf5;padding:10px;gap:10px}
+  .tab{flex:1;text-align:center;padding:10px 12px;border-radius:25px;color:#001F8F;font-weight:600;font-size:13px;cursor:pointer;border:none;background:transparent;font-family:"Inter",sans-serif;text-decoration:none;display:inline-block;transition:.2s}
+  .tab.active{background:#001F8F;color:white}
+  .tab:hover:not(.active){background:#d9dff5}
+  main{max-width:700px;margin:0 auto;padding:20px;flex:1;width:100%;box-sizing:border-box}
+
+  .warn{background:#fff3cd;border-left:4px solid #ff9f1c;padding:14px 16px;border-radius:8px;font-size:13px;color:#856404;margin-bottom:20px;line-height:1.7}
+  .warn strong{display:block;font-size:14px;margin-bottom:6px}
+
+  .card{background:white;padding:22px;border-radius:15px;margin-bottom:20px;box-shadow:0 3px 8px rgba(0,0,0,.05)}
+  .card h2{color:#001F8F;margin:0 0 16px 0;font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px}
+
+  label{display:block;font-weight:600;font-size:13px;color:#001F8F;margin-bottom:5px;margin-top:14px}
+  label:first-child{margin-top:0}
+  input[type=number],input[type=text],select{width:100%;padding:10px 12px;border-radius:10px;border:1px solid #ccd2e3;font-size:15px;font-family:"Inter",sans-serif;box-sizing:border-box;color:#111;background:#fff;transition:border-color .2s;appearance:none}
+  input[type=number]{padding-right:72px}
+  input[type=number]:focus,input[type=text]:focus,select:focus{border-color:#001F8F;outline:none}
+  .iw{position:relative}
+  .iu{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:12px;font-weight:600;color:#001F8F;background:#e9ecf5;padding:2px 7px;border-radius:6px;pointer-events:none;white-space:nowrap}
+  .hint{font-size:11px;color:#888;margin-top:5px;line-height:1.5}
+  .src-badge{display:inline-block;font-size:10px;font-weight:600;background:#eef2ff;color:#001F8F;padding:1px 6px;border-radius:4px;margin-left:4px;vertical-align:middle}
+
+  .sel-wrap{position:relative}
+  .sel-wrap select{padding-right:36px}
+  .sel-wrap::after{content:'▾';position:absolute;right:14px;top:50%;transform:translateY(-50%);color:#001F8F;font-size:12px;pointer-events:none}
+
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:480px){.grid-2{grid-template-columns:1fr}}
+
+  .pci-info{margin-top:10px;padding:10px 14px;background:#eef2ff;border-radius:8px;border-left:3px solid #001F8F;font-size:12.5px;color:#555;display:none}
+  .pci-info strong{color:#001F8F}
+  .hl-notice{margin-top:10px;padding:9px 13px;background:#fff3cd;border:1px solid #f0c040;border-left:3px solid #ff9f1c;border-radius:8px;font-size:12px;color:#856404;display:none}
+  .custom-produit-zone{display:none}
+
+  .pill-group{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+  .pill{flex:1;min-width:120px;padding:10px 12px;border:1px solid #ccd2e3;border-radius:10px;cursor:pointer;text-align:center;transition:all .2s;background:#fff;position:relative;font-family:"Inter",sans-serif}
+  .pill:hover{background:#e9ecf5}
+  .pill.active{background:#001F8F;border-color:#001F8F}
+  .pill .pv{font-size:18px;font-weight:700;display:block}
+  .pill.active .pv{color:white}
+  .pill:not(.active) .pv{color:#001F8F}
+  .pill .pl{font-size:10px;display:block;margin-top:2px;font-weight:500}
+  .pill.active .pl{color:rgba(255,255,255,.75)}
+  .pill:not(.active) .pl{color:#888}
+  .pill .pb{position:absolute;top:-6px;right:8px;background:#001F8F;color:#fff;font-size:9px;font-weight:700;padding:2px 6px;border-radius:10px;letter-spacing:.3px}
+  .pill.active .pb{background:rgba(255,255,255,.25)}
+
+  .btn-generate{width:100%;padding:16px;background:#001F8F;color:white;border:none;font-size:16px;font-family:"Inter",sans-serif;border-radius:14px;cursor:pointer;font-weight:700;margin-top:4px;transition:all .2s;box-shadow:0 4px 12px rgba(0,31,143,.3)}
+  .btn-generate:hover{background:#002bbf;transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,31,143,.4)}
+  .btn-generate:active{transform:translateY(0)}
+
+  #resultZone{display:none;margin-top:0}
+
+  .res-hero{text-align:center;padding:28px 20px;border-radius:15px;background:white;box-shadow:0 3px 8px rgba(0,0,0,.05);margin-bottom:20px;border-top:5px solid #001F8F}
+  .res-hero .rl{font-size:13px;font-weight:600;color:#666;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+  .res-hero .rv{font-size:clamp(2rem,8vw,3.5rem);font-weight:800;color:#001F8F;line-height:1}
+  .res-hero .ru{font-size:14px;color:#666;margin-top:4px}
+  .res-hero .rf{margin-top:8px;font-size:11.5px;color:#888;font-style:italic;line-height:1.5;word-break:break-word}
+  .res-verdict{display:inline-block;margin-top:12px;padding:8px 22px;border-radius:25px;font-size:14px;font-weight:700}
+
+  .zone-table{width:100%;border-collapse:collapse;font-size:13px}
+  .zone-table th{background:#eef2ff;color:#001F8F;font-size:11px;letter-spacing:.05em;text-transform:uppercase;padding:8px 12px;border:1px solid #e0e4f0;text-align:left;font-weight:700}
+  .zone-table td{border:1px solid #e0e4f0;padding:8px 12px}
+  .zone-table tr:hover td{background:#f9fafb}
+  .zone-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700}
+
+  .ref-box{background:#eef2ff;border-radius:10px;padding:12px 16px;font-size:11.5px;color:#555;margin:14px;margin-top:10px;border-left:3px solid #001F8F;line-height:1.6}
+  .ref-box strong{color:#001F8F}
+
+  .sources-box{background:#f1f3fa;border-radius:10px;padding:14px 16px;margin-bottom:20px;font-size:11px;color:#555;line-height:1.8}
+  .sources-box strong{color:#001F8F}
+
+  .btn-export{width:100%;padding:14px;background:#e9ecf5;color:#001F8F;border:none;font-size:14px;font-family:"Inter",sans-serif;border-radius:14px;cursor:pointer;font-weight:700;transition:all .2s;margin-bottom:20px}
+  .btn-export:hover{background:#d9dff5}
+  .btn-export.copied{background:#d4edda;color:#155724}
+</style>
+</head>
+<body>
+
+<header>
+  Mémento Opérationnel IA — ENSOSP
+  <div class="header-sub">Équivalent TNT · Méthode TNT Equivalency · Abaque TM5-1300</div>
+</header>
+
+<nav class="tabs">
+  <a href="index.html" class="tab">🏠 Accueil</a>
+  <a href="scan.html" class="tab">📷 Lecture QR</a>
+  <a href="create.html" class="tab">📝 Création fiche</a>
+  <a href="nrbc.html" class="tab active">⚗️ Espace NRBC</a>
+</nav>
+
+<main>
+
+  <div class="warn">
+    <strong>⚠️ Aide au dimensionnement — résultats estimatifs</strong>
+    Le rendement effectif de l'explosion dépend du type de gaz et de la configuration du nuage (confinement, encombrement) — cf. <strong>OMEGA 32, INERIS</strong>.
+    Les explosions de faible puissance sont mal représentées par cette méthode.
+    Valeur majorante avec η = 100 % ; recommandation Lannoy : η = 10 % (≈97 % des cas).
+    Résultats à croiser avec les méthodes multi-énergie pour les scénarios UVCE confinés.
+    Tout engagement opérationnel reste sous l'autorité du COS.
+  </div>
+
+  <div class="card">
+    <h2>🧪 Produit &amp; masse</h2>
+    <div class="grid-2">
+
+      <div>
+        <label>Produit <span class="src-badge">NIST / SFPE</span></label>
+        <div class="sel-wrap">
+          <select id="selProduit" onchange="onProduitChange()">
+            <option value="">— Sélectionner —</option>
+            <optgroup label="Produits courants">
+              <option value="CO">Monoxyde de carbone (CO)</option>
+              <option value="diesel">Diesel</option>
+              <option value="fioul">Fioul / Gazole</option>
+              <option value="gaznaturel">Gaz naturel</option>
+              <option value="hydrogene">Hydrogène (H₂)</option>
+              <option value="methane">Méthane (CH₄)</option>
+              <option value="propane">Propane (C₃H₈)</option>
+              <option value="essence">Essence automobile</option>
+              <option value="kerosene">Kérosène</option>
+              <option value="GPL">GPL</option>
+            </optgroup>
+            <optgroup label="Autres">
+              <option value="hors_liste">Hydrocarbure hors liste</option>
+              <option value="personnalise">✎ Produit personnalisé (saisie PCI)</option>
+            </optgroup>
+          </select>
+        </div>
+
+        <div class="pci-info" id="pciInfo">
+          PCI = <strong id="pciVal">—</strong> MJ/kg &nbsp;|&nbsp;
+          Rapport PCI/PCI<sub>TNT</sub> = <strong id="rapportVal">—</strong>
+        </div>
+        <div class="hl-notice" id="hlNotice">
+          Hydrocarbure hors liste : <strong>m<sub>TNT</sub> = η × masse combustible</strong><br>
+          (rapport PCI/PCI<sub>TNT</sub> = 1 appliqué par défaut)
+        </div>
+
+        <div class="custom-produit-zone" id="customProduitZone">
+          <div style="background:#fff3cd;border-left:3px solid #ff9f1c;border-radius:8px;padding:8px 12px;margin-top:10px;font-size:12px;color:#856404">
+            <strong>Produit hors base</strong> — Saisir le PCI depuis NIST, fiche INRS ou FDS.
+          </div>
+          <div class="grid-2" style="margin-top:8px">
+            <div>
+              <label style="margin-top:0">Nom du produit</label>
+              <input type="text" id="customNom" placeholder="ex : Acétylène" oninput="onCustomPciChange()" />
+            </div>
+            <div>
+              <label style="margin-top:0">PCI <span class="src-badge">MJ/kg</span></label>
+              <div class="iw">
+                <input type="number" id="customPci" placeholder="ex : 48.2" min="0.1" step="any" oninput="onCustomPciChange()" />
+                <span class="iu">MJ/kg</span>
+              </div>
+            </div>
+          </div>
+          <div class="pci-info" id="pciInfoCustom" style="margin-top:10px;">
+            PCI saisi = <strong id="pciValCustom">—</strong> MJ/kg &nbsp;|&nbsp;
+            Rapport PCI/PCI<sub>TNT</sub> = <strong id="rapportValCustom">—</strong>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <label>Masse combustible <span class="src-badge">kg</span></label>
+        <div class="iw">
+          <input type="number" id="masse" placeholder="ex : 500" min="0" step="any" />
+          <span class="iu">kg</span>
+        </div>
+        <div class="hint">Masse totale du nuage inflammable.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>🔢 Rendement d'explosion η</h2>
+    <div class="pill-group">
+      <div class="pill active" id="pill100" onclick="setRendement(100)">
+        <span class="pv">100 %</span>
+        <span class="pl">Scénario majorant</span>
+        <span class="pb">PAR DÉFAUT</span>
+      </div>
+      <div class="pill" id="pill10" onclick="setRendement(10)">
+        <span class="pv">10 %</span>
+        <span class="pl">Recommandation Lannoy <span class="src-badge" style="background:rgba(0,31,143,.1)">1984</span></span>
+      </div>
+      <div class="pill" id="pillC" onclick="focusCustom()">
+        <span class="pv" id="pillCVal">—</span>
+        <span class="pl">Personnalisé</span>
+      </div>
+    </div>
+    <label>Valeur personnalisée <span class="src-badge">%</span></label>
+    <div class="iw">
+      <input type="number" id="customEta" placeholder="ex : 30" min="1" max="100" step="1" oninput="onCustomEta()" />
+      <span class="iu">%</span>
+    </div>
+    <div class="hint">Justifier dans le rapport (nature fuite, confinement, RETEX). Plage opérationnelle : 1–100 %.</div>
+  </div>
+
+  <button class="btn-generate" onclick="calculer()">▶ Calculer l'équivalent TNT et les distances</button>
+
+  <div id="resultZone">
+
+    <div class="res-hero" id="resHero">
+      <div class="rl">Masse équivalente TNT</div>
+      <div class="rv" id="resMtnt">—</div>
+      <div class="ru" id="resUnit">kg équivalent TNT</div>
+      <div class="rf" id="resFormule">—</div>
+      <div class="res-verdict" id="resVerdict"></div>
+    </div>
+
+    <div class="card" style="padding:0;overflow:hidden;margin-bottom:20px">
+      <div style="padding:16px 20px;border-bottom:1px solid #e0e4f0">
+        <h2 style="margin:0">🗺️ Distances des zones d'effets <span class="src-badge">TM5-1300 · UFC 3-340-02</span></h2>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="zone-table">
+          <thead>
+            <tr>
+              <th>Zone</th>
+              <th>Seuil</th>
+              <th>Z réduit (m·kg<sup>−1/3</sup>)</th>
+              <th>Distance</th>
+              <th>Effet physique</th>
+              <th>Impact humain</th>
+            </tr>
+          </thead>
+          <tbody id="tbodyDist"></tbody>
+        </table>
+      </div>
+      <div class="ref-box">
+        <strong>Formule :</strong> d = Z × m<sub>TNT</sub><sup>1/3</sup> &nbsp;|&nbsp;
+        Z : distance réduite Hopkinson-Cranz · PCI<sub>TNT</sub> = 4,69 MJ/kg
+      </div>
+    </div>
+
+    <div class="sources-box">
+      <strong>Références :</strong> UFC 3-340-02 (TM5-1300) extrapolé ·
+      Lannoy A. (1984), <em>Analyse des explosions air-hydrocarbures en milieu libre et en milieu encombré</em> ·
+      OMEGA 32 (INERIS) · PCI<sub>TNT</sub> = 4,69 MJ/kg ·
+      <strong>Substances :</strong> NIST / SFPE Handbook
+    </div>
+
+    <button class="btn-export" id="btnExport" onclick="exporter()">📋 Copier le résumé — Main courante / RETEX</button>
+
+  </div>
+
+</main>
+
+<script>
+const PRODUITS = {
+  CO:         { nom:"Monoxyde de carbone (CO)", pci:10.9  },
+  diesel:     { nom:"Diesel",                   pci:43.0  },
+  fioul:      { nom:"Fioul / Gazole",           pci:42.5  },
+  gaznaturel: { nom:"Gaz naturel",              pci:38.1  },
+  hydrogene:  { nom:"Hydrogène (H₂)",           pci:120.1 },
+  methane:    { nom:"Méthane (CH₄)",            pci:50.1  },
+  propane:    { nom:"Propane (C₃H₈)",           pci:45.8  },
+  essence:    { nom:"Essence automobile",        pci:43.8  },
+  kerosene:   { nom:"Kérosène",                 pci:43.3  },
+  GPL:        { nom:"GPL",                       pci:46.1  },
+  hors_liste: { nom:"Hydrocarbure hors liste",  pci:null  }
+};
+
+const PCI_TNT = 4.69;
+
+const SEUILS = [
+  { label:"20 mbar",  nom:"Bris de vitres", mbar:20,  z:65,   color:"#28a745", colorBg:"rgba(40,167,69,.06)",
+    effet:"Rupture vitrages, dégâts structures légères",         impact:"Blessures légères possibles" },
+  { label:"50 mbar",  nom:"SEI",            mbar:50,  z:22,   color:"#e6a817", colorBg:"rgba(230,168,23,.07)",
+    effet:"Projection bris de vitre, brûlures superficielles",   impact:"Effets irréversibles" },
+  { label:"140 mbar", nom:"SELS",           mbar:140, z:10.1, color:"#e06c00", colorBg:"rgba(224,108,0,.07)",
+    effet:"Dommages pulmonaires, projection de fragments",        impact:"Létalité 1 %" },
+  { label:"170 mbar", nom:"SELS+",          mbar:170, z:8.9,  color:"#cc3300", colorBg:"rgba(204,51,0,.07)",
+    effet:"Lésions graves tympan et poumons",                     impact:"Létalité significative" },
+  { label:"200 mbar", nom:"SEL",            mbar:200, z:7.6,  color:"#cc1a00", colorBg:"rgba(204,26,0,.07)",
+    effet:"Rupture tympan, lésions pulmonaires graves",           impact:"Létalité majeure" },
+];
+
+let eta = 100;
+let lastResult = null;
+
+function onProduitChange() {
+  const sel = document.getElementById('selProduit').value;
+  const pi  = document.getElementById('pciInfo');
+  const hl  = document.getElementById('hlNotice');
+  const cpz = document.getElementById('customProduitZone');
+  const pic = document.getElementById('pciInfoCustom');
+  pi.style.display='none'; hl.style.display='none';
+  cpz.style.display='none'; pic.style.display='none';
+  if (sel==='hors_liste') {
+    hl.style.display='block';
+  } else if (sel==='personnalise') {
+    cpz.style.display='block';
+    onCustomPciChange();
+  } else if (sel && PRODUITS[sel] && PRODUITS[sel].pci) {
+    const r=(PRODUITS[sel].pci/PCI_TNT).toFixed(2);
+    document.getElementById('pciVal').textContent=PRODUITS[sel].pci.toFixed(1);
+    document.getElementById('rapportVal').textContent=r;
+    pi.style.display='block';
+  }
+}
+
+function onCustomPciChange() {
+  const pci=parseFloat(document.getElementById('customPci').value);
+  const pic=document.getElementById('pciInfoCustom');
+  if (!isNaN(pci)&&pci>0) {
+    const r=(pci/PCI_TNT).toFixed(3);
+    document.getElementById('pciValCustom').textContent=pci.toFixed(2);
+    document.getElementById('rapportValCustom').textContent=r;
+    pic.style.display='block';
+  } else { pic.style.display='none'; }
+}
+
+function setRendement(v) {
+  eta=v;
+  document.getElementById('pill100').classList.toggle('active',v===100);
+  document.getElementById('pill10').classList.toggle('active',v===10);
+  document.getElementById('pillC').classList.remove('active');
+  document.getElementById('customEta').value='';
+  document.getElementById('pillCVal').textContent='—';
+}
+function focusCustom(){ document.getElementById('customEta').focus(); }
+function onCustomEta() {
+  const v=parseFloat(document.getElementById('customEta').value);
+  if (!isNaN(v)&&v>0&&v<=100) {
+    eta=v;
+    document.getElementById('pill100').classList.remove('active');
+    document.getElementById('pill10').classList.remove('active');
+    document.getElementById('pillC').classList.add('active');
+    document.getElementById('pillCVal').textContent=v+' %';
+  }
+}
+
+function getVerdict(mTNT) {
+  const cbrt=Math.pow(mTNT,1/3);
+  const dSEL =Math.round(SEUILS[4].z*cbrt);
+  const dSELS=Math.round(SEUILS[2].z*cbrt);
+  const dSEI =Math.round(SEUILS[1].z*cbrt);
+  return {
+    text:`⛔ SEL à ${dSEL} m · SELS à ${dSELS} m · SEI à ${dSEI} m`,
+    color:'#cc1a00', bg:'#f8d7da', border:'#cc1a00'
+  };
+}
+
+function calculer() {
+  const sel  =document.getElementById('selProduit').value;
+  const masse=parseFloat(document.getElementById('masse').value);
+  if (!sel)                       { alert('Veuillez sélectionner un produit.'); return; }
+  if (isNaN(masse)||masse<=0)     { alert('Veuillez saisir une masse valide (> 0 kg).'); return; }
+
+  let mTNT, formule, nomProduit;
+  const etaVal=eta/100;
+
+  if (sel==='hors_liste') {
+    mTNT=etaVal*masse;
+    nomProduit='Hydrocarbure hors liste';
+    formule=`m_TNT = η × m = ${etaVal.toFixed(2)} × ${masse} kg = ${mTNT.toFixed(2)} kg éq. TNT`;
+  } else if (sel==='personnalise') {
+    const pciC=parseFloat(document.getElementById('customPci').value);
+    nomProduit=document.getElementById('customNom').value.trim()||'Produit personnalisé';
+    if (isNaN(pciC)||pciC<=0) { alert('Veuillez saisir un PCI valide.'); return; }
+    const r=pciC/PCI_TNT;
+    mTNT=etaVal*r*masse;
+    formule=`m_TNT = η × (PCI_${nomProduit}/PCI_TNT) × m = ${etaVal.toFixed(2)} × ${r.toFixed(3)} × ${masse} kg = ${mTNT.toFixed(2)} kg éq. TNT`;
+  } else {
+    const pci=PRODUITS[sel].pci;
+    nomProduit=PRODUITS[sel].nom;
+    const r=pci/PCI_TNT;
+    mTNT=etaVal*r*masse;
+    formule=`m_TNT = η × (PCI/PCI_TNT) × m = ${etaVal.toFixed(2)} × ${r.toFixed(3)} × ${masse} kg = ${mTNT.toFixed(2)} kg éq. TNT`;
+  }
+
+  // Hero
+  let dispVal, dispUnit;
+  if (mTNT>=1000) { dispVal=(mTNT/1000).toFixed(2); dispUnit='tonnes équivalent TNT'; }
+  else            { dispVal=mTNT.toFixed(2);         dispUnit='kg équivalent TNT'; }
+  document.getElementById('resMtnt').textContent  =dispVal;
+  document.getElementById('resUnit').textContent  =dispUnit;
+  document.getElementById('resFormule').textContent=formule;
+
+  const verdict=getVerdict(mTNT);
+  const vEl=document.getElementById('resVerdict');
+  vEl.textContent=verdict.text; vEl.style.background=verdict.bg; vEl.style.color=verdict.color;
+  document.getElementById('resHero').style.borderTopColor=verdict.border;
+
+  // Tableau 6 colonnes
+  const cbrt=Math.pow(mTNT,1/3);
+  const tbody=document.getElementById('tbodyDist');
+  tbody.innerHTML='';
+  SEUILS.forEach(function(s){
+    const d=Math.round(s.z*cbrt);
+    const tr=document.createElement('tr');
+    tr.style.background=s.colorBg;
+    tr.innerHTML=
+      `<td><span class="zone-badge" style="background:${s.colorBg};color:${s.color};border:1px solid ${s.color}">${s.nom}</span></td>`+
+      `<td style="color:${s.color};font-weight:700">${s.label}</td>`+
+      `<td style="color:#555;font-size:12px">${s.z}</td>`+
+      `<td style="font-weight:700;color:${s.color};font-size:15px">${d} m</td>`+
+      `<td style="color:#555;font-size:12px">${s.effet}</td>`+
+      `<td style="color:#555;font-size:12px">${s.impact}</td>`;
+    tbody.appendChild(tr);
+  });
+
+  lastResult={sel,nomProduit,masse,eta,mTNT,dispVal,dispUnit,formule,cbrt};
+
+  const rz=document.getElementById('resultZone');
+  rz.style.display='block';
+  rz.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function exporter() {
+  if (!lastResult) return;
+  const r  =lastResult;
+  const now=new Date().toLocaleString('fr-FR');
+  let zones='';
+  SEUILS.forEach(function(s){
+    const d=Math.round(s.z*r.cbrt);
+    zones+=`  ${(s.nom+' ('+s.label+')').padEnd(24)}: ${d} m\n`;
+  });
+
+  const txt=
+`=== ÉQUIVALENT TNT — DIMENSIONNEMENT SURPRESSION ===
+Date/heure   : ${now}
+Méthode      : TNT Equivalency · Abaque TM5-1300 (UFC 3-340-02)
+PCI_TNT réf. : 4,69 MJ/kg
+
+PARAMÈTRES
+Produit      : ${r.nomProduit}
+Masse        : ${r.masse} kg
+Rendement η  : ${r.eta} %
+
+CALCUL
+${r.formule}
+m_TNT        : ${r.dispVal} ${r.dispUnit}
+
+DISTANCES AUX SEUILS (depuis le centre du nuage)
+${zones}
+Mémento IA NRBC — ENSOSP · Cne E. Fischer – Cdt A. Tirelle · v1.0`;
+
+  navigator.clipboard.writeText(txt).then(function(){
+    const btn=document.getElementById('btnExport');
+    btn.textContent='✔ Copié dans le presse-papier';
+    btn.classList.add('copied');
+    setTimeout(function(){
+      btn.textContent='📋 Copier le résumé — Main courante / RETEX';
+      btn.classList.remove('copied');
+    },2500);
+  });
+}
+</script>
+</body>
+</html>
