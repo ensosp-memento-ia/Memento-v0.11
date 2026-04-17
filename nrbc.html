@@ -96,7 +96,7 @@
       padding: 22px 18px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 10px;
       box-shadow: 0 3px 8px rgba(0,0,0,.04);
     }
     .col-header {
@@ -105,6 +105,7 @@
       gap: 12px;
       padding-bottom: 16px;
       border-bottom: 1px solid #eef0f8;
+      margin-bottom: 2px;
     }
     .col-icon {
       width: 42px;
@@ -116,9 +117,9 @@
       font-size: 20px;
       flex-shrink: 0;
     }
-    .icon-nrbc  { background: #eef2ff; }
-    .icon-chim  { background: #fff7e6; }
-    .icon-rad   { background: #edf7f0; }
+    .icon-nrbc { background: #eef2ff; }
+    .icon-chim { background: #fff7e6; }
+    .icon-rad  { background: #edf7f0; }
     .col-title {
       font-size: 16px;
       font-weight: 700;
@@ -128,8 +129,9 @@
       font-size: 13px;
       color: #666;
       line-height: 1.65;
-      margin: 0;
+      margin: 0 0 4px;
     }
+    /* Bouton actif */
     .btn-tool {
       display: block;
       width: 100%;
@@ -161,6 +163,7 @@
       color: rgba(255,255,255,0.75);
       margin-top: 3px;
     }
+    /* Bouton inactif / à venir */
     .btn-soon {
       display: block;
       width: 100%;
@@ -193,6 +196,7 @@
     }
     .badge-chim { background: #fff3e0; color: #7a4200; }
     .badge-rad  { background: #e8f5e9; color: #2e7d32; }
+    .badge-nrbc { background: #eef2ff; color: #001F8F; }
   </style>
 </head>
 <body>
@@ -222,57 +226,67 @@
           <div class="col-title">NRBC</div>
         </div>
         <p class="col-desc">Ressources transversales et cartographie des experts du réseau national NRBC.</p>
+
         <a href="expert.html" class="btn-tool">
           Cartographie experts NRBC
           <span class="btn-tool-sub">Réseau national — 41 experts référencés</span>
         </a>
+
+        <div class="btn-soon">
+          Prochainement disponible
+          <span class="btn-soon-sub">Nouvel outil en préparation</span>
+        </div>
+        <span class="badge badge-nrbc">À venir</span>
       </div>
 
-      <!-- COLONNE RISQUES CHIMIQUES -->
+      <!-- COLONNE RISQUES CHIMIQUES (RCH) -->
       <div class="col">
         <div class="col-header">
           <div class="col-icon icon-chim">🧪</div>
           <div class="col-title">Risques chimiques</div>
         </div>
-        <p class="col-desc">Outils de calculs et d'aide à la décision pour les interventions sur risques chimiques.</p>
+        <p class="col-desc">Outils de calcul et d'aide à la décision pour les interventions sur risques chimiques.</p>
+
         <a href="fluxthermique.html" class="btn-tool">
-          Dimensionnement de flux thermique
+          Dimensionnement flux thermique
           <span class="btn-tool-sub">Pool fire — Méthode Mudan &amp; Croce · Données INERIS</span>
         </a>
-        <div>
-           <a href="uvce.html" class="btn-tool">
-          Dimensionnement surpression - UVCE en construction
+
+        <a href="uvce.html" class="btn-tool">
+          Surpression UVCE — Multi-énergie
           <span class="btn-tool-sub">Méthode Multi-énergie · Données INERIS</span>
         </a>
-        <div>
-           <div>
-           <a href="tnt.html" class="btn-tool">
-          Dimensionnement surpression - UVCE
-          <span class="btn-tool-sub">Méthode Equivalent TNT · Données INERIS</span>
+
+        <a href="tnt.html" class="btn-tool">
+          Surpression UVCE — Équivalent TNT
+          <span class="btn-tool-sub">Méthode Équivalent TNT · Données INERIS</span>
         </a>
-        <div>
-          <div class="btn-soon">
-            Prochainement disponible
-            <span class="btn-soon-sub">Nouvel outil en préparation</span>
-          </div>
-          <span class="badge badge-chim" style="margin-top:8px;">À venir</span>
+
+        <div class="btn-soon">
+          Prochainement disponible
+          <span class="btn-soon-sub">Nouvel outil en préparation</span>
         </div>
+        <span class="badge badge-chim">À venir</span>
       </div>
-</div>
-      <!-- COLONNE RISQUES RADIOLOGIQUES -->
+
+      <!-- COLONNE RISQUES RADIOLOGIQUES (RAD) -->
       <div class="col">
         <div class="col-header">
           <div class="col-icon icon-rad">☢️</div>
           <div class="col-title">Risques radiologiques</div>
         </div>
         <p class="col-desc">Outils de calcul et d'aide à la décision pour les interventions sur sources radioactives.</p>
-        <div>
-           <a href="debitdedose.html" class="btn-tool">
+
+        <a href="debitdedose.html" class="btn-tool">
           Calcul de débit de dose
-          <span class="btn-tool-sub"> ICRP Publication 107</span>
+          <span class="btn-tool-sub">ICRP Publication 107</span>
         </a>
-          <span class="badge badge-rad" style="margin-top:8px;">Prochainement disponible</span>
+
+        <div class="btn-soon">
+          Prochainement disponible
+          <span class="btn-soon-sub">Nouvel outil en préparation</span>
         </div>
+        <span class="badge badge-rad">À venir</span>
       </div>
 
     </div>
