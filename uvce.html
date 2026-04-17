@@ -132,6 +132,989 @@
 <main>
 
 <div class="warn">
+  <strong>⚠️ Aide au dimensionnement — résultats estimatifs</strong>
+  Méthode Multi-Énergie INERIS Omega 32 / Van den Berg 1985. Tout engagement reste sous l'autorité du COS.
+  Base CASU RCH4 2018 · R̄ validées SDIS 76 / CASU avril 2026 (indices 4✓ 6✓ 10✓).
+</div>
+
+<div class="grid-2">
+
+  <!-- COLONNE GAUCHE -->
+  <div>
+
+    <div class="card">
+      <h2>🧪 Substance</h2>
+      <label>Produit <span class="src-badge">CASU · RCH4 2018</span></label>
+      <select id="substance" onchange="onSubstanceChange()">
+        <option value="custom">— Personnalisé —</option>
+        <optgroup label="Gaz / Vapeurs (données CASU)">
+          <option value="ammonia">Ammoniac (NH₃) — ρ=0.77 · C=21.8%</option>
+          <option value="butane">Butane (C₄H₁₀) — ρ=2.7 · C=4%</option>
+          <option value="methane">Méthane (CH₄) — ρ=0.68 · C=9.5%</option>
+          <option value="propane">Propane (C₃H₈) — ρ=2 · C=5%</option>
+          <option value="acetylene">Acétylène (C₂H₂) — ρ=1.17 · C=13%</option>
+          <option value="benzene">Benzène (C₆H₆) — ρ=0.9 · C=4%</option>
+          <option value="butylene">Butylène (C₄H₈) — ρ=2.44 · C=3.5%</option>
+          <option value="cyclohexane">Cyclohexane (C₆H₁₂) — ρ=4.02 · C=3%</option>
+          <option value="ethane">Éthane (C₂H₆) — ρ=1.28 · C=7%</option>
+          <option value="ethylene">Éthylène (C₂H₄) — ρ=1.2 · C=8%</option>
+          <option value="nhexane">n-Hexane (C₆H₁₄) — ρ=4.17 · C=2.5%</option>
+          <option value="nheptane">n-Heptane (C₇H₁₆) — ρ=5.01 · C=1.87%</option>
+          <option value="hydrogen">Hydrogène (H₂) — ρ=0.09 · C=29%</option>
+          <option value="pentane">Pentane (C₅H₁₂) — ρ=2.41 · C=2.6%</option>
+          <option value="propylene">Propylène (C₃H₆) — ρ=1.8 · C=4.3%</option>
+        </optgroup>
+      </select>
+
+      <div class="fiche-substance" id="ficheSubstance">
+        <div class="fiche-name" id="fc-name">—</div>
+        <div class="fiche-grid">
+          <span class="fiche-lbl">Su combustion</span><span class="fiche-val" id="fc-su">—</span>
+          <span class="fiche-lbl">ρ_gaz (air=1)</span><span class="fiche-val" id="fc-rho">—</span>
+          <span class="fiche-lbl">C stœchio (%)</span><span class="fiche-val" id="fc-c">—</span>
+          <span class="fiche-lbl">ρ × C (CASU)</span><span class="fiche-val" id="fc-rxc">—</span>
+          <span class="fiche-lbl">LII / LSI (%)</span><span class="fiche-val" id="fc-li">—</span>
+          <span class="fiche-lbl">PCI (MJ/kg)</span><span class="fiche-val" id="fc-pci">—</span>
+        </div>
+      </div>
+
+      <!-- ── BLOC PRODUIT PERSONNALISÉ ── -->
+      <div id="custom-product-wrap" style="display:none">
+        <div style="background:#fff3cd;border-left:3px solid #e6a817;border-radius:8px;padding:8px 12px;margin-top:10px;margin-bottom:12px;font-size:12px;color:#856404">
+          <strong>Produit hors base</strong> — Utilisez le <strong>prompt UVCE</strong> du Mémento IA pour obtenir ces valeurs.
+        </div>
+
+        <!-- Ligne 1 : PCI + ρ_gaz -->
+        <div class="grid-2" style="gap:10px">
+          <div>
+            <label style="margin-top:0">PCI <span class="src-badge">NIST / SFPE</span></label>
+            <div class="iw"><input type="number" id="custom-pci" value="46.4" min="0.1" max="200" step="0.1"
+              placeholder="ex : 46.4" oninput="onCustomChange()"><span class="iu">MJ/kg</span></div>
+            <div class="hint">PCI — pouvoir calorifique inférieur</div>
+          </div>
+          <div>
+            <label style="margin-top:0">ρ_gaz <span class="src-badge">air=1</span></label>
+            <div class="iw"><input type="number" id="custom-rho" value="" min="0.01" max="20" step="0.01"
+              placeholder="ex : 2.0" oninput="onCustomChange()"><span class="iu">—</span></div>
+            <div class="hint">M_mol / 28.97 ou fiche INRS</div>
+          </div>
+        </div>
+
+        <!-- Ligne 2 : C stœchio + Su -->
+        <div class="grid-2" style="gap:10px;margin-top:8px">
+          <div>
+            <label style="margin-top:0">C stœchio <span class="src-badge">% vol</span></label>
+            <div class="iw"><input type="number" id="custom-c" value="" min="0.1" max="100" step="0.1"
+              placeholder="ex : 5.0" oninput="onCustomChange()"><span class="iu">%</span></div>
+            <div class="hint">Concentration stœchiométrique vol.</div>
+          </div>
+          <div>
+            <label style="margin-top:0">Su <span class="src-badge">cm/s</span></label>
+            <div class="iw"><input type="number" id="custom-su" value="" min="1" max="500" step="1"
+              placeholder="ex : 46" oninput="onCustomChange()"><span class="iu">cm/s</span></div>
+            <div class="hint">Réf. propane = 46 cm/s (Omega 32)</div>
+          </div>
+        </div>
+
+        <!-- Ligne 3 : LII / LSI (optionnel) -->
+        <div style="margin-top:8px">
+          <label style="margin-top:0">LII / LSI <span class="src-badge">% vol — optionnel</span></label>
+          <div class="grid-2" style="gap:10px">
+            <div class="iw"><input type="number" id="custom-lii" value="" min="0" max="100" step="0.1"
+              placeholder="LII (ex : 1.8)" oninput="onCustomChange()"><span class="iu">%</span></div>
+            <div class="iw"><input type="number" id="custom-lsi" value="" min="0" max="100" step="0.1"
+              placeholder="LSI (ex : 9.5)" oninput="onCustomChange()"><span class="iu">%</span></div>
+          </div>
+        </div>
+
+        <!-- Résultats calculés automatiquement -->
+        <div id="custom-rxc-result" style="display:none;margin-top:10px;background:#eef2ff;border-radius:8px;padding:10px 12px;font-size:12px">
+          <div class="fiche-grid">
+            <span class="fiche-lbl">ρ_gaz × C (indice CASU)</span>
+            <span class="fiche-val" id="custom-rxc-val">—</span>
+            <span class="fiche-lbl">Su vs Propane (46 cm/s)</span>
+            <span class="fiche-val" id="custom-su-result">—</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- PCI affiché uniquement pour les produits de la base -->
+      <div id="pci-base-wrap">
+        <label>PCI <span class="src-badge">NIST / SFPE</span></label>
+        <div class="iw"><input type="number" id="pci" value="46.4" min="0.1" step="0.1" oninput="calculate()"><span class="iu">MJ/kg</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>⚖️ Masse inflammable</h2>
+      <div class="mode-toggle">
+        <button class="mode-btn active" id="btn-mode-direct" onclick="setMassMode('direct')">✎ Masse directe</button>
+        <button class="mode-btn" id="btn-mode-debit" onclick="setMassMode('debit')">⏱ Débit × Durée</button>
+      </div>
+
+      <div id="mass-direct-wrap">
+        <label style="margin-top:0">Masse inflammable</label>
+        <div class="iw"><input type="number" id="mass" value="1000" min="0.1" step="any" oninput="calculate()"><span class="iu">kg</span></div>
+        <div class="hint">Masse totale du nuage inflammable.</div>
+      </div>
+
+      <div id="mass-debit-wrap" style="display:none">
+        <div class="grid-2" style="gap:10px;margin-top:4px">
+          <div>
+            <label style="margin-top:0">Débit de fuite</label>
+            <div class="iw"><input type="number" id="debit" value="10" min="0.001" step="any" oninput="onDebitChange()"><span class="iu">kg/s</span></div>
+          </div>
+          <div>
+            <label style="margin-top:0">Durée de fuite</label>
+            <div class="iw"><input type="number" id="duree" value="60" min="1" step="1" oninput="onDebitChange()"><span class="iu">s</span></div>
+          </div>
+        </div>
+        <div class="debit-result">m = débit × durée = <strong id="mass-computed">600</strong> kg</div>
+        <div class="hint">Fuite continue à débit constant.</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>🔢 Fraction réactive</h2>
+      <label style="margin-top:0">Scénario</label>
+      <select id="alphaPreset" onchange="onAlphaPresetChange()">
+        <option value="1.0" selected>α = 1.0 — Cas majorant / fuite jet haute pression</option>
+        <option value="0.1">α = 0.1 — Nuage espace ouvert, peu d'obstacles (Omega 32)</option>
+        <option value="0.3">α = 0.3 — Zone semi-confinée, obstacles significatifs</option>
+        <option value="custom">α libre — Valeur personnalisée</option>
+      </select>
+      <div class="alpha-desc" id="alphaDesc"></div>
+      <div id="alphaCustomWrap" style="display:none;margin-top:8px">
+        <label>Valeur α</label>
+        <div class="iw"><input type="number" id="alphaCustom" value="0.5" min="0.01" max="1.0" step="0.01" oninput="calculate()"><span class="iu">—</span></div>
+      </div>
+      <div style="display:none"><span id="alphaEffective">1.0</span></div>
+    </div>
+
+  </div>
+
+  <!-- COLONNE DROITE -->
+  <div>
+
+    <div class="card">
+      <h2>📊 Indice de sévérité</h2>
+      <div class="mode-toggle">
+        <button class="mode-btn active" id="btn-sev-guide" onclick="setSevMode('guide')">▶ Choix guidé</button>
+        <button class="mode-btn" id="btn-sev-libre" onclick="setSevMode('libre')">✎ Indice libre</button>
+      </div>
+
+      <div id="sev-guide-wrap">
+        <div class="guide-cols">
+          <div>
+            <div class="guide-col-title">Étape 1 — Vitesse de combustion<br><span style="text-transform:none;letter-spacing:0;font-weight:400;font-size:10px">automatique via la substance</span></div>
+            <div class="vc-banner" id="vc-auto-banner"><span style="color:#aaa">← Sélectionner une substance</span></div>
+          </div>
+          <div>
+            <div class="guide-col-title">Étape 2 — Type de zone</div>
+            <div class="zone-btns">
+              <button class="zbtn zbtn-enc" id="btn-zone-enc" onclick="setZone('enc')">Zone encombrée<br><span style="font-weight:400;font-size:11px">obstacles, tuyauteries…</span></button>
+              <button class="zbtn zbtn-lib" id="btn-zone-lib" onclick="setZone('lib')">Zone libre<br><span style="font-weight:400;font-size:11px">espace dégagé…</span></button>
+            </div>
+          </div>
+        </div>
+        <div class="guide-result" id="sev-guide-result">
+          Indice recommandé :
+          <span class="guide-result-val" id="sev-guide-val">—</span>
+          <span style="font-size:12px;color:#666;margin-left:4px" id="sev-guide-label"></span>
+        </div>
+      </div>
+
+      <div id="sev-libre-wrap" style="display:none">
+        <div class="hint" style="margin-bottom:6px">Sélectionner l'indice manuellement</div>
+      </div>
+
+      <div class="sev-grid" id="sevGrid"></div>
+      <div class="sev-desc" id="sevDesc"></div>
+    </div>
+
+    <div class="card">
+      <h2>🎯 Cible</h2>
+      <label style="margin-top:0">Distance d'intérêt</label>
+      <div class="iw"><input type="number" id="distance" value="100" min="1" step="1" oninput="calculate()"><span class="iu">m</span></div>
+      <div class="hint">Distance depuis le centre du nuage jusqu'à la cible.</div>
+      <input type="hidden" id="p0" value="101325"><!-- P0 = 101325 Pa — valeur réglementaire FR, non exposée -->
+
+      <button class="btn-generate" onclick="calculate()">▶ Calculer les effets</button>
+    </div>
+
+  </div>
+
+  <!-- COLONNE DROITE — suite : slot fermant -->
+  <div style="display:contents"></div>
+</div>
+
+<!-- Formules clés + Données produits — 2 colonnes -->
+<div class="grid-2" style="align-items:start;margin-bottom:20px">
+
+  <div class="formule-box" style="margin-bottom:0">
+    <h3>Formules clés — Méthode Multi-Énergie</h3>
+    <div class="feq-row">
+      <span class="feq-sym">E</span><span class="feq-eq">=</span>
+      <span class="feq-sym">α</span><span class="feq-eq">·</span>
+      <span class="feq-sym"><em>m</em></span><span class="feq-eq">·</span>
+      <span class="feq-sym">PCI</span>
+      <span class="feq-warn" style="font-size:12px">&nbsp;[J]</span>
+    </div>
+    <div class="feq-row">
+      <span class="feq-sym">R̃</span><span class="feq-eq">=</span>
+      <span class="feq-sym"><em>R</em></span><span class="feq-eq">·</span>
+      <span class="feq-frac"><span style="color:#001F8F">P₀</span><span style="color:#001F8F">E</span></span>
+      <sup style="font-size:11px;color:#001F8F">1/3</sup>
+      <span class="feq-warn" style="font-size:12px">&nbsp;[—]</span>
+    </div>
+    <div class="feq-row">
+      <span class="feq-sym">P<sub>s</sub></span><span class="feq-eq">=</span>
+      <span class="feq-sym">P̃<sub style="font-size:.7em">s</sub></span><span class="feq-eq">·</span>
+      <span class="feq-sym">P₀</span>
+      <span class="feq-warn" style="font-size:12px">&nbsp;[Pa]</span>
+    </div>
+    <div style="font-size:12px;color:#555;margin-top:10px;line-height:1.7">
+      <strong style="color:#001F8F">Distances :</strong> R = R̄ × (E/P₀)^(1/3) · R̄ abaque Omega 32 Fig. 40<br>
+      <strong style="color:#001F8F">Validation :</strong> SDIS 76 / CASU — avril 2026 · ind. 4✓ 6✓ 10✓
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:0">
+    <h2>📋 Données produits <span class="src-badge">CASU · RCH4 2018</span></h2>
+    <div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:11px">
+        <thead>
+          <tr style="background:#eef2ff;color:#001F8F">
+            <th style="padding:5px 8px;text-align:left">Produit</th>
+            <th style="padding:5px 8px;text-align:center">Su (cm/s)</th>
+            <th style="padding:5px 8px;text-align:center">ρ_gaz</th>
+            <th style="padding:5px 8px;text-align:center">C (%)</th>
+            <th style="padding:5px 8px;text-align:center">PCI</th>
+          </tr>
+        </thead>
+        <tbody id="table-produits"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- RÉSULTATS -->
+<div id="results">
+
+  <div id="flux-hero" style="text-align:center;padding:28px 20px;border-radius:15px;background:white;box-shadow:0 3px 8px rgba(0,0,0,.05);margin-bottom:20px;border-top:5px solid #001F8F">
+    <div style="font-size:13px;font-weight:600;color:#666;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px" id="hero-title">Surpression à la cible</div>
+    <div id="kpi-Ps" style="font-size:clamp(2.5rem,8vw,4rem);font-weight:800;color:#001F8F;line-height:1">—</div>
+    <div style="font-size:14px;color:#666;margin-top:4px">mbar</div>
+    <div id="res-verdict" style="display:inline-block;margin-top:12px;padding:8px 22px;border-radius:25px;font-size:14px;font-weight:700"></div>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="km"><div class="km-lbl">Énergie effective E</div><div class="km-val" id="kpi-E">—</div><div class="km-unit">MJ</div></div>
+    <div class="km"><div class="km-lbl">Distance réduite R̃</div><div class="km-val" id="kpi-R">—</div><div class="km-unit">sans dim.</div></div>
+    <div class="km"><div class="km-lbl">Classification</div><div class="km-val" id="kpi-class" style="font-size:1rem;line-height:1.3;margin-top:4px">—</div><div class="km-unit">&nbsp;</div></div>
+  </div>
+
+  <div class="card" style="margin-bottom:20px;padding:0;overflow:hidden">
+    <div style="padding:16px 20px;border-bottom:1px solid #e0e4f0"><h2 style="margin:0">🗺️ Distances des zones d'effets réglementaires</h2></div>
+    <div style="overflow-x:auto">
+      <table class="zone-table">
+        <thead><tr><th>Zone</th><th>Seuil</th><th>Distance</th><th>Effet physique</th><th>Impact humain</th></tr></thead>
+        <tbody id="zoneTbody"><tr><td colspan="5" style="text-align:center;color:#aaa;padding:20px">→ Saisissez les paramètres et cliquez sur Calculer</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:20px">
+    <h2>📈 Surpression vs Distance — Courbe multi-énergie</h2>
+    <canvas id="chartCanvas" style="width:100%;height:260px;display:block"></canvas>
+  </div>
+
+  <div class="sources-box">
+    <strong>Réf. :</strong> INERIS Omega 32 DRA-06-50798-16173A · Baker et al. (1983) · Van den Berg (1985) ·
+    <strong>Substances :</strong> CASU RCH4 2018 ·
+    <strong>R̄ validées :</strong> SDIS 76 / CASU — avril 2026
+  </div>
+
+  <button class="btn-export" id="btn-export" onclick="exporter()">📋 Copier le résumé — Main courante / RETEX</button>
+
+</div>
+
+</main>
+<footer>© ENSOSP — Mémento IA NRBC · Cne Eddy Fischer – Cdt Anne Tirelle · v1.0</footer>
+
+<script>
+// ══════════════════════════════════════════════════════════
+//  BASE SUBSTANCES — CASU / Mémento RCH4 2018
+//  Su (cm/s) : INERIS Omega 32 Tableau 5 — NFPA 68, 2002
+//  Référence propane : 46 cm/s (Omega 32) — corrigé avril 2026
+// ══════════════════════════════════════════════════════════
+const SU_PROPANE = 46; // Omega 32 Tableau 5 — NFPA 68, 2002 (46 cm/s)
+const substancesDB = {
+  //           ρ_gaz   C%    ρ×C    PCI    LII   LSI   Su(cm/s) ← Omega32 Tableau5
+  ammonia:    {name:"Ammoniac",    form:"NH₃",   rho:0.77, c:21.8, rxc:0.167, pci:18.6,  lii:15.0,lsi:28.0,  su:7  }, // 0.07 m/s → 7 cm/s  ✓
+  butane:     {name:"Butane",      form:"C₄H₁₀", rho:2.7,  c:4.0,  rxc:0.108, pci:45.8,  lii:1.5, lsi:8.5,   su:45 }, // 0.45 m/s → 45 cm/s  corrigé (était 40)
+  methane:    {name:"Méthane",     form:"CH₄",   rho:0.68, c:9.5,  rxc:0.065, pci:50.1,  lii:5.0, lsi:15.0,  su:40 }, // 0.40 m/s → 40 cm/s  ✓
+  propane:    {name:"Propane",     form:"C₃H₈",  rho:2.0,  c:5.0,  rxc:0.100, pci:46.4,  lii:1.8, lsi:9.5,   su:46 }, // 0.46 m/s → 46 cm/s  corrigé (était 43 — référence)
+  acetylene:  {name:"Acétylène",   form:"C₂H₂",  rho:1.17, c:13.0, rxc:0.152, pci:48.2,  lii:2.3, lsi:82.0,  su:166}, // 1.66 m/s → 166 cm/s corrigé (était 155)
+  benzene:    {name:"Benzène",     form:"C₆H₆",  rho:0.9,  c:4.0,  rxc:0.036, pci:40.1,  lii:1.2, lsi:8.0,   su:48 }, // 0.48 m/s → 48 cm/s  corrigé (était 40)
+  butylene:   {name:"Butylène",    form:"C₄H₈",  rho:2.44, c:3.5,  rxc:0.085, pci:45.3,  lii:1.6, lsi:10.0,  su:51 }, // 0.51 m/s → 51 cm/s  corrigé (était 44)
+  cyclohexane:{name:"Cyclohexane", form:"C₆H₁₂", rho:4.02, c:3.0,  rxc:0.120, pci:43.5,  lii:1.3, lsi:8.4,   su:46 }, // 0.46 m/s → 46 cm/s  corrigé (était 33)
+  ethane:     {name:"Éthane",      form:"C₂H₆",  rho:1.28, c:7.0,  rxc:0.090, pci:47.5,  lii:3.0, lsi:12.5,  su:47 }, // 0.47 m/s → 47 cm/s  corrigé (était 43)
+  ethylene:   {name:"Éthylène",    form:"C₂H₄",  rho:1.2,  c:8.0,  rxc:0.096, pci:47.2,  lii:2.3, lsi:36.0,  su:80 }, // 0.80 m/s → 80 cm/s  corrigé (était 75)
+  nhexane:    {name:"n-Hexane",    form:"C₆H₁₄", rho:4.17, c:2.5,  rxc:0.104, pci:44.8,  lii:1.0, lsi:7.5,   su:46 }, // 0.46 m/s → 46 cm/s  corrigé (était 39)
+  nheptane:   {name:"n-Heptane",   form:"C₇H₁₆", rho:5.01, c:1.87, rxc:0.093, pci:44.6,  lii:1.0, lsi:6.7,   su:46 }, // 0.46 m/s → 46 cm/s  corrigé (était 37)
+  hydrogen:   {name:"Hydrogène",   form:"H₂",    rho:0.09, c:29.0, rxc:0.026, pci:120.0, lii:4.0, lsi:75.0,  su:330}, // 3.30 m/s → 330 cm/s corrigé (était 295)
+  pentane:    {name:"Pentane",     form:"C₅H₁₂", rho:2.41, c:2.6,  rxc:0.063, pci:44.8,  lii:1.3, lsi:7.8,   su:46 }, // 0.46 m/s → 46 cm/s  corrigé (était 39)
+  propylene:  {name:"Propylène",   form:"C₃H₆",  rho:1.8,  c:4.3,  rxc:0.077, pci:45.8,  lii:2.0, lsi:11.7,  su:66 }, // 0.66 m/s → 66 cm/s  corrigé (était 52)
+};
+
+// ══════════════════════════════════════════════════════════
+//  TABLE R̄ — DISTANCES RÉDUITES PAR INDICE DE SÉVÉRITÉ
+//  Lecture abaque Van den Berg 1985 / INERIS Omega 32 Fig. 40
+//
+//  Définition : R̄ = R / (E/P₀)^(1/3)  [sans dimension]
+//  Conversion : R [m] = R̄ × (E/P₀)^(1/3)
+//
+//  ┌────────┬─────────┬─────────┬────────┬────────┬────────┐
+//  │ Indice │ 200 mbar│ 140 mbar│ 50 mbar│ 20 mbar│  5 mbar│
+//  │        │  (SEL)  │  (SELS) │  (SEI) │  bris  │ percep.│
+//  ├────────┼─────────┼─────────┼────────┼────────┼────────┤
+//  │   1    │    /    │    /    │   /    │   /    │   1.5  │
+//  │   2    │    /    │    /    │   /    │  0.6   │   3.0  │
+//  │   3    │    /    │    /    │  0.6   │  1.5   │   7.0  │
+//  │   4  ✓ │    /    │    /    │  1.5   │  3.0   │  15.0  │
+//  │   5    │   0.7   │   0.9   │  2.5   │  6.0   │  25.0  │
+//  │   6  ✓ │   1.5   │   2.5   │  5.0   │  13.0  │  40.0  │
+//  │   7    │   1.8   │   2.5   │  5.0   │  13.0  │  40.0  │
+//  │   8    │   1.8   │   2.5   │  5.0   │  13.0  │  40.0  │
+//  │   9    │   1.8   │   2.5   │  5.0   │  13.0  │  40.0  │
+//  │  10  ✓ │   1.8   │   2.5   │  5.0   │  13.0  │  40.0  │
+//  └────────┴─────────┴─────────┴────────┴────────┴────────┘
+//
+//  /  = seuil non atteint (Ps_max de l'indice < seuil)
+//  ✓  = certifié tableau CASU / SDIS 76 — avril 2026
+//  Ind 1–3, 5, 7–9 : lecture visuelle abaques Fig. 40 / Van den Berg
+//  Ind 6→10 convergent à partir de 50 mbar (champ lointain)
+//
+//  null = seuil non atteint pour cet indice
+// ══════════════════════════════════════════════════════════
+const R_bar_table = {
+  1: {200:null,140:null,50:null, 20:null, 5:1.5 },
+  2: {200:null,140:null,50:null, 20:0.6,  5:3.0 },
+  3: {200:null,140:null,50:0.6,  20:1.5,  5:7.0 },
+  4: {200:null,140:null,50:1.5,  20:3.0,  5:15.0},
+  5: {200:0.7, 140:0.9, 50:2.5,  20:6.0,  5:25.0},
+  6: {200:1.5, 140:2.5, 50:5.0,  20:13.0, 5:40.0},
+  7: {200:1.8, 140:2.5, 50:5.0,  20:13.0, 5:40.0},
+  8: {200:1.8, 140:2.5, 50:5.0,  20:13.0, 5:40.0},
+  9: {200:1.8, 140:2.5, 50:5.0,  20:13.0, 5:40.0},
+  10:{200:1.8, 140:2.5, 50:5.0,  20:13.0, 5:40.0},
+};
+
+// Courbes Ps_data pour le graphique (Baker 1983 recalibrées)
+const R_tilde=[0.05,0.1,0.2,0.3,0.5,0.7,1.0,1.5,2.0,3.0,4.0,5.0,7.0,10.0,15.0,20.0,30.0];
+const Ps_data={
+  1: [0.00100,0.00065,0.00040,0.00025,0.00013,0.000080,0.000045,0.000024,0.000015,0.0000080,0.0000050,0.0000034,0.0000020,0.0000012,0.00000065,0.00000045,0.00000026],
+  2: [0.00300,0.00190,0.00110,0.00070,0.00038,0.000240,0.000135,0.000072,0.000046,0.0000250,0.0000155,0.0000105,0.0000062,0.0000037,0.0000021, 0.0000015, 0.00000087],
+  3: [0.01000,0.00650,0.00380,0.00240,0.00130,0.000800,0.000470,0.000250,0.000160,0.0000880,0.0000550,0.0000370,0.0000220,0.0000130,0.0000074, 0.0000052, 0.0000030],
+  4: [0.03000,0.01900,0.01100,0.00700,0.00380,0.002400,0.001350,0.000730,0.000470,0.0002560,0.0001600,0.0001080,0.0000640,0.0000380,0.0000215, 0.0000152, 0.0000088],
+  5: [0.10000,0.06400,0.03700,0.02300,0.01200,0.007700,0.004300,0.002300,0.001500,0.0008200,0.0005200,0.0003500,0.0002100,0.0001200,0.0000700, 0.0000500, 0.0000290],
+  6: [0.80000,0.80000,0.41400,0.24300,0.12400,0.079800,0.049900,0.029300,0.020100,0.0117700,0.0080600,0.0060100,0.0038600,0.0024200,0.0014200, 0.0009700, 0.0005700],
+  7: [2.00000,2.00000,1.20000,0.72000,0.38000,0.245000,0.154000,0.090000,0.062000,0.0363000,0.0249000,0.0185000,0.0119000,0.0074500,0.0043800, 0.0029900, 0.0017600],
+  8: [4.00000,4.00000,2.50000,1.55000,0.84000,0.545000,0.345000,0.205000,0.141000,0.0830000,0.0572000,0.0428000,0.0276000,0.0173000,0.0102000, 0.0069600, 0.0041000],
+  9: [6.50000,6.50000,4.10000,2.60000,1.44000,0.950000,0.610000,0.370000,0.258000,0.1530000,0.1060000,0.0800000,0.0520000,0.0328000,0.0194000, 0.0133000, 0.0079000],
+  10:[9.00000,9.00000,6.00000,4.00000,2.30000,1.580000,1.060000,0.670000,0.480000,0.2950000,0.2100000,0.1620000,0.1080000,0.0695000,0.0419000, 0.0292000, 0.0176000],
+};
+
+const sevDescriptions={
+  1:"Combustion laminaire, nuage quasi-libre. Surpression négligeable.",
+  2:"Très faible sévérité. Pratiquement pas d'effets de souffle.",
+  3:"Faible sévérité. Obstacles très rares. Effets très faibles.",
+  4:"Sévérité modérée. Obstacles dispersés. Nappe en zone semi-ouverte.",
+  5:"Sévérité moyenne. Obstacles nombreux. Cas industriel courant.",
+  6:"Sévérité élevée. Confinement partiel. Peut dépasser le SEI (50 mbar).",
+  7:"Sévérité forte. Déflagration rapide. Peut atteindre le SELS (140 mbar).",
+  8:"Sévérité très forte. Déflagration sévère. Dépasse souvent le SEL.",
+  9:"Quasi-détonation. Flamme proche vitesse du son.",
+  10:"Détonation — DDT. Vitesse supersonique. Effets catastrophiques."
+};
+
+const logigramme={inf:{enc:6,lib:4},sup:{enc:10,lib:6}};
+const alphaDescriptions={
+  '1.0':'<strong>Cas majorant</strong> — Totalité de la masse participe. Fuite jet haute pression. Études réglementaires (PPRT, ICPE).',
+  '0.1':'<strong>Espace ouvert, peu d\'obstacles</strong> — Référence Omega 32. Nappe d\'hydrocarbures en zone dégagée.',
+  '0.3':'<strong>Zone semi-confinée</strong> — Sites industriels avec équipements, tuyauteries, obstacles modérés.',
+  'custom':'<strong>Valeur personnalisée</strong> — Justifier dans le rapport (nature fuite, confinement, RETEX). Plage : 0.05–0.5.'
+};
+
+let currentSev=5, sevMode='guide', massMode='direct', vcChoice=null, zoneChoice=null, lastResult=null;
+
+// ── INIT ──
+window.addEventListener('load',function(){
+  buildSeverityGrid();
+  onAlphaPresetChange();
+  setSevMode('guide');
+  buildTableProduits();
+});
+
+function buildTableProduits(){
+  const tb=document.getElementById('table-produits');
+  Object.entries(substancesDB).forEach(function([k,s],i){
+    const tr=document.createElement('tr');
+    tr.style.background=i%2===0?'#f9fafb':'white';
+    const col=s.su<SU_PROPANE?'#28a745':'#cc1a00';
+    tr.innerHTML='<td style="padding:5px 8px;font-weight:600">'+s.name+'</td>'+
+      '<td style="padding:5px 8px;text-align:center;color:'+col+';font-weight:700">'+s.su+'</td>'+
+      '<td style="padding:5px 8px;text-align:center">'+s.rho+'</td>'+
+      '<td style="padding:5px 8px;text-align:center">'+s.c+'</td>'+
+      '<td style="padding:5px 8px;text-align:center">'+s.pci+'</td>';
+    tb.appendChild(tr);
+  });
+}
+
+// ── SÉVÉRITÉ ──
+function buildSeverityGrid(){
+  const g=document.getElementById('sevGrid'); g.innerHTML='';
+  for(let i=1;i<=10;i++){
+    const b=document.createElement('button');
+    b.className='sev-btn'+(i===currentSev?' active':'');
+    b.textContent=i; b.onclick=()=>selectSev(i); g.appendChild(b);
+  }
+  updateSevDesc();
+}
+function selectSev(n){
+  currentSev=n;
+  document.querySelectorAll('.sev-btn').forEach((b,i)=>b.classList.toggle('active',i+1===n));
+  updateSevDesc(); calculate();
+}
+function updateSevDesc(){
+  document.getElementById('sevDesc').innerHTML='<strong>Indice '+currentSev+'</strong> — '+sevDescriptions[currentSev];
+}
+function setSevMode(mode){
+  sevMode=mode; const g=mode==='guide';
+  document.getElementById('btn-sev-guide').className='mode-btn'+(g?' active':'');
+  document.getElementById('btn-sev-libre').className='mode-btn'+(!g?' active':'');
+  document.getElementById('sev-guide-wrap').style.display=g?'':'none';
+  document.getElementById('sev-libre-wrap').style.display=g?'none':'';
+  if(g) applyLogigramme();
+}
+function updateVCBanner(key){
+  const banner=document.getElementById('vc-auto-banner');
+  if(!key||key==='custom'||!substancesDB[key]){
+    vcChoice=null; banner.style.borderLeftColor='#ccd2e3';
+    banner.innerHTML='<span style="color:#aaa">← Sélectionner une substance</span>'; return;
+  }
+  const s=substancesDB[key]; const isInf=s.su<SU_PROPANE; vcChoice=isInf?'inf':'sup';
+  const col=isInf?'#28a745':'#cc1a00';
+  banner.style.borderLeftColor=col;
+  banner.innerHTML='<span style="font-size:12px;line-height:1.5"><strong style="color:'+col+'">'+s.name+'</strong><br>'+
+    'Su = '+s.su+' cm/s → <strong style="color:'+col+'">'+(isInf?'Vitesse &lt; Propane':'Vitesse ≥ Propane')+'</strong><br>'+
+    '<span style="color:#888;font-size:10px">(propane = 43 cm/s)</span></span>';
+  applyLogigramme();
+}
+function setZone(choice){
+  zoneChoice=choice;
+  document.getElementById('btn-zone-enc').className='zbtn zbtn-enc'+(choice==='enc'?' zbtn-active':'');
+  document.getElementById('btn-zone-lib').className='zbtn zbtn-lib'+(choice==='lib'?' zbtn-active':'');
+  applyLogigramme();
+}
+function applyLogigramme(){
+  if(!vcChoice||!zoneChoice) return;
+  const idx=logigramme[vcChoice][zoneChoice];
+  const lbl=(vcChoice==='inf'?'Vit. < Propane':'Vit. ≥ Propane')+' · '+(zoneChoice==='enc'?'Zone encombrée':'Zone libre');
+  document.getElementById('sev-guide-result').style.display='';
+  document.getElementById('sev-guide-val').textContent=idx;
+  document.getElementById('sev-guide-label').textContent='— '+lbl;
+  selectSev(idx);
+}
+
+// ── SUBSTANCE ──
+function onSubstanceChange(){
+  const sel=document.getElementById('substance').value;
+  const fiche=document.getElementById('ficheSubstance');
+  const customWrap=document.getElementById('custom-product-wrap');
+  const pciBaseWrap=document.getElementById('pci-base-wrap');
+
+  if(sel!=='custom'&&substancesDB[sel]){
+    // Produit base CASU
+    customWrap.style.display='none';
+    pciBaseWrap.style.display='';
+    const s=substancesDB[sel];
+    document.getElementById('pci').value=s.pci;
+    fiche.style.display='';
+    document.getElementById('fc-name').textContent=s.name+' ('+s.form+')';
+    const col=s.su<SU_PROPANE?'#28a745':'#cc1a00';
+    document.getElementById('fc-su').innerHTML='<span style="color:'+col+';font-weight:700">'+s.su+' cm/s</span>';
+    document.getElementById('fc-rho').textContent=s.rho;
+    document.getElementById('fc-c').textContent=s.c+' %';
+    document.getElementById('fc-rxc').textContent=s.rxc.toFixed(3);
+    document.getElementById('fc-li').textContent=s.lii+' / '+s.lsi+' %';
+    document.getElementById('fc-pci').textContent=s.pci+' MJ/kg';
+    updateVCBanner(sel);
+  } else {
+    // Produit personnalisé
+    fiche.style.display='none';
+    customWrap.style.display='';
+    pciBaseWrap.style.display='none'; // PCI géré dans le bloc custom
+    onCustomChange();
+  }
+  calculate();
+}
+
+function onCustomChange(){
+  const rho = parseFloat(document.getElementById('custom-rho').value) || 0;
+  const c   = parseFloat(document.getElementById('custom-c').value)   || 0;
+  const su  = parseFloat(document.getElementById('custom-su').value)  || 0;
+  const pci = parseFloat(document.getElementById('custom-pci').value) || 0;
+
+  // Synchroniser le champ PCI principal utilisé par calculate()
+  if(pci > 0) document.getElementById('pci').value = pci;
+
+  // Afficher ρ×C si les deux champs sont remplis
+  const rxcRes = document.getElementById('custom-rxc-result');
+  if(rho > 0 && c > 0){
+    const rxc = rho * c / 100;
+    document.getElementById('custom-rxc-val').innerHTML =
+      rxc.toFixed(4) + ' <span style="color:#888;font-weight:400">(propane réf : 0.100)</span>';
+    rxcRes.style.display = '';
+  } else {
+    rxcRes.style.display = 'none';
+  }
+
+  // Mettre à jour le logigramme indice de sévérité depuis Su
+  if(su > 0){
+    const isInf = su < SU_PROPANE;
+    const col = isInf ? '#28a745' : '#cc1a00';
+    document.getElementById('custom-su-result').innerHTML =
+      '<span style="color:'+col+';font-weight:700">'+su+' cm/s → '+(isInf?'&lt; Propane':'≥ Propane')+'</span>';
+    vcChoice = isInf ? 'inf' : 'sup';
+    const banner = document.getElementById('vc-auto-banner');
+    banner.style.borderLeftColor = col;
+    banner.innerHTML =
+      '<span style="font-size:12px;line-height:1.5">'+
+      '<strong style="color:'+col+'">Produit personnalisé</strong><br>'+
+      'Su = '+su+' cm/s → <strong style="color:'+col+'">'+(isInf?'Vitesse &lt; Propane':'Vitesse ≥ Propane')+'</strong><br>'+
+      '<span style="color:#888;font-size:10px">(propane = 43 cm/s)</span></span>';
+    applyLogigramme();
+  } else {
+    vcChoice = null;
+    const banner = document.getElementById('vc-auto-banner');
+    banner.style.borderLeftColor = '#ccd2e3';
+    banner.innerHTML = '<span style="color:#aaa">← Saisir Su (cm/s)</span>';
+  }
+  calculate();
+}
+
+// ── MASSE ──
+function setMassMode(mode){
+  massMode=mode; const d=mode==='direct';
+  document.getElementById('mass-direct-wrap').style.display=d?'':'none';
+  document.getElementById('mass-debit-wrap').style.display=d?'none':'';
+  document.getElementById('btn-mode-direct').className='mode-btn'+(d?' active':'');
+  document.getElementById('btn-mode-debit').className='mode-btn'+(!d?' active':'');
+  if(!d) onDebitChange(); calculate();
+}
+function onDebitChange(){
+  const q=parseFloat(document.getElementById('debit').value)||0;
+  const dt=parseFloat(document.getElementById('duree').value)||0;
+  document.getElementById('mass-computed').textContent=(q*dt).toFixed(1);
+  calculate();
+}
+function getMasse(){
+  if(massMode==='direct') return parseFloat(document.getElementById('mass').value)||0;
+  return (parseFloat(document.getElementById('debit').value)||0)*(parseFloat(document.getElementById('duree').value)||0);
+}
+
+// ── ALPHA ──
+function onAlphaPresetChange(){
+  const preset=document.getElementById('alphaPreset').value;
+  document.getElementById('alphaDesc').innerHTML=alphaDescriptions[preset]||alphaDescriptions['custom'];
+  document.getElementById('alphaCustomWrap').style.display=preset==='custom'?'':'none';
+  calculate();
+}
+function getAlpha(){
+  const p=document.getElementById('alphaPreset').value;
+  return p==='custom'?(parseFloat(document.getElementById('alphaCustom').value)||0.5):parseFloat(p);
+}
+
+// ── INTERPOLATION LOG-LOG ──
+function logInterp(x,xs,ys){
+  if(x<=xs[0]) return ys[0]; if(x>=xs[xs.length-1]) return ys[ys.length-1];
+  for(let i=0;i<xs.length-1;i++){
+    if(x>=xs[i]&&x<=xs[i+1]){
+      const t=(Math.log(x)-Math.log(xs[i]))/(Math.log(xs[i+1])-Math.log(xs[i]));
+      return Math.exp(Math.log(ys[i])+t*(Math.log(ys[i+1])-Math.log(ys[i])));
+    }
+  }
+  return ys[ys.length-1];
+}
+
+// ── DISTANCE DEPUIS R̄ ──
+function findDist(seuil_mbar,E,P0,sev){
+  const seuils=[200,140,50,20,5]; const row=R_bar_table[sev];
+  if(row[seuil_mbar]!==undefined) return row[seuil_mbar]===null?null:row[seuil_mbar]*Math.pow(E/P0,1/3);
+  let ss=null,si=null;
+  for(let i=0;i<seuils.length-1;i++){
+    if(seuils[i]>=seuil_mbar&&seuil_mbar>=seuils[i+1]){ss=seuils[i];si=seuils[i+1];break;}
+  }
+  if(!si||!ss||row[ss]===null||row[si]===null) return null;
+  const t=(Math.log(seuil_mbar)-Math.log(ss))/(Math.log(si)-Math.log(ss));
+  return Math.exp(Math.log(row[ss])+t*(Math.log(row[si])-Math.log(row[ss])))*Math.pow(E/P0,1/3);
+}
+
+// ── CLASSIFICATION ──
+function classifyEffect(Ps){
+  if(Ps>=200) return{label:'SEL — Effets létaux',    color:'#cc1a00',bg:'#f8d7da',verdict:'⛔ ZONE LÉTALE — Retrait immédiat'};
+  if(Ps>=140) return{label:'SELS — Létaux signif.',  color:'#e06c00',bg:'#ffe5cc',verdict:'🔴 ZONE LÉTALE SIGNIF. — Évacuation personnel non protégé'};
+  if(Ps>=50)  return{label:'SEI — Irréversibles',    color:'#e6a817',bg:'#fff3cd',verdict:'🟠 ZONE IRRÉVERSIBLE — EPI complets obligatoires'};
+  if(Ps>=20)  return{label:'Bris de vitres',         color:'#28a745',bg:'#d4edda',verdict:'🟡 Bris de vitres possibles — Zone de prudence'};
+  if(Ps>=5)   return{label:'Effets faibles',         color:'#17a2b8',bg:'#d1ecf1',verdict:'🟢 Effets faibles — Zone acceptable'};
+  return{label:'Négligeable',color:'#6c757d',bg:'#e9ecef',verdict:'🟢 Négligeable — Hors zone d\'effets'};
+}
+
+// ── CALCUL PRINCIPAL ──
+function calculate(){
+  const m=getMasse(), pci=parseFloat(document.getElementById('pci').value)||0;
+  const alpha=getAlpha(), R=parseFloat(document.getElementById('distance').value)||100;
+  const P0=101325, sev=currentSev;
+  if(!m||!pci||!R) return;
+
+  const E=alpha*m*pci*1e6;
+  const R_red=R*Math.pow(P0/E,1/3);
+  const Ps_mbar=logInterp(R_red,R_tilde,Ps_data[sev])*P0/100;
+  const cl=classifyEffect(Ps_mbar);
+
+  document.getElementById('kpi-E').textContent=(E/1e6).toFixed(1);
+  document.getElementById('kpi-R').textContent=R_red.toFixed(3);
+  const psEl=document.getElementById('kpi-Ps'); psEl.textContent=Ps_mbar.toFixed(1); psEl.style.color=cl.color;
+  document.getElementById('kpi-class').textContent=cl.label; document.getElementById('kpi-class').style.color=cl.color;
+
+  // Titre hero dynamique avec distance
+  document.getElementById('hero-title').textContent='Surpression à ' + R + ' m de la source';
+
+  const hero=document.getElementById('flux-hero'); hero.style.borderTopColor=cl.color;
+  const ve=document.getElementById('res-verdict'); ve.textContent=cl.verdict; ve.style.background=cl.bg; ve.style.color=cl.color;
+
+  updateZoneTable(E,P0,sev,Ps_mbar);
+  drawChart(R,E,P0,sev);
+  document.getElementById('results').classList.add('visible');
+  lastResult={m,pci,alpha,R,P0,E,sev,Ps_mbar,R_red,cl};
+}
+
+// ── TABLEAU ZONES ──
+const zonesData=[
+  {label:'SEL',   color:'#cc1a00',bg:'rgba(204,26,0,.07)',  seuil:200, effet:'Rupture tympan, lésions pulmonaires graves',   impact:'Létalité significative'},
+  {label:'SELS',  color:'#e06c00',bg:'rgba(224,108,0,.07)', seuil:140, effet:'Dommages pulmonaires, projection de fragments',impact:'Létalité 1%'},
+  {label:'SEI',   color:'#e6a817',bg:'rgba(230,168,23,.07)',seuil:50,  effet:'Projection bris de vitre, brûlures superf.',  impact:'Effets irréversibles'},
+  {label:'Bris de vitres',color:'#28a745',bg:'rgba(40,167,69,.06)',seuil:20,effet:'Rupture vitrages, dégâts légers',impact:'Blessures légères possibles'},
+  {label:'Perception',color:'#17a2b8',bg:'rgba(23,162,184,.05)',seuil:5,effet:'Perception humaine nette',impact:'Néant'},
+];
+function updateZoneTable(E,P0,sev,Ps_mbar){
+  const tb=document.getElementById('zoneTbody'); tb.innerHTML='';
+  zonesData.forEach(function(z){
+    const d=findDist(z.seuil,E,P0,sev);
+    const tr=document.createElement('tr'); tr.style.background=z.bg;
+    const dtxt=d!==null?'<strong style="color:'+z.color+'">'+d.toFixed(0)+' m</strong>':'<span style="color:#aaa">— non atteint</span>';
+    tr.innerHTML='<td><span class="zone-badge" style="background:'+z.bg+';color:'+z.color+';border:1px solid '+z.color+'">'+z.label+'</span></td>'+
+      '<td style="color:'+z.color+';font-weight:700">'+z.seuil+' mbar</td>'+
+      '<td>'+dtxt+'</td>'+
+      '<td style="color:#555;font-size:12px">'+z.effet+'</td>'+
+      '<td style="color:#555;font-size:12px">'+z.impact+'</td>';
+    tb.appendChild(tr);
+  });
+}
+
+// ── GRAPHIQUE ──
+function drawChart(R_interest,E,P0,sev){
+  const canvas=document.getElementById('chartCanvas');
+  const dpr=window.devicePixelRatio||1;
+  const W=canvas.offsetWidth||800, H=260;
+  canvas.width=W*dpr; canvas.height=H*dpr;
+  const ctx=canvas.getContext('2d'); ctx.scale(dpr,dpr);
+  const ml=52,mr=20,mt=12,mb=44, pw=W-ml-mr, ph=H-mt-mb;
+  ctx.clearRect(0,0,W,H);
+
+  const factor=Math.pow(P0/E,1/3);
+  const psArr=Ps_data[sev];
+  const Ps_max=psArr[0]*P0/100, Ps_min=psArr[psArr.length-1]*P0/100;
+  const R_max=R_tilde[R_tilde.length-1]/factor;
+  const logRmin=Math.log10(1), logRmax=Math.log10(R_max*1.2);
+  const logPmin=Math.log10(Math.max(0.01,Ps_min*0.5)), logPmax=Math.log10(Ps_max*2);
+
+  function xP(R){return ml+(Math.log10(R)-logRmin)/(logRmax-logRmin)*pw;}
+  function yP(p){return mt+(1-(Math.log10(Math.max(p,0.001))-logPmin)/(logPmax-logPmin))*ph;}
+
+  // Grille
+  ctx.strokeStyle='#e0e4f0'; ctx.lineWidth=1;
+  for(let d=Math.ceil(logRmin);d<=Math.floor(logRmax);d++)
+    for(let s=1;s<=9;s++){const r=Math.pow(10,d)*s; if(r<1||r>Math.pow(10,logRmax))continue; ctx.beginPath();ctx.moveTo(xP(r),mt);ctx.lineTo(xP(r),mt+ph);ctx.stroke();}
+  for(let d=Math.floor(logPmin);d<=Math.ceil(logPmax);d++)
+    for(let s=1;s<=9;s++){const p=Math.pow(10,d)*s; if(p<Math.pow(10,logPmin)||p>Math.pow(10,logPmax))continue; ctx.beginPath();ctx.moveTo(ml,yP(p));ctx.lineTo(ml+pw,yP(p));ctx.stroke();}
+
+  // Seuils PPRT
+  [{mb:200,c:'#cc1a00',l:'SEL 200'},{mb:140,c:'#e06c00',l:'SELS 140'},{mb:50,c:'#e6a817',l:'SEI 50'},{mb:20,c:'#28a745',l:'20'}].forEach(function(s){
+    const y=yP(s.mb); if(y<mt||y>mt+ph)return;
+    ctx.save();ctx.setLineDash([5,4]);ctx.strokeStyle=s.c;ctx.lineWidth=1;ctx.globalAlpha=.6;
+    ctx.beginPath();ctx.moveTo(ml,y);ctx.lineTo(ml+pw,y);ctx.stroke();ctx.restore();
+    ctx.fillStyle=s.c;ctx.font='10px Inter,sans-serif';ctx.textAlign='right';
+    ctx.fillText(s.l+' mbar',ml+pw-4,y-3);
+  });
+
+  // Courbes grises
+  for(let si=1;si<=10;si++){
+    if(si===sev)continue;
+    ctx.beginPath();ctx.strokeStyle='rgba(190,200,215,.5)';ctx.lineWidth=.8;
+    let first=true;
+    R_tilde.forEach(function(Rt){
+      const r=Rt/factor; if(r<1)return;
+      const pm=logInterp(Rt,R_tilde,Ps_data[si])*P0/100;
+      first?(ctx.moveTo(xP(r),yP(pm)),first=false):ctx.lineTo(xP(r),yP(pm));
+    });
+    ctx.stroke();
+  }
+
+  // Courbe active
+  ctx.beginPath();ctx.strokeStyle='#001F8F';ctx.lineWidth=2.5;
+  ctx.shadowColor='rgba(0,31,143,.25)';ctx.shadowBlur=6;
+  let first=true;
+  R_tilde.forEach(function(Rt){
+    const r=Rt/factor; if(r<1)return;
+    const pm=logInterp(Rt,R_tilde,Ps_data[sev])*P0/100;
+    first?(ctx.moveTo(xP(r),yP(pm)),first=false):ctx.lineTo(xP(r),yP(pm));
+  });
+  ctx.stroke();ctx.shadowBlur=0;
+
+  // Label indice
+  ctx.fillStyle='#001F8F';ctx.font='bold 11px Inter,sans-serif';ctx.textAlign='left';
+  ctx.fillText('Indice '+sev,ml+6,mt+18);
+
+  // Marqueur
+  const Rt_int=R_interest*factor;
+  const Pm_int=logInterp(Rt_int,R_tilde,Ps_data[sev])*P0/100;
+  const xR=xP(R_interest),yR=yP(Pm_int);
+  ctx.save();ctx.setLineDash([3,3]);ctx.strokeStyle='#e6a817';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(xR,mt);ctx.lineTo(xR,mt+ph);ctx.moveTo(ml,yR);ctx.lineTo(ml+pw,yR);ctx.stroke();ctx.restore();
+  ctx.beginPath();ctx.arc(xR,yR,6,0,2*Math.PI);ctx.fillStyle='#e6a817';
+  ctx.shadowColor='rgba(230,168,23,.5)';ctx.shadowBlur=8;ctx.fill();ctx.shadowBlur=0;
+  ctx.strokeStyle='white';ctx.lineWidth=1.5;ctx.stroke();
+  ctx.fillStyle='#001F8F';ctx.font='bold 11px Inter,sans-serif';ctx.textAlign='left';
+  ctx.fillText('R='+R_interest+'m | Ps='+Pm_int.toFixed(1)+'mbar',xR+9,yR-7);
+
+  // Axes
+  ctx.strokeStyle='#ccd2e3';ctx.lineWidth=1.5;ctx.strokeRect(ml,mt,pw,ph);
+  ctx.fillStyle='#666';ctx.font='10px Inter,sans-serif';ctx.textAlign='center';
+  for(let d=Math.ceil(logRmin);d<=Math.floor(logRmax);d++){
+    const r=Math.pow(10,d),x=xP(r); if(x>ml&&x<ml+pw) ctx.fillText(r,x,mt+ph+14);
+  }
+  ctx.fillText('Distance R [m]',ml+pw/2,H-6);
+  ctx.textAlign='right';
+  for(let d=Math.floor(logPmin);d<=Math.ceil(logPmax);d++){
+    const p=Math.pow(10,d),y=yP(p); if(y>mt&&y<mt+ph) ctx.fillText(p<1?p.toFixed(2):p.toFixed(0),ml-5,y+3);
+  }
+  ctx.save();ctx.translate(14,mt+ph/2);ctx.rotate(-Math.PI/2);ctx.textAlign='center';
+  ctx.fillText('Surpression [mbar]',0,0);ctx.restore();
+}
+
+// ── EXPORT ──
+function exporter(){
+  if(!lastResult)return;
+  const r=lastResult;
+  const now=new Date().toLocaleString('fr-FR');
+  const sel=document.getElementById('substance').value;
+  const prod=document.getElementById('substance').selectedOptions[0]?document.getElementById('substance').selectedOptions[0].text:'Personnalisé';
+  const coef=Math.pow(r.E/r.P0,1/3);
+
+  // Données produit personnalisé
+  let prodDetails='';
+  if(sel==='custom'){
+    const rho=document.getElementById('custom-rho').value||'—';
+    const c  =document.getElementById('custom-c').value||'—';
+    const su =document.getElementById('custom-su').value||'—';
+    const lii=document.getElementById('custom-lii').value||'—';
+    const lsi=document.getElementById('custom-lsi').value||'—';
+    prodDetails=
+'  ρ_gaz (air=1) : '+rho+'\n'+
+'  C stœchio    : '+c+' %\n'+
+'  Su           : '+su+' cm/s\n'+
+'  LII / LSI    : '+lii+' / '+lsi+' %\n';
+  }
+
+  let zones='';
+  zonesData.forEach(function(z){
+    const d=findDist(z.seuil,r.E,r.P0,r.sev);
+    zones+='  '+z.label.padEnd(14)+' ('+z.seuil+' mbar) : '+(d?d.toFixed(0)+' m':'non atteint')+'\n';
+  });
+
+  const txt=
+'=== UVCE — DIMENSIONNEMENT SURPRESSION ===\n'+
+'Date/heure   : '+now+'\n'+
+'Méthode      : Multi-Énergie — INERIS Omega 32 · Van den Berg 1985\n'+
+'Validation R̄ : CASU / SDIS 76 — avril 2026\n\n'+
+'PARAMÈTRES\n'+
+'Substance    : '+prod+'\n'+
+prodDetails+
+'PCI          : '+r.pci+' MJ/kg\n'+
+'Masse        : '+r.m.toFixed(1)+' kg\n'+
+'Alpha (α)    : '+r.alpha+'\n'+
+'Indice sév.  : '+r.sev+'\n'+
+'Distance     : '+r.R+' m\n\n'+
+'CALCUL\n'+
+'Énergie E    : '+(r.E/1e6).toFixed(1)+' MJ\n'+
+'(E/P₀)^1/3  : '+coef.toFixed(2)+' m\n'+
+'R̃            : '+r.R_red.toFixed(3)+'\n\n'+
+'RÉSULTAT À LA CIBLE\n'+
+'Surpression  : '+r.Ps_mbar.toFixed(1)+' mbar\n'+
+r.cl.verdict+'\n\n'+
+'DISTANCES AUX SEUILS (depuis centre du nuage)\n'+
+zones+'\n'+
+'Mémento IA NRBC — ENSOSP · Cne E. Fischer – Cdt A. Tirelle · v1.0';
+  navigator.clipboard.writeText(txt).then(function(){
+    const btn=document.getElementById('btn-export');
+    btn.textContent='✔ Copié dans le presse-papier'; btn.classList.add('copied');
+    setTimeout(function(){btn.textContent='📋 Copier le résumé — Main courante / RETEX';btn.classList.remove('copied');},2500);
+  });
+}
+
+window.addEventListener('resize',function(){
+  if(lastResult) drawChart(lastResult.R,lastResult.E,lastResult.P0,lastResult.sev);
+});
+</script>
+</body>
+</html><!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<title>Dimensionnement Surpression — UVCE Multi-Énergie | Mémento IA ENSOSP</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<style>
+  body{font-family:"Inter",sans-serif;background:#f5f7fb;margin:0;padding:0;color:#111;min-height:100vh;display:flex;flex-direction:column}
+  header{background:#001F8F;padding:12px 20px;text-align:center;color:white;font-size:16px;font-weight:700;letter-spacing:.5px}
+  .header-sub{font-size:12px;font-weight:400;opacity:.8;margin-top:3px}
+  .tabs{display:flex;background:#e9ecf5;padding:10px;gap:10px}
+  .tab{flex:1;text-align:center;padding:10px 12px;border-radius:25px;color:#001F8F;font-weight:600;font-size:13px;cursor:pointer;border:none;background:transparent;font-family:"Inter",sans-serif;text-decoration:none;display:inline-block;transition:.2s}
+  .tab.active{background:#001F8F;color:white}
+  .tab:hover:not(.active){background:#d9dff5}
+  main{max-width:900px;margin:0 auto;padding:20px;flex:1;width:100%;box-sizing:border-box}
+
+  .warn{background:#fff3cd;border-left:4px solid #ff9f1c;padding:14px 16px;border-radius:8px;font-size:13px;color:#856404;margin-bottom:20px;line-height:1.7}
+  .warn strong{display:block;font-size:14px;margin-bottom:6px}
+
+  .card{background:white;padding:22px;border-radius:15px;margin-bottom:20px;box-shadow:0 3px 8px rgba(0,0,0,.05)}
+  .card h2{color:#001F8F;margin:0 0 16px 0;font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  @media(max-width:640px){.grid-2{grid-template-columns:1fr}}
+
+  label{display:block;font-weight:600;font-size:13px;color:#001F8F;margin-bottom:5px;margin-top:14px}
+  label:first-child{margin-top:0}
+  input[type=number],select{width:100%;padding:10px 12px;border-radius:10px;border:1px solid #ccd2e3;font-size:15px;font-family:"Inter",sans-serif;box-sizing:border-box;color:#111;background:#fff;transition:border-color .2s;appearance:none}
+  input[type=number]{padding-right:72px}
+  input[type=number]:focus,select:focus{border-color:#001F8F;outline:none}
+  .iw{position:relative}
+  .iu{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:12px;font-weight:600;color:#001F8F;background:#e9ecf5;padding:2px 7px;border-radius:6px;pointer-events:none;white-space:nowrap}
+  .hint{font-size:11px;color:#888;margin-top:5px;line-height:1.5}
+  .src-badge{display:inline-block;font-size:10px;font-weight:600;background:#eef2ff;color:#001F8F;padding:1px 6px;border-radius:4px;margin-left:4px;vertical-align:middle}
+
+  .mode-toggle{display:flex;gap:8px;margin-bottom:10px}
+  .mode-btn{flex:1;padding:8px;border-radius:10px;border:1px solid #ccd2e3;background:white;color:#001F8F;font-size:12px;font-weight:600;font-family:"Inter",sans-serif;cursor:pointer;text-align:center;transition:all .15s}
+  .mode-btn.active{background:#001F8F;color:white;border-color:#001F8F}
+  .mode-btn:hover:not(.active){background:#e9ecf5}
+
+  .sev-grid{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;margin-top:6px}
+  .sev-btn{padding:8px 0;border-radius:8px;border:1px solid #ccd2e3;background:white;color:#001F8F;font-size:13px;font-weight:700;font-family:"Inter",sans-serif;cursor:pointer;text-align:center;transition:all .15s}
+  .sev-btn.active{background:#001F8F;color:white;border-color:#001F8F}
+  .sev-btn:hover:not(.active){background:#e9ecf5}
+  .sev-desc{background:#eef2ff;border-radius:8px;padding:10px 12px;font-size:12px;color:#001F8F;margin-top:8px;line-height:1.5}
+
+  .guide-cols{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:6px}
+  .guide-col-title{font-size:11px;color:#888;text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;font-weight:600;line-height:1.4}
+  .vc-banner{background:#f1f3fa;border-left:3px solid #ccd2e3;border-radius:8px;padding:10px 12px;font-size:12px;min-height:52px;display:flex;align-items:center;line-height:1.5}
+  .zone-btns{display:flex;flex-direction:column;gap:6px}
+  .zbtn{padding:8px 10px;border-radius:8px;border:2px solid #ccd2e3;background:white;color:#001F8F;font-size:12px;font-weight:600;font-family:"Inter",sans-serif;cursor:pointer;text-align:center;transition:all .15s;line-height:1.3}
+  .zbtn-enc{border-color:#4ea8de;color:#4ea8de}
+  .zbtn-lib{border-color:#e6a817;color:#e6a817}
+  .zbtn-enc.zbtn-active{background:#4ea8de;color:white}
+  .zbtn-lib.zbtn-active{background:#e6a817;color:white}
+  .guide-result{background:#eef2ff;border:1px solid #ccd2e3;border-left:3px solid #001F8F;border-radius:8px;padding:10px 14px;font-size:13px;margin-top:10px;display:none}
+  .guide-result-val{font-size:1.6rem;font-weight:800;color:#001F8F;margin-left:6px}
+
+  .alpha-desc{background:#fff3cd;border-left:3px solid #e6a817;border-radius:8px;padding:10px 12px;font-size:12px;color:#856404;margin-top:8px;line-height:1.5}
+
+  .debit-result{background:#fff3cd;border-left:3px solid #e6a817;border-radius:8px;padding:10px 12px;font-size:13px;margin-top:8px}
+
+  .fiche-substance{background:#eef2ff;border-radius:10px;padding:12px 14px;margin-top:8px;display:none}
+  .fiche-name{font-size:13px;font-weight:700;color:#001F8F;margin-bottom:8px}
+  .fiche-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px 12px;font-size:12px}
+  .fiche-lbl{color:#666}.fiche-val{color:#001F8F;font-weight:600}
+
+  .formule-box{background:#eef2ff;border-radius:12px;padding:18px 20px;margin-bottom:20px}
+  .formule-box h3{color:#001F8F;margin:0 0 10px 0;font-size:12px;text-transform:uppercase;letter-spacing:.5px;font-weight:700}
+  .feq-row{display:flex;align-items:baseline;gap:.3rem;flex-wrap:wrap;margin-bottom:6px;font-size:14px}
+  .feq-sym{color:#001F8F;font-style:italic;font-weight:700;font-family:Georgia,serif}
+  .feq-eq{color:#111}
+  .feq-frac{display:inline-flex;flex-direction:column;align-items:center;font-size:13px;line-height:1.2;border-left:1px solid #999;border-right:1px solid #999;padding:0 4px;margin:0 2px}
+  .feq-frac span:last-child{border-top:1px solid #999;padding-top:1px}
+  .feq-warn{color:#888}
+
+  .btn-generate{width:100%;padding:16px;background:#001F8F;color:white;border:none;font-size:16px;font-family:"Inter",sans-serif;border-radius:14px;cursor:pointer;font-weight:700;margin-top:20px;transition:all .2s;box-shadow:0 4px 12px rgba(0,31,143,.3)}
+  .btn-generate:hover{background:#002bbf;transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,31,143,.4)}
+  .btn-generate:active{transform:translateY(0)}
+
+  #results{display:none}
+  #results.visible{display:block}
+
+  .kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+  @media(max-width:500px){.kpi-grid{grid-template-columns:1fr 1fr}}
+  .km{background:white;border-radius:14px;box-shadow:0 3px 8px rgba(0,0,0,.05);padding:16px;text-align:center;border-top:3px solid #001F8F}
+  .km-lbl{font-size:10px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+  .km-val{font-size:1.4rem;font-weight:800;color:#001F8F}
+  .km-unit{font-size:11px;color:#666}
+
+  .zone-table{width:100%;border-collapse:collapse;font-size:13px}
+  .zone-table th{background:#eef2ff;color:#001F8F;font-size:11px;letter-spacing:.05em;text-transform:uppercase;padding:8px 12px;border:1px solid #e0e4f0;text-align:left;font-weight:700}
+  .zone-table td{border:1px solid #e0e4f0;padding:8px 12px}
+  .zone-table tr:hover td{background:#f9fafb}
+  .zone-badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700}
+
+  .seuils{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+  @media(max-width:600px){.seuils{grid-template-columns:repeat(2,1fr)}}
+  .sc{background:white;border-radius:14px;padding:14px;text-align:center;box-shadow:0 3px 8px rgba(0,0,0,.05);border-top:4px solid #ccd2e3}
+  .sc.sel{border-top-color:#cc1a00}.sc.sels{border-top-color:#e06c00}.sc.sei{border-top-color:#e6a817}.sc.bris{border-top-color:#28a745}
+  .sn{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#666;margin-bottom:4px}
+  .sv{font-size:1.3rem;font-weight:800;color:#001F8F}
+  .sd{font-size:11px;color:#666;margin-top:4px;line-height:1.4}
+  .ss{font-size:11px;font-weight:700;margin-top:6px;padding:3px 8px;border-radius:6px}
+  .ss.ok{background:#d4edda;color:#155724}.ss.atteint{background:#f8d7da;color:#721c24}
+
+  .sources-box{background:#f1f3fa;border-radius:10px;padding:14px 16px;margin-bottom:20px;font-size:11px;color:#555;line-height:1.8}
+  .sources-box strong{color:#001F8F}
+
+  .btn-export{width:100%;padding:14px;background:#e9ecf5;color:#001F8F;border:none;font-size:14px;font-family:"Inter",sans-serif;border-radius:14px;cursor:pointer;font-weight:700;transition:all .2s;margin-bottom:20px}
+  .btn-export:hover{background:#d9dff5}
+  .btn-export.copied{background:#d4edda;color:#155724}
+
+  footer{padding:12px;text-align:center;font-size:12px;color:#444;border-top:1px solid #e0e4f0}
+  @media(max-width:640px){.card{padding:16px}main{padding:14px}}
+</style>
+</head>
+<body>
+
+<header>
+  Mémento Opérationnel IA – ENSOSP
+  <div class="header-sub">Dimensionnement surpression — UVCE Multi-Énergie · INERIS Omega 32 · Van den Berg 1985</div>
+</header>
+
+<nav class="tabs">
+  <a href="index.html" class="tab">🏠 Accueil</a>
+  <a href="scan.html" class="tab">📷 Lecture QR</a>
+  <a href="create.html" class="tab">📝 Création fiche</a>
+  <a href="nrbc.html" class="tab active">⚗️ Espace NRBC</a>
+</nav>
+
+<main>
+
+<div class="warn">
   <strong>⚠️ Outil d'aide au dimensionnement — Méthode Multi-Énergie</strong>
   Résultats estimatifs basés sur les abaques INERIS Omega 32 / Van den Berg 1985. Tout engagement reste sous l'autorité du COS et s'appuie sur les constatations terrain.
   Base substances : CASU — Mémoire RCH4 2018 — Mémento Dimensionnement RCH · Distances réduites R̄ validées : SDIS 76 / CASU, avril 2026 (indices 4✓ 6✓ 10✓).
