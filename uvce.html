@@ -119,7 +119,7 @@
 
 <header>
   Mémento Opérationnel IA – ENSOSP
-  <div class="header-sub">Dimensionnement surpression — UVCE Multi-Énergie </div>
+  <div class="header-sub">Dimensionnement surpression — UVCE Multi-Énergie · INERIS Omega 32 · Van den Berg 1985</div>
 </header>
 
 <nav class="tabs">
@@ -133,8 +133,8 @@
 
 <div class="warn">
   <strong>⚠️ Outil d'aide au dimensionnement — Méthode Multi-Énergie</strong>
-  Résultats estimatifs basés sur les abaques INERIS Omega 32. Tout engagement reste sous l'autorité du COS et s'appuie sur les constatations terrain.
-  Base substances : CASU — Mémoire RCH4 2018 — Mémento Dimensionnement RCH
+  Résultats estimatifs basés sur les abaques INERIS Omega 32 / Van den Berg 1985. Tout engagement reste sous l'autorité du COS et s'appuie sur les constatations terrain.
+  Base substances : CASU — Mémoire RCH4 2018 — Mémento Dimensionnement RCH · Distances réduites R̄ validées : SDIS 76 / CASU, avril 2026 (indices 4✓ 6✓ 10✓).
 </div>
 
 <div class="grid-2">
@@ -182,7 +182,7 @@
       <div id="custom-product-wrap" style="display:none">
         <div style="background:#fff3cd;border-left:3px solid #e6a817;border-radius:8px;padding:10px 12px;margin-top:10px;margin-bottom:12px;font-size:12px;color:#856404;line-height:1.5">
           <strong>Produit hors base</strong> — Renseignez les données ci-dessous.<br>
-          Utilisez le <strong>prompt UVCE - Multi-énergie</strong> du Mémento IA pour obtenir ces valeurs depuis une IA.
+          Utilisez le <strong>prompt UVCE</strong> du Mémento IA pour obtenir ces valeurs depuis une IA.
         </div>
 
         <!-- Ligne 1 : PCI + ρ_gaz -->
@@ -362,34 +362,35 @@
       </div>
     </div>
 
-  </div>
-</div>
+    <!-- FORMULES CLÉS — positionnées sous le tableau produits -->
+    <div class="formule-box" style="margin-bottom:0">
+      <h3>Formules clés — Méthode Multi-Énergie · INERIS Omega 32 · Van den Berg 1985</h3>
+      <div class="feq-row">
+        <span class="feq-sym">E</span><span class="feq-eq">=</span>
+        <span class="feq-sym">α</span><span class="feq-eq">·</span>
+        <span class="feq-sym"><em>m</em></span><span class="feq-eq">·</span>
+        <span class="feq-sym">PCI</span>
+        <span class="feq-warn" style="font-size:12px">&nbsp;[J] — énergie effective</span>
+      </div>
+      <div class="feq-row">
+        <span class="feq-sym">R̃</span><span class="feq-eq">=</span>
+        <span class="feq-sym"><em>R</em></span><span class="feq-eq">·</span>
+        <span class="feq-frac"><span style="color:#001F8F">P₀</span><span style="color:#001F8F">E</span></span>
+        <sup style="font-size:11px;color:#001F8F">1/3</sup>
+        <span class="feq-warn" style="font-size:12px">&nbsp;[—] — distance réduite</span>
+      </div>
+      <div class="feq-row">
+        <span class="feq-sym">P<sub>s</sub></span><span class="feq-eq">=</span>
+        <span class="feq-sym">P̃<sub style="font-size:.7em">s</sub></span><span class="feq-eq">·</span>
+        <span class="feq-sym">P₀</span>
+        <span class="feq-warn" style="font-size:12px">&nbsp;[Pa] — surpression absolue</span>
+      </div>
+      <div style="font-size:12px;color:#555;margin-top:10px;line-height:1.8">
+        <strong style="color:#001F8F">Distances :</strong> R = R̄ × (E/P₀)^(1/3) · R̄ lue sur abaque Van den Berg 1985 / INERIS Fig. 40<br>
+        <strong style="color:#001F8F">Validation :</strong> Cdt Anne — SDIS 76 — avril 2026 · Ind. 4✓ 6✓ 10✓
+      </div>
+    </div>
 
-<!-- FORMULES -->
-<div class="formule-box">
-  <h3>Formules clés — Méthode Multi-Énergie · INERIS Omega 32 · Van den Berg 1985</h3>
-  <div class="feq-row">
-    <span class="feq-sym">E</span><span class="feq-eq">=</span>
-    <span class="feq-sym">α</span><span class="feq-eq">·</span>
-    <span class="feq-sym"><em>m</em></span><span class="feq-eq">·</span>
-    <span class="feq-sym">PCI</span>
-    <span class="feq-warn" style="font-size:12px">&nbsp;[J] — énergie effective</span>
-  </div>
-  <div class="feq-row">
-    <span class="feq-sym">R̃</span><span class="feq-eq">=</span>
-    <span class="feq-sym"><em>R</em></span><span class="feq-eq">·</span>
-    <span class="feq-frac"><span style="color:#001F8F">P₀</span><span style="color:#001F8F">E</span></span>
-    <sup style="font-size:11px;color:#001F8F">1/3</sup>
-    <span class="feq-warn" style="font-size:12px">&nbsp;[—] — distance réduite</span>
-  </div>
-  <div class="feq-row">
-    <span class="feq-sym">P<sub>s</sub></span><span class="feq-eq">=</span>
-    <span class="feq-sym">P̃<sub style="font-size:.7em">s</sub></span><span class="feq-eq">·</span>
-    <span class="feq-sym">P₀</span>
-    <span class="feq-warn" style="font-size:12px">&nbsp;[Pa] — surpression absolue</span>
-  </div>
-  <div style="font-size:12px;color:#555;margin-top:10px;line-height:1.8">
-    <strong style="color:#001F8F">Calcul des distances :</strong> R = R̄ × (E/P₀)^(1/3) &nbsp;·&nbsp; R̄ = distance réduite lue sur abaque (INERIS Omega 32 - Fig. 43)<br>
   </div>
 </div>
 
@@ -397,7 +398,7 @@
 <div id="results">
 
   <div id="flux-hero" style="text-align:center;padding:28px 20px;border-radius:15px;background:white;box-shadow:0 3px 8px rgba(0,0,0,.05);margin-bottom:20px;border-top:5px solid #001F8F">
-    <div style="font-size:13px;font-weight:600;color:#666;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Surpression à la cible</div>
+    <div style="font-size:13px;font-weight:600;color:#666;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px" id="hero-title">Surpression à la cible</div>
     <div id="kpi-Ps" style="font-size:clamp(2.5rem,8vw,4rem);font-weight:800;color:#001F8F;line-height:1">—</div>
     <div style="font-size:14px;color:#666;margin-top:4px">mbar</div>
     <div id="res-verdict" style="display:inline-block;margin-top:12px;padding:8px 22px;border-radius:25px;font-size:14px;font-weight:700"></div>
@@ -408,17 +409,7 @@
     <div class="km"><div class="km-lbl">Distance réduite R̃</div><div class="km-val" id="kpi-R">—</div><div class="km-unit">sans dim.</div></div>
     <div class="km"><div class="km-lbl">Classification</div><div class="km-val" id="kpi-class" style="font-size:1rem;line-height:1.3;margin-top:4px">—</div><div class="km-unit">&nbsp;</div></div>
   </div>
-  
-   <div class="card" style="margin-bottom:20px">
-    <h2>⚠️ Seuils réglementaires — Arrêté PPRT du 29/09/2005</h2>
-    <div class="seuils">
-      <div class="sc sel"><div class="sn">SEL</div><div class="sv">200 mbar</div><div class="sd">Rupture tympan, lésions pulmonaires</div><div class="ss" id="st-sel"></div></div>
-      <div class="sc sels"><div class="sn">SELS</div><div class="sv">140 mbar</div><div class="sd">Dommages pulmonaires, projection</div><div class="ss" id="st-sels"></div></div>
-      <div class="sc sei"><div class="sn">SEI</div><div class="sv">50 mbar</div><div class="sd">Projection bris de vitre</div><div class="ss" id="st-sei"></div></div>
-      <div class="sc bris"><div class="sn">Bris vitres</div><div class="sv">20 mbar</div><div class="sd">Rupture vitrages, dégâts légers</div><div class="ss" id="st-bris"></div></div>
-    </div>
-  </div>
-  
+
   <div class="card" style="margin-bottom:20px;padding:0;overflow:hidden">
     <div style="padding:16px 20px;border-bottom:1px solid #e0e4f0"><h2 style="margin:0">🗺️ Distances des zones d'effets réglementaires</h2></div>
     <div style="overflow-x:auto">
@@ -435,8 +426,9 @@
   </div>
 
   <div class="sources-box">
-    <strong>Références :</strong> INERIS Omega 32 — DRA-06-50798-16173A (2006)
+    <strong>Références :</strong> INERIS Omega 32 — DRA-06-50798-16173A (2006) · Baker et al. (1983) · Van den Berg (1985) ·
     <strong>Base substances :</strong> CASU — Mémoire RCH4 2018 — Mémento Dimensionnement RCH ·
+    <strong>Validation R̄ :</strong> Cdt Anne — SDIS 76 / CASU — avril 2026
   </div>
 
   <button class="btn-export" id="btn-export" onclick="exporter()">📋 Copier le résumé — Main courante / RETEX</button>
@@ -792,6 +784,9 @@ function calculate(){
   document.getElementById('kpi-R').textContent=R_red.toFixed(3);
   const psEl=document.getElementById('kpi-Ps'); psEl.textContent=Ps_mbar.toFixed(1); psEl.style.color=cl.color;
   document.getElementById('kpi-class').textContent=cl.label; document.getElementById('kpi-class').style.color=cl.color;
+
+  // Titre hero dynamique avec distance
+  document.getElementById('hero-title').textContent='Surpression à la cible — ' + R + ' m';
 
   const hero=document.getElementById('flux-hero'); hero.style.borderTopColor=cl.color;
   const ve=document.getElementById('res-verdict'); ve.textContent=cl.verdict; ve.style.background=cl.bg; ve.style.color=cl.color;
