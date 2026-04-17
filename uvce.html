@@ -134,6 +134,7 @@
 <div class="warn">
   <strong>⚠️ Aide au dimensionnement — résultats estimatifs</strong>
   Méthode Multi-Énergie INERIS Omega 32 / Van den Berg 1985. Tout engagement reste sous l'autorité du COS.
+  Base CASU RCH4 2018 · R̄ validées SDIS 76 / CASU avril 2026 (indices 4✓ 6✓ 10✓).
 </div>
 
 <div class="grid-2">
@@ -305,7 +306,7 @@
       <div id="sev-guide-wrap">
         <div class="guide-cols">
           <div>
-            <div class="guide-col-title">Étape 1 — Vitesse de combustion<br><span style="text-transform:none;letter-spacing:0;font-weight:400;font-size:10px">automatique via la substance</span></div>
+            <div class="guide-col-title">Étape 1 — Vitesse de combustion<br><span style="text-transform:none;letter-spacing:0;font-weight:400;font-size:10px">auto via la substance</span></div>
             <div class="vc-banner" id="vc-auto-banner"><span style="color:#aaa">← Sélectionner une substance</span></div>
           </div>
           <div>
@@ -323,9 +324,7 @@
         </div>
       </div>
 
-      <div id="sev-libre-wrap" style="display:none">
-        <div class="hint" style="margin-bottom:6px">Sélectionner l'indice manuellement</div>
-      </div>
+      <div id="sev-libre-wrap" style="display:none"></div>
 
       <div class="sev-grid" id="sevGrid"></div>
       <div class="sev-desc" id="sevDesc"></div>
@@ -373,7 +372,8 @@
       <span class="feq-warn" style="font-size:12px">&nbsp;[Pa]</span>
     </div>
     <div style="font-size:12px;color:#555;margin-top:10px;line-height:1.7">
-      <strong style="color:#001F8F">Distances :</strong> R = R̄ × (E/P₀)^(1/3) · R̄ abaque Omega 32 Fig. 43<br>
+      <strong style="color:#001F8F">Distances :</strong> R = R̄ × (E/P₀)^(1/3) · R̄ abaque Omega 32 Fig. 40<br>
+      <strong style="color:#001F8F">Validation :</strong> SDIS 76 / CASU — avril 2026 · ind. 4✓ 6✓ 10✓
     </div>
   </div>
 
@@ -414,7 +414,7 @@
   </div>
 
   <div class="card" style="margin-bottom:20px;padding:0;overflow:hidden">
-    <div style="padding:16px 20px;border-bottom:1px solid #e0e4f0"><h2 style="margin:0">🗺️ Distances des zones d'effets réglementaires</h2></div>
+    <div style="padding:16px 20px;border-bottom:1px solid #e0e4f0"><h2 style="margin:0">🗺️ Zones d'effets — Arrêté PPRT 29/09/2005</h2></div>
     <div style="overflow-x:auto">
       <table class="zone-table">
         <thead><tr><th>Zone</th><th>Seuil</th><th>Distance</th><th>Effet physique</th><th>Impact humain</th></tr></thead>
@@ -423,9 +423,15 @@
     </div>
   </div>
 
+  <div class="card" style="margin-bottom:20px">
+    <h2>📈 Courbe surpression / distance — Indice <span id="chart-indice-label">—</span></h2>
+    <canvas id="chartCanvas" style="width:100%;height:260px;display:block"></canvas>
+  </div>
+
   <div class="sources-box">
     <strong>Réf. :</strong> INERIS Omega 32 DRA-06-50798-16173A · Baker et al. (1983) · Van den Berg (1985) ·
     <strong>Substances :</strong> CASU RCH4 2018 ·
+    <strong>R̄ validées :</strong> SDIS 76 / CASU — avril 2026
   </div>
 
   <button class="btn-export" id="btn-export" onclick="exporter()">📋 Copier le résumé — Main courante / RETEX</button>
@@ -534,10 +540,10 @@ const sevDescriptions={
 
 const logigramme={inf:{enc:6,lib:4},sup:{enc:10,lib:6}};
 const alphaDescriptions={
-  '1.0':'<strong>Cas majorant</strong> — Totalité de la masse participe. Fuite jet haute pression. Études réglementaires (PPRT, ICPE).',
-  '0.1':'<strong>Espace ouvert, peu d\'obstacles</strong> — Référence Omega 32. Nappe d\'hydrocarbures en zone dégagée.',
-  '0.3':'<strong>Zone semi-confinée</strong> — Sites industriels avec équipements, tuyauteries, obstacles modérés.',
-  'custom':'<strong>Valeur personnalisée</strong> — Justifier dans le rapport (nature fuite, confinement, RETEX). Plage : 0.05–0.5.'
+  '1.0':'<strong>Cas majorant</strong> — Fuite jet HP. Recommandé pour études réglementaires (PPRT, ICPE).',
+  '0.1':'<strong>Espace ouvert</strong> — Référence Omega 32. Nappe en zone dégagée, peu d\'obstacles.',
+  '0.3':'<strong>Zone semi-confinée</strong> — Obstacles modérés, tuyauteries, équipements.',
+  'custom':'<strong>Valeur libre</strong> — Justifier dans le rapport. Plage usuelle : 0.05–0.5 (Omega 32).'
 };
 
 let currentSev=5, sevMode='guide', massMode='direct', vcChoice=null, zoneChoice=null, lastResult=null;
@@ -602,7 +608,7 @@ function updateVCBanner(key){
   banner.style.borderLeftColor=col;
   banner.innerHTML='<span style="font-size:12px;line-height:1.5"><strong style="color:'+col+'">'+s.name+'</strong><br>'+
     'Su = '+s.su+' cm/s → <strong style="color:'+col+'">'+(isInf?'Vitesse &lt; Propane':'Vitesse ≥ Propane')+'</strong><br>'+
-    '<span style="color:#888;font-size:10px">(propane = 43 cm/s)</span></span>';
+    '<span style="color:#888;font-size:10px">(propane = 46 cm/s)</span></span>';
   applyLogigramme();
 }
 function setZone(choice){
@@ -687,7 +693,7 @@ function onCustomChange(){
       '<span style="font-size:12px;line-height:1.5">'+
       '<strong style="color:'+col+'">Produit personnalisé</strong><br>'+
       'Su = '+su+' cm/s → <strong style="color:'+col+'">'+(isInf?'Vitesse &lt; Propane':'Vitesse ≥ Propane')+'</strong><br>'+
-      '<span style="color:#888;font-size:10px">(propane = 43 cm/s)</span></span>';
+      '<span style="color:#888;font-size:10px">(propane = 46 cm/s)</span></span>';
     applyLogigramme();
   } else {
     vcChoice = null;
@@ -784,6 +790,8 @@ function calculate(){
 
   // Titre hero dynamique avec distance
   document.getElementById('hero-title').textContent='Surpression à ' + R + ' m de la source';
+  // Label indice dans le titre graphique
+  const lbl=document.getElementById('chart-indice-label'); if(lbl) lbl.textContent=sev;
 
   const hero=document.getElementById('flux-hero'); hero.style.borderTopColor=cl.color;
   const ve=document.getElementById('res-verdict'); ve.textContent=cl.verdict; ve.style.background=cl.bg; ve.style.color=cl.color;
@@ -942,7 +950,7 @@ function exporter(){
 '=== UVCE — DIMENSIONNEMENT SURPRESSION ===\n'+
 'Date/heure   : '+now+'\n'+
 'Méthode      : Multi-Énergie — INERIS Omega 32 · Van den Berg 1985\n'+
-'R̄ : Lecture Abaque INERIS Imega 32 - Figure 43\n\n'+
+'Validation R̄ : CASU / SDIS 76 — avril 2026\n\n'+
 'PARAMÈTRES\n'+
 'Substance    : '+prod+'\n'+
 prodDetails+
