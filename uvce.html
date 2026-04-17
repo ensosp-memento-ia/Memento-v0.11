@@ -343,26 +343,7 @@
       <button class="btn-generate" onclick="calculate()">▶ Calculer les effets</button>
     </div>
 
-    <!-- Tableau données produits -->
-    <div class="card">
-      <h2>📋 Données produits <span class="src-badge">CASU · RCH4 2018</span></h2>
-      <div style="overflow-x:auto">
-        <table style="width:100%;border-collapse:collapse;font-size:11px">
-          <thead>
-            <tr style="background:#eef2ff;color:#001F8F">
-              <th style="padding:5px 8px;text-align:left">Produit</th>
-              <th style="padding:5px 8px;text-align:center">Su (cm/s)</th>
-              <th style="padding:5px 8px;text-align:center">ρ_gaz</th>
-              <th style="padding:5px 8px;text-align:center">C (%)</th>
-              <th style="padding:5px 8px;text-align:center">PCI (MJ/kg)</th>
-            </tr>
-          </thead>
-          <tbody id="table-produits"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- FORMULES CLÉS — positionnées sous le tableau produits -->
+    <!-- Formules clés — positionnées sous le bloc cible -->
     <div class="formule-box" style="margin-bottom:0">
       <h3>Formules clés — Méthode Multi-Énergie · INERIS Omega 32 · Van den Berg 1985</h3>
       <div class="feq-row">
@@ -391,6 +372,28 @@
       </div>
     </div>
 
+  </div>
+
+  <!-- COLONNE DROITE — suite : tableau données produits -->
+  <div style="display:contents"><!-- slot vide, tableau produits déplacé en colonne droite --></div>
+</div>
+
+<!-- Tableau données produits — pleine largeur sous les 2 colonnes -->
+<div class="card" style="margin-bottom:20px">
+  <h2>📋 Données produits <span class="src-badge">CASU · RCH4 2018</span></h2>
+  <div style="overflow-x:auto">
+    <table style="width:100%;border-collapse:collapse;font-size:11px">
+      <thead>
+        <tr style="background:#eef2ff;color:#001F8F">
+          <th style="padding:5px 8px;text-align:left">Produit</th>
+          <th style="padding:5px 8px;text-align:center">Su (cm/s)</th>
+          <th style="padding:5px 8px;text-align:center">ρ_gaz</th>
+          <th style="padding:5px 8px;text-align:center">C (%)</th>
+          <th style="padding:5px 8px;text-align:center">PCI (MJ/kg)</th>
+        </tr>
+      </thead>
+      <tbody id="table-produits"></tbody>
+    </table>
   </div>
 </div>
 
@@ -784,6 +787,9 @@ function calculate(){
   document.getElementById('kpi-R').textContent=R_red.toFixed(3);
   const psEl=document.getElementById('kpi-Ps'); psEl.textContent=Ps_mbar.toFixed(1); psEl.style.color=cl.color;
   document.getElementById('kpi-class').textContent=cl.label; document.getElementById('kpi-class').style.color=cl.color;
+
+  // Titre hero dynamique avec distance
+  document.getElementById('hero-title').textContent='Surpression à ' + R + ' m de la source';
 
   // Titre hero dynamique avec distance
   document.getElementById('hero-title').textContent='Surpression à la cible — ' + R + ' m';
