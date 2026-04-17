@@ -120,6 +120,7 @@
         <div class="sel-wrap">
           <select id="selProduit" onchange="onProduitChange()">
             <option value="">— Sélectionner —</option>
+            <option value="personnalise">✎ Produit personnalisé (saisie PCI)</option>
             <optgroup label="Produits courants">
               <option value="CO">Monoxyde de carbone (CO)</option>
               <option value="diesel">Diesel</option>
@@ -134,7 +135,19 @@
             </optgroup>
             <optgroup label="Autres">
               <option value="hors_liste">Hydrocarbure hors liste</option>
-              <option value="personnalise">✎ Produit personnalisé (saisie PCI)</option>
+              <option value="ammoniac">Ammoniac</option>
+              <option value="butane">Butane</option>
+              <option value="acetylene">Acétylène</option>
+              <option value="benzene">Benzène</option>
+              <option value="butylene">Butylène</option>
+              <option value="cyclohexane">Cyclohexane</option>
+              <option value="ethane">Ethane</option>
+              <option value="ethylene">Ethylène</option>
+              <option value="nhexane">n-Hexane</option>
+              <option value="nheptane">n-Heptane</option>
+              <option value="hydrogene">Hydrogène</option>
+              <option value="pentane">Pentane</option>
+              <option value="propylene">Propylène</option>
             </optgroup>
           </select>
         </div>
@@ -270,6 +283,18 @@ const PRODUITS = {
   essence:    { nom:"Essence automobile",        pci:43.8  },
   kerosene:   { nom:"Kérosène",                 pci:43.3  },
   GPL:        { nom:"GPL",                       pci:46.1  },
+  ammoniac:   { nom:"Ammoniac",                  pci:18.6 },
+  butane:     { nom:"Butane",                    pci:45.8 },
+  acetylene:  { nom:"Acétylène",                 pci:48.2 },
+  benzene:    { nom:"Benzène",                    pci:40.1 },
+  butylene:   { nom:"Butylène",                 pci:45.3 },
+  cyclohexane:{ nom:"Cyclohexane",              pci:43.5 },
+  ethane:     { nom:"Ethane",                    pci:47.5 },
+  ethylene:     { nom:"Ethylene",                    pci:47.2 },
+  nhexane:     { nom:"n-Hexane",                    pci:44.8 },
+  nheptane:     { nom:"n-Heptane",                    pci:44.6 },
+  pentane:     { nom:"Pentane",                    pci:44.8 },
+  propylene:     { nom:"Propylène",                    pci:45.8 },
   hors_liste: { nom:"Hydrocarbure hors liste",  pci:null  }
 };
 
