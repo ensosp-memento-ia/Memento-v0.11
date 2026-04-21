@@ -116,18 +116,7 @@ async function onGenerate() {
         return;
     }
 
-    // Vérification prompt
-    if (!prompt) {
-        alert("⚠️ Le prompt ne peut pas être vide !");
-        return;
-    }
-
-    if (prompt.length > 8000) {
-        alert("❌ Le prompt dépasse 8000 caractères !");
-        return;
-    }
-
-    // Construction JSON final (AVEC indices IA)
+    // Construction JSON final
     const fiche = {
         meta,
         ai: aiIndices,
@@ -139,23 +128,11 @@ async function onGenerate() {
 
     console.log("📦 Fiche JSON construite :", fiche);
 
-    // Compression + wrapper
+    // Compression
     let encoded;
     try {
         encoded = encodeFiche(fiche);
         console.log("📊 Stats compression :", encoded.stats);
-
-        // ⚠️ Vérification taille Base64URL (seuil opérationnel : 2400 chars = URL ~2450 chars)
-        // La limite réelle du QR est 2953 chars (mode byte v40-L), pas 4296 (alphanumeric)
-        if (encoded.stats.base64 > 2400) {
-            const confirm = window.confirm(
-                `⚠️ Attention : fiche volumineuse (${encoded.stats.base64} chars compressés).\n` +
-                `L'URL générée sera proche de la limite QR Code (2953 chars).\n` +
-                `Le QR Code sera très dense — préférez l'URL cliquable pour partager.\n\n` +
-                `Voulez-vous continuer ?`
-            );
-            if (!confirm) return;
-        }
     }
     catch (err) {
         alert("❌ Erreur compression : " + err.message);
@@ -164,49 +141,21 @@ async function onGenerate() {
     }
 
     // ================================================================
-    // ✅ ÉTAPE 1 : GÉNÉRER L'URL AVEC VÉRIFICATION TAILLE
+    // ÉTAPE 1 : GÉNÉRER L'URL
     // ================================================================
     let ficheUrl;
     const urlContainer = document.getElementById("urlContainer");
     const generatedUrlInput = document.getElementById("generatedUrlCreate");
-    
-    console.log("🔗 Génération de l'URL cliquable...");
-    
+
     try {
-        // Générer l'URL
         ficheUrl = generateFicheUrl(fiche);
-        
-        // ✅ NOUVEAU : Vérifier la longueur de l'URL
         console.log("📊 Longueur URL générée:", ficheUrl.length, "caractères");
-        
-        // Afficher l'URL
-        if (generatedUrlInput) {
-            generatedUrlInput.value = ficheUrl;
-        }
-        if (urlContainer) {
-            urlContainer.style.display = "block";
-        }
-        
-        // Avertissement si URL proche de la limite QR réelle (2953 chars mode byte v40-L)
-        if (ficheUrl.length > 2700) {
-            console.warn("⚠️ URL proche limite QR:", ficheUrl.length, "chars (limite: 2953)");
-            
-            const continueGeneration = confirm(
-                `⚠️ URL volumineuse (${ficheUrl.length} caractères)\n\n` +
-                `Limite QR Code : 2953 chars (mode byte, version 40, correction L).\n` +
-                `L'URL cliquable fonctionne normalement.\n` +
-                `Le QR Code sera très dense — préférez l'URL pour partager.\n\n` +
-                `Continuer ?`
-            );
-            
-            if (!continueGeneration) {
-                console.log("Génération annulée par l'utilisateur");
-                return;
-            }
-        }
-        
+
+        if (generatedUrlInput) generatedUrlInput.value = ficheUrl;
+        if (urlContainer)     urlContainer.style.display = "block";
+
         console.log("✅ URL générée avec succès");
-        
+
     } catch (err) {
         console.error("❌ Erreur génération URL :", err);
         alert("❌ Impossible de générer l'URL : " + err.message);
@@ -279,24 +228,36 @@ async function onGenerate() {
             
         } catch (err) {
             console.error("❌ Erreur génération QR :", err);
-            
-            // ✅ Message d'erreur détaillé
+
+            // Calculer les caractères disponibles pour le prompt
+            // en retirant la taille encodée de la fiche sans le prompt
+            let dispoPourPrompt = "inconnu";
+            try {
+                const ficheSansPrompt = {
+                    meta: fiche.meta,
+                    ai: fiche.ai,
+                    prompt: { base: "", variables: fiche.prompt.variables }
+                };
+                const encSans = encodeFiche(ficheSansPrompt);
+                const urlSans = generateFicheUrl(ficheSansPrompt);
+                const margeUrl = 2953 - urlSans.length;
+                // Estimer les chars de prompt bruts que la marge peut absorber
+                // DEFLATE compresse le texte français à ~35–50% → facteur conservateur 0.4
+                dispoPourPrompt = Math.floor(margeUrl / 0.4);
+            } catch(e) { /* calcul indicatif, ne pas bloquer */ }
+
             qrContainer.innerHTML = `
-                <p style='color:#ff4d4d;font-weight:600;'>❌ Erreur lors de la génération du QR Code</p>
+                <p style='color:#ff4d4d;font-weight:600;'>❌ QR Code impossible à générer</p>
                 <p style='font-size:14px;margin-top:10px;'>
-                    L'URL est probablement trop longue (${ficheUrl.length} chars).<br>
-                    Limite réelle du QR Code : 2953 chars (mode byte, version 40, correction L).<br>
-                    <em>Note : la valeur 4296 souvent citée correspond au mode alphanumeric,
-                    inapplicable aux URLs qui contiennent des minuscules.</em>
+                    Le fiche est trop volumineuse pour tenir dans un QR Code.<br>
+                    Avec vos métadonnées et variables actuelles, le prompt peut contenir
+                    environ <strong>${typeof dispoPourPrompt === 'number' ? dispoPourPrompt.toLocaleString('fr-FR') : dispoPourPrompt} caractères</strong>
+                    (prompt actuel : ${fiche.prompt.base.length.toLocaleString('fr-FR')} caractères).
                 </p>
                 <p style='font-size:14px;margin-top:10px;background:#fff3cd;padding:10px;border-radius:6px;'>
-                    <strong>💡 Solution :</strong><br>
-                    Utilisez l'URL cliquable ci-dessus pour partager la fiche.<br>
-                    Pour générer un QR Code, réduisez le contenu de la fiche.
+                    <strong>💡 Solution :</strong> utilisez l'URL cliquable ci-dessus — elle fonctionne sans limite de taille.
                 </p>
             `;
-            
-            // On n'affiche pas d'alert supplémentaire car le message est clair
             return;
         }
     }
