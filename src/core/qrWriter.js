@@ -15,24 +15,24 @@ function isMobileDevice() {
     || window.innerWidth < 768;
 }
 
-// ✅ CORRECTION : Taille dynamique adaptée au device
+// Taille dynamique adaptée au device et à la densité réelle du QR
+// Limite réelle : 2953 chars (mode byte, QR v40, correction L)
+// (Les minuscules de l'URL forcent le mode byte — la valeur 4296 souvent
+//  citée correspond au mode alphanumeric, inutilisable ici.)
 function computeQrSize(payloadLength) {
   const isMobile = isMobileDevice();
   
-  // Base selon device
   let size = isMobile ? MIN_QR_SIZE_MOBILE : MIN_QR_SIZE_DESKTOP;
 
-  // Ajustement selon complexité (desktop uniquement)
   if (!isMobile) {
-    if (payloadLength > 3500) size = 700;
-    if (payloadLength > 4500) size = 800;
+    // Seuils calés sur la limite réelle de 2953 chars
+    if (payloadLength > 2500) size = 800;
+    else if (payloadLength > 1800) size = 700;
   } else {
-    // Mobile : on reste sur 300px même si QR complexe
-    // (la lib QRCode.js gère la densité automatiquement)
     size = MIN_QR_SIZE_MOBILE;
   }
 
-  console.log(`📐 QR Size: ${size}px (${isMobile ? 'mobile' : 'desktop'}, payload: ${payloadLength})`);
+  console.log(`📐 QR Size: ${size}px (${isMobile ? 'mobile' : 'desktop'}, payload: ${payloadLength} chars, limite QR byte-L: 2953)`);
 
   return size;
 }
@@ -101,7 +101,7 @@ export function generateQrForFiche(dataOrUrl, containerId) {
       text: qrData,
       width: qrSize,
       height: qrSize,
-      correctLevel: QRCode.CorrectLevel.L,  // L = capacité maximale (~4296 car.) — usage URL prioritaire
+      correctLevel: QRCode.CorrectLevel.L,  // L = capacité maximale — limite réelle 2953 chars (mode byte URL)
       colorDark: "#000000",
       colorLight: "#ffffff"
     });
