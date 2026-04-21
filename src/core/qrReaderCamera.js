@@ -1,13 +1,13 @@
 // ======================================================
 // qrReaderCamera.js — Lecture QR via caméra (module technique)
-// Version corrigée : cleanup mémoire + meilleure extraction iOS
+// v0.11.21 : Résolution forcée + zone centrale + scan 15fps
 // ======================================================
 
 let currentScanner = null;
 
 /**
  * Normalise le résultat renvoyé par QrScanner en string.
- * Version améliorée avec support iOS renforcé
+ * Support iOS renforcé.
  */
 function extractTextFromScanResult(result) {
   if (!result) {
@@ -15,45 +15,29 @@ function extractTextFromScanResult(result) {
     return "";
   }
 
-  // Cas 1 : string directe
   if (typeof result === "string") {
-    console.log("✅ String directe extraite");
     return result;
   }
 
-  // Cas 2 : ScanResult standard { data: "...", cornerPoints: [...] }
   if (result.data && typeof result.data === "string") {
-    console.log("✅ String depuis result.data");
     return result.data;
   }
 
-  // Cas 3 : iOS tordu - data est un objet ou Buffer
   if (result.data && typeof result.data === "object") {
-    console.warn("⚠️ iOS : data est un objet, tentative stringify");
-    
-    // Si c'est un Buffer ou Uint8Array
     if (result.data instanceof Uint8Array || result.data.buffer) {
       try {
-        const decoded = new TextDecoder().decode(result.data);
-        console.log("✅ Décodage Buffer réussi");
-        return decoded;
+        return new TextDecoder().decode(result.data);
       } catch (e) {
         console.error("❌ Erreur décodage Buffer :", e);
       }
     }
-
-    // Sinon on stringify
     try {
-      const stringified = JSON.stringify(result.data);
-      console.log("✅ Stringify objet réussi");
-      return stringified;
+      return JSON.stringify(result.data);
     } catch (e) {
       console.error("❌ Stringify échoué :", e);
     }
   }
 
-  // Cas 4 : Fallback - on stringify tout
-  console.warn("⚠️ Format inconnu, stringify complet");
   try {
     return JSON.stringify(result);
   } catch (e) {
@@ -63,9 +47,46 @@ function extractTextFromScanResult(result) {
 }
 
 /**
+ * Tente d'améliorer la résolution et l'autofocus après démarrage du scanner.
+ * Silencieux si le navigateur ou le matériel ne supporte pas les contraintes.
+ *
+ * @param {HTMLVideoElement} videoElement
+ */
+async function applyHighResConstraints(videoElement) {
+  try {
+    const stream = videoElement.srcObject;
+    if (!stream) return;
+
+    const track = stream.getVideoTracks()[0];
+    if (!track?.applyConstraints) return;
+
+    await track.applyConstraints({
+      width:     { ideal: 1920 },
+      height:    { ideal: 1080 },
+      focusMode: "continuous"   // autofocus continu — meilleur pour QR denses
+    });
+
+    const settings = track.getSettings();
+    console.log(
+      `📷 Résolution appliquée : ${settings.width}×${settings.height}`,
+      settings.focusMode ? `| focus: ${settings.focusMode}` : ""
+    );
+  } catch (e) {
+    // Non bloquant : certains navigateurs refusent ces contraintes
+    console.warn("⚠️ applyConstraints non supporté ou refusé :", e.message);
+  }
+}
+
+/**
  * Démarre le scan caméra.
- * Version améliorée avec cleanup systématique
- * 
+ *
+ * Optimisations v0.11.21 :
+ *  - preferredCamera: "environment" dès l'instanciation (évite le switch)
+ *  - maxScansPerSecond: 15 (vs défaut ~5)
+ *  - calculateScanRegion: zone centrale 70% — réduit le bruit et
+ *    concentre l'analyse là où l'utilisateur cadre le QR
+ *  - applyHighResConstraints: tente 1080p + autofocus continu après start()
+ *
  * @param {HTMLVideoElement} videoElement
  * @param {(rawText: string) => void} onText
  */
@@ -77,7 +98,7 @@ export async function startCameraScan(videoElement, onText) {
     throw new Error("❌ Élément <video> non fourni.");
   }
 
-  // ✅ CORRECTION : Cleanup systématique avant nouvelle instance
+  // Cleanup systématique avant nouvelle instance
   if (currentScanner) {
     console.log("🧹 Nettoyage scanner existant...");
     try {
@@ -90,16 +111,12 @@ export async function startCameraScan(videoElement, onText) {
     }
   }
 
-  console.log("🎥 Création nouveau scanner...");
+  console.log("🎥 Création nouveau scanner (haute performance)...");
 
   currentScanner = new window.QrScanner(
     videoElement,
     (scanResult) => {
-      console.log("[CAM] Résultat brut QrScanner :", scanResult);
-      
       const text = extractTextFromScanResult(scanResult);
-      console.log("[CAM] Texte normalisé :", text);
-      
       if (text && text.length > 0) {
         onText(text);
       } else {
@@ -108,30 +125,48 @@ export async function startCameraScan(videoElement, onText) {
     },
     {
       returnDetailedScanResult: true,
-      highlightScanRegion: true,  // ✅ Aide visuelle
-      highlightCodeOutline: true
+      highlightScanRegion:      true,
+      highlightCodeOutline:     true,
+
+      // ── Optimisation 1 : caméra arrière dès l'init ──────────────
+      preferredCamera: "environment",
+
+      // ── Optimisation 2 : fréquence d'analyse 15 fps ─────────────
+      // Le défaut QrScanner est ~5/s. 15/s améliore la réactivité
+      // sans surcharger le CPU mobile (limite navigateur ~25/s).
+      maxScansPerSecond: 15,
+
+      // ── Optimisation 3 : zone centrale 70% ──────────────────────
+      // Analyse uniquement le carré central du flux vidéo.
+      // Avantages : moins de bruit de fond, traitement plus rapide,
+      // meilleure détection des QR codes denses.
+      calculateScanRegion: (video) => {
+        const size = Math.round(
+          0.7 * Math.min(video.videoWidth, video.videoHeight)
+        );
+        const x = Math.round((video.videoWidth  - size) / 2);
+        const y = Math.round((video.videoHeight - size) / 2);
+        return { x, y, width: size, height: size };
+      }
     }
   );
 
-  // On privilégie la caméra arrière si dispo
+  // Démarrage
   try {
-    await currentScanner.start({ facingMode: "environment" });
-    console.log("✅ Scanner démarré (caméra arrière)");
+    await currentScanner.start();
+    console.log("✅ Scanner démarré");
+
+    // ── Optimisation 4 : résolution 1080p + autofocus continu ────
+    await applyHighResConstraints(videoElement);
+
   } catch (e) {
-    console.warn("⚠️ Caméra arrière indisponible, tentative caméra frontale...");
-    try {
-      await currentScanner.start({ facingMode: "user" });
-      console.log("✅ Scanner démarré (caméra frontale)");
-    } catch (e2) {
-      console.error("❌ Impossible de démarrer la caméra :", e2);
-      throw new Error("Impossible d'accéder à la caméra : " + e2.message);
-    }
+    console.error("❌ Impossible de démarrer la caméra :", e);
+    throw new Error("Impossible d'accéder à la caméra : " + e.message);
   }
 }
 
 /**
  * Arrête et détruit le scanner actuel.
- * Version améliorée avec nettoyage complet
  */
 export async function stopCameraScan() {
   if (!currentScanner) {
@@ -143,23 +178,22 @@ export async function stopCameraScan() {
 
   try {
     await currentScanner.stop();
-    console.log("✅ Scanner arrêté");
   } catch (e) {
-    console.warn("⚠️ Erreur à l'arrêt du scanner :", e);
+    console.warn("⚠️ Erreur à l'arrêt :", e);
   }
 
   try {
     currentScanner.destroy();
-    console.log("✅ Scanner détruit");
   } catch (e) {
-    console.warn("⚠️ Erreur destruction scanner :", e);
+    console.warn("⚠️ Erreur destruction :", e);
   } finally {
     currentScanner = null;
+    console.log("✅ Scanner arrêté et détruit");
   }
 }
 
 /**
- * Vérifie si un scanner est actif
+ * Vérifie si un scanner est actif.
  */
 export function isScannerActive() {
   return currentScanner !== null;
