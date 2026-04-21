@@ -1,6 +1,7 @@
 // ======================================================
 // qrReaderCamera.js — Lecture QR via caméra (module technique)
-// v0.11.21 : Résolution forcée + zone centrale + scan 15fps
+// v0.11.22 : Suppression calculateScanRegion (carré trop petit + zones mortes)
+//            Résolution 1080p + autofocus continu + 15fps conservés
 // ======================================================
 
 let currentScanner = null;
@@ -15,40 +16,26 @@ function extractTextFromScanResult(result) {
     return "";
   }
 
-  if (typeof result === "string") {
-    return result;
-  }
+  if (typeof result === "string") return result;
 
-  if (result.data && typeof result.data === "string") {
-    return result.data;
-  }
+  if (result.data && typeof result.data === "string") return result.data;
 
   if (result.data && typeof result.data === "object") {
     if (result.data instanceof Uint8Array || result.data.buffer) {
-      try {
-        return new TextDecoder().decode(result.data);
-      } catch (e) {
-        console.error("❌ Erreur décodage Buffer :", e);
-      }
+      try { return new TextDecoder().decode(result.data); }
+      catch (e) { console.error("❌ Erreur décodage Buffer :", e); }
     }
-    try {
-      return JSON.stringify(result.data);
-    } catch (e) {
-      console.error("❌ Stringify échoué :", e);
-    }
+    try { return JSON.stringify(result.data); }
+    catch (e) { console.error("❌ Stringify échoué :", e); }
   }
 
-  try {
-    return JSON.stringify(result);
-  } catch (e) {
-    console.error("❌ Impossible d'extraire le texte :", e);
-    return "";
-  }
+  try { return JSON.stringify(result); }
+  catch (e) { console.error("❌ Impossible d'extraire le texte :", e); return ""; }
 }
 
 /**
- * Tente d'améliorer la résolution et l'autofocus après démarrage du scanner.
- * Silencieux si le navigateur ou le matériel ne supporte pas les contraintes.
+ * Tente de forcer 1080p + autofocus continu après démarrage.
+ * Silencieux si non supporté par le navigateur ou le matériel.
  *
  * @param {HTMLVideoElement} videoElement
  */
@@ -63,29 +50,36 @@ async function applyHighResConstraints(videoElement) {
     await track.applyConstraints({
       width:     { ideal: 1920 },
       height:    { ideal: 1080 },
-      focusMode: "continuous"   // autofocus continu — meilleur pour QR denses
+      focusMode: "continuous"
     });
 
-    const settings = track.getSettings();
+    const s = track.getSettings();
     console.log(
-      `📷 Résolution appliquée : ${settings.width}×${settings.height}`,
-      settings.focusMode ? `| focus: ${settings.focusMode}` : ""
+      `📷 Résolution : ${s.width}×${s.height}`,
+      s.focusMode ? `| focus: ${s.focusMode}` : ""
     );
   } catch (e) {
-    // Non bloquant : certains navigateurs refusent ces contraintes
-    console.warn("⚠️ applyConstraints non supporté ou refusé :", e.message);
+    console.warn("⚠️ applyConstraints non supporté :", e.message);
   }
 }
 
 /**
  * Démarre le scan caméra.
  *
- * Optimisations v0.11.21 :
- *  - preferredCamera: "environment" dès l'instanciation (évite le switch)
- *  - maxScansPerSecond: 15 (vs défaut ~5)
- *  - calculateScanRegion: zone centrale 70% — réduit le bruit et
- *    concentre l'analyse là où l'utilisateur cadre le QR
- *  - applyHighResConstraints: tente 1080p + autofocus continu après start()
+ * Pourquoi calculateScanRegion est ABSENT ici :
+ *  - Cette option calcule la zone d'analyse en pixels natifs du capteur
+ *    (ex. 1920×1080), mais le cadre de visée (highlightScanRegion) est
+ *    rendu en coordonnées CSS sur le <video> affiché.
+ *  - Sur mobile, l'écart entre résolution native et taille CSS affichée
+ *    (ex. 400px wide) fait paraître le carré minuscule à l'écran.
+ *  - De plus, un QR code zoomé déborde la zone centrale et n'est plus détecté.
+ *  - Sans cette option, QrScanner analyse tout le flux vidéo et le cadre
+ *    de visée affiché par highlightScanRegion couvre toute la zone utile.
+ *
+ * Optimisations conservées :
+ *  - preferredCamera: "environment"  → caméra arrière dès l'init
+ *  - maxScansPerSecond: 15           → 3× plus réactif que le défaut
+ *  - applyHighResConstraints()       → 1080p + autofocus continu
  *
  * @param {HTMLVideoElement} videoElement
  * @param {(rawText: string) => void} onText
@@ -111,7 +105,7 @@ export async function startCameraScan(videoElement, onText) {
     }
   }
 
-  console.log("🎥 Création nouveau scanner (haute performance)...");
+  console.log("🎥 Création nouveau scanner...");
 
   currentScanner = new window.QrScanner(
     videoElement,
@@ -125,40 +119,20 @@ export async function startCameraScan(videoElement, onText) {
     },
     {
       returnDetailedScanResult: true,
-      highlightScanRegion:      true,
-      highlightCodeOutline:     true,
-
-      // ── Optimisation 1 : caméra arrière dès l'init ──────────────
-      preferredCamera: "environment",
-
-      // ── Optimisation 2 : fréquence d'analyse 15 fps ─────────────
-      // Le défaut QrScanner est ~5/s. 15/s améliore la réactivité
-      // sans surcharger le CPU mobile (limite navigateur ~25/s).
-      maxScansPerSecond: 15,
-
-      // ── Optimisation 3 : zone centrale 70% ──────────────────────
-      // Analyse uniquement le carré central du flux vidéo.
-      // Avantages : moins de bruit de fond, traitement plus rapide,
-      // meilleure détection des QR codes denses.
-      calculateScanRegion: (video) => {
-        const size = Math.round(
-          0.7 * Math.min(video.videoWidth, video.videoHeight)
-        );
-        const x = Math.round((video.videoWidth  - size) / 2);
-        const y = Math.round((video.videoHeight - size) / 2);
-        return { x, y, width: size, height: size };
-      }
+      highlightScanRegion:      true,   // cadre de visée pleine zone vidéo
+      highlightCodeOutline:     true,   // contour vert au moment de la détection
+      preferredCamera:          "environment",
+      maxScansPerSecond:        15
+      // calculateScanRegion : volontairement absent
+      // → analyse tout le flux, cadre de visée correct sur mobile,
+      //   détection même sur QR code zoomé ou excentré
     }
   );
 
-  // Démarrage
   try {
     await currentScanner.start();
     console.log("✅ Scanner démarré");
-
-    // ── Optimisation 4 : résolution 1080p + autofocus continu ────
     await applyHighResConstraints(videoElement);
-
   } catch (e) {
     console.error("❌ Impossible de démarrer la caméra :", e);
     throw new Error("Impossible d'accéder à la caméra : " + e.message);
@@ -176,17 +150,12 @@ export async function stopCameraScan() {
 
   console.log("🛑 Arrêt du scanner...");
 
-  try {
-    await currentScanner.stop();
-  } catch (e) {
-    console.warn("⚠️ Erreur à l'arrêt :", e);
-  }
+  try { await currentScanner.stop(); }
+  catch (e) { console.warn("⚠️ Erreur à l'arrêt :", e); }
 
-  try {
-    currentScanner.destroy();
-  } catch (e) {
-    console.warn("⚠️ Erreur destruction :", e);
-  } finally {
+  try { currentScanner.destroy(); }
+  catch (e) { console.warn("⚠️ Erreur destruction :", e); }
+  finally {
     currentScanner = null;
     console.log("✅ Scanner arrêté et détruit");
   }
