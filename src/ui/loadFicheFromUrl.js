@@ -39,16 +39,8 @@ export function loadFicheFromUrl() {
         
         console.log("✅ Paramètre 'fiche' extrait");
         
-        // Décoder Base64 URL-safe et restaurer padding
-        let normalizedData = ficheParam
-            .replace(/-/g, '+')
-            .replace(/_/g, '/');
-        
-        const paddingNeeded = (4 - (normalizedData.length % 4)) % 4;
-        normalizedData += '='.repeat(paddingNeeded);
-        
-        // Décoder la fiche
-        const fiche = decodeFiche(normalizedData);
+        // Décoder la fiche (decodeFiche gère Base64URL et Base64 standard)
+        const fiche = decodeFiche(ficheParam);
         
         console.log("✅ Fiche décodée :", fiche);
         
