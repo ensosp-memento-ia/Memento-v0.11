@@ -1,130 +1,173 @@
 // ======================================================
-// qrReaderCamera.js — Lecture QR via caméra (module technique)
-// v0.11.23 : Suppression highlightScanRegion natif (rétrécissement auto)
-//            Cadre de visée géré en CSS pur dans scan.html
+// qrReaderCamera.js — Lecture QR via caméra
+// v0.11.24 : jsQR (pas de worker, pas de CORS)
+//            Compatible iOS Safari + Android Chrome
+// ======================================================
+//
+// Pourquoi jsQR et non QrScanner.js :
+//  QrScanner.js délègue le décodage à un Web Worker.
+//  Sur iOS Safari, les Workers cross-origin (CDN) sont bloqués
+//  par WebKit sans erreur visible → caméra ouverte mais jamais
+//  de détection. jsQR décode directement dans le thread principal
+//  via canvas.getImageData() — aucun worker, aucun CORS.
 // ======================================================
 
-let currentScanner = null;
+let rafId       = null;   // requestAnimationFrame handle
+let stream      = null;   // MediaStream actif
+let canvasEl    = null;   // canvas de travail (hors DOM)
+let ctx         = null;
 
-/**
- * Normalise le résultat renvoyé par QrScanner en string.
- * Support iOS renforcé.
- */
-function extractTextFromScanResult(result) {
-  if (!result) { console.warn("⚠️ Résultat QR vide"); return ""; }
-  if (typeof result === "string") return result;
-  if (result.data && typeof result.data === "string") return result.data;
-  if (result.data && typeof result.data === "object") {
-    if (result.data instanceof Uint8Array || result.data.buffer) {
-      try { return new TextDecoder().decode(result.data); }
-      catch (e) { console.error("❌ Erreur décodage Buffer :", e); }
-    }
-    try { return JSON.stringify(result.data); }
-    catch (e) { console.error("❌ Stringify échoué :", e); }
-  }
-  try { return JSON.stringify(result); }
-  catch (e) { console.error("❌ Impossible d'extraire le texte :", e); return ""; }
-}
-
-/**
- * Tente de forcer 1080p + autofocus continu après démarrage.
- * Silencieux si non supporté.
- */
-async function applyHighResConstraints(videoElement) {
+// ------------------------------------------------------------------
+// Tenter d'appliquer 1080p + autofocus après démarrage
+// ------------------------------------------------------------------
+async function applyHighResConstraints(videoTrack) {
+  if (!videoTrack?.applyConstraints) return;
   try {
-    const stream = videoElement.srcObject;
-    if (!stream) return;
-    const track = stream.getVideoTracks()[0];
-    if (!track?.applyConstraints) return;
-    await track.applyConstraints({
+    await videoTrack.applyConstraints({
       width:     { ideal: 1920 },
       height:    { ideal: 1080 },
       focusMode: "continuous"
     });
-    const s = track.getSettings();
-    console.log(`📷 Résolution : ${s.width}×${s.height}`, s.focusMode ? `| focus: ${s.focusMode}` : "");
+    const s = videoTrack.getSettings();
+    console.log(`📷 ${s.width}×${s.height}` + (s.focusMode ? ` | focus:${s.focusMode}` : ""));
   } catch (e) {
-    console.warn("⚠️ applyConstraints non supporté :", e.message);
+    console.warn("⚠️ applyConstraints ignoré :", e.message);
   }
 }
 
-/**
- * Démarre le scan caméra.
- *
- * Pourquoi highlightScanRegion et highlightCodeOutline sont DÉSACTIVÉS :
- *  QrScanner.js redimensionne dynamiquement son cadre de visée natif en
- *  fonction de ses tentatives de détection internes. Sur mobile, ce
- *  comportement produit un carré qui rétrécit progressivement jusqu'à
- *  empêcher toute détection. Le cadre de visée est remplacé par un
- *  élément CSS fixe dans scan.html (#qrViewfinder), purement visuel
- *  et stable quelle que soit l'activité du scanner.
- *
- * @param {HTMLVideoElement} videoElement
- * @param {(rawText: string) => void} onText
- */
-export async function startCameraScan(videoElement, onText) {
-  if (!window.QrScanner) {
-    throw new Error("❌ QrScanner n'est pas chargé (window.QrScanner absent).");
+// ------------------------------------------------------------------
+// Boucle de décodage jsQR
+// ------------------------------------------------------------------
+function scanLoop(videoEl, onText) {
+  if (!canvasEl || !ctx) return;
+
+  // Attendre que la vidéo soit prête
+  if (videoEl.readyState < videoEl.HAVE_ENOUGH_DATA) {
+    rafId = requestAnimationFrame(() => scanLoop(videoEl, onText));
+    return;
   }
-  if (!videoElement) {
+
+  const w = videoEl.videoWidth;
+  const h = videoEl.videoHeight;
+
+  if (w === 0 || h === 0) {
+    rafId = requestAnimationFrame(() => scanLoop(videoEl, onText));
+    return;
+  }
+
+  // Ajuster canvas si besoin
+  if (canvasEl.width !== w || canvasEl.height !== h) {
+    canvasEl.width  = w;
+    canvasEl.height = h;
+  }
+
+  ctx.drawImage(videoEl, 0, 0, w, h);
+  const imageData = ctx.getImageData(0, 0, w, h);
+
+  const result = window.jsQR(imageData.data, imageData.width, imageData.height, {
+    inversionAttempts: "dontInvert"
+  });
+
+  if (result && result.data) {
+    console.log("✅ jsQR — QR détecté :", result.data.substring(0, 80) + "...");
+    onText(result.data);
+    // Ne pas relancer la boucle : uiScan appellera stopCameraScan()
+    return;
+  }
+
+  rafId = requestAnimationFrame(() => scanLoop(videoEl, onText));
+}
+
+// ------------------------------------------------------------------
+// API publique
+// ------------------------------------------------------------------
+
+/**
+ * Démarre le scan caméra avec jsQR.
+ *
+ * @param {HTMLVideoElement} videoEl
+ * @param {(rawText: string) => void} onText  — appelé une seule fois à la détection
+ */
+export async function startCameraScan(videoEl, onText) {
+  if (!window.jsQR) {
+    throw new Error("❌ jsQR n'est pas chargé (window.jsQR absent).");
+  }
+  if (!videoEl) {
     throw new Error("❌ Élément <video> non fourni.");
   }
 
-  if (currentScanner) {
-    console.log("🧹 Nettoyage scanner existant...");
-    try {
-      await currentScanner.stop();
-      currentScanner.destroy();
-    } catch (e) {
-      console.warn("⚠️ Erreur cleanup :", e);
-    } finally {
-      currentScanner = null;
-    }
-  }
+  // Cleanup si scan précédent encore actif
+  await stopCameraScan();
 
-  console.log("🎥 Création nouveau scanner...");
+  console.log("🎥 Démarrage caméra (jsQR)...");
 
-  currentScanner = new window.QrScanner(
-    videoElement,
-    (scanResult) => {
-      const text = extractTextFromScanResult(scanResult);
-      if (text && text.length > 0) {
-        onText(text);
-      } else {
-        console.warn("⚠️ Texte extrait vide, scan ignoré");
-      }
+  // Contraintes getUserMedia — caméra arrière, résolution idéale 1080p
+  const constraints = {
+    video: {
+      facingMode:  { ideal: "environment" },
+      width:       { ideal: 1920 },
+      height:      { ideal: 1080 }
     },
-    {
-      returnDetailedScanResult: true,
-      highlightScanRegion:      false,  // désactivé — cadre CSS fixe dans scan.html
-      highlightCodeOutline:     false,  // désactivé — source du rétrécissement auto
-      preferredCamera:          "environment",
-      maxScansPerSecond:        15
-    }
-  );
+    audio: false
+  };
 
   try {
-    await currentScanner.start();
-    console.log("✅ Scanner démarré");
-    await applyHighResConstraints(videoElement);
+    stream = await navigator.mediaDevices.getUserMedia(constraints);
   } catch (e) {
-    console.error("❌ Impossible de démarrer la caméra :", e);
-    throw new Error("Impossible d'accéder à la caméra : " + e.message);
+    // Fallback : contraintes minimales (iOS plus strict)
+    console.warn("⚠️ getUserMedia contraint échoué, fallback minimal :", e.message);
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "environment" },
+        audio: false
+      });
+    } catch (e2) {
+      throw new Error("Impossible d'accéder à la caméra : " + e2.message);
+    }
   }
+
+  videoEl.srcObject = stream;
+  videoEl.setAttribute("playsinline", "true");  // obligatoire iOS Safari
+  videoEl.setAttribute("autoplay",    "true");
+  videoEl.muted = true;
+
+  await videoEl.play().catch(e => {
+    console.warn("⚠️ videoEl.play() échoué :", e.message);
+  });
+
+  // Tenter d'améliorer résolution + autofocus
+  const track = stream.getVideoTracks()[0];
+  await applyHighResConstraints(track);
+
+  // Préparer canvas hors DOM
+  canvasEl = document.createElement("canvas");
+  ctx      = canvasEl.getContext("2d", { willReadFrequently: true });
+
+  console.log("✅ Caméra démarrée — boucle jsQR lancée");
+  rafId = requestAnimationFrame(() => scanLoop(videoEl, onText));
 }
 
 /**
- * Arrête et détruit le scanner actuel.
+ * Arrête la caméra et la boucle de décodage.
  */
 export async function stopCameraScan() {
-  if (!currentScanner) { console.log("ℹ️ Aucun scanner à arrêter"); return; }
-  console.log("🛑 Arrêt du scanner...");
-  try { await currentScanner.stop(); } catch (e) { console.warn("⚠️ Erreur arrêt :", e); }
-  try { currentScanner.destroy(); } catch (e) { console.warn("⚠️ Erreur destruction :", e); }
-  finally { currentScanner = null; console.log("✅ Scanner arrêté et détruit"); }
+  if (rafId !== null) {
+    cancelAnimationFrame(rafId);
+    rafId = null;
+  }
+
+  if (stream) {
+    stream.getTracks().forEach(t => t.stop());
+    stream = null;
+  }
+
+  canvasEl = null;
+  ctx      = null;
+
+  console.log("✅ Caméra arrêtée");
 }
 
-/** Vérifie si un scanner est actif. */
+/** Vérifie si un scan est en cours. */
 export function isScannerActive() {
-  return currentScanner !== null;
+  return stream !== null;
 }
