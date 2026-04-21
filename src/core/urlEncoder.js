@@ -63,39 +63,37 @@ export function generateFicheUrl(fiche, baseUrl = null) {
   try {
     encoded = encodeFiche(fiche);
     console.log("📦 Fiche encodée avec succès");
-    console.log("  - Taille JSON compacté:", encoded.stats.jsonLength, "caractères");
-    console.log("  - Taille compressée:", encoded.stats.deflated, "octets");
-    console.log("  - Taille Base64:", encoded.stats.base64, "caractères");
+    console.log("  - Taille JSON compacté :", encoded.stats.original,  "chars");
+    console.log("  - Taille DEFLATE       :", encoded.stats.deflated,  "bytes");
+    console.log("  - Taille Base64URL     :", encoded.stats.base64,    "chars");
+    console.log("  - Taux de compression  :", encoded.stats.ratio,     "%");
   } catch (e) {
     console.error("❌ Erreur lors de l'encodage de la fiche :", e);
     throw new Error("Impossible d'encoder la fiche : " + e.message);
   }
   
   // ---------------------------------------------------------------
-  // 3. CONVERSION EN URL-SAFE BASE64
+  // 3. CONSTRUCTION DE L'URL FINALE
   // ---------------------------------------------------------------
-  // On utilise encodeURIComponent sur le wrapper JSON complet
-  // Cela garantit la compatibilité avec tous les navigateurs
-  const urlSafeData = encodeURIComponent(encoded.wrapperString);
-  
-  // ---------------------------------------------------------------
-  // 4. CONSTRUCTION DE L'URL FINALE
-  // ---------------------------------------------------------------
-  const url = `${baseUrl}/scan.html?fiche=${urlSafeData}`;
+  // wrapperString est déjà en Base64URL (caractères URL-safe : A-Z a-z 0-9 - _)
+  // → pas besoin d'encodeURIComponent, ce qui économise ~70–120 chars sur l'URL
+  //   et réduit d'autant le payload du QR Code.
+  const url = `${baseUrl}/scan.html?fiche=${encoded.wrapperString}`;
   
   console.log("🔗 URL générée :", url);
   console.log("📏 Longueur totale de l'URL :", url.length, "caractères");
   
   // ---------------------------------------------------------------
-  // 5. AVERTISSEMENTS SI URL TROP LONGUE
+  // 4. AVERTISSEMENTS SI URL PROCHE DE LA LIMITE QR
   // ---------------------------------------------------------------
-  if (url.length > 2083) {
-    console.warn("⚠️ ATTENTION : URL très longue (" + url.length + " caractères)");
-    console.warn("   Internet Explorer limite les URLs à 2083 caractères");
-    console.warn("   Certains serveurs/proxies peuvent avoir des limites");
-  } else if (url.length > 2000) {
-    console.warn("⚠️ URL longue (" + url.length + " caractères)");
-    console.warn("   La plupart des navigateurs la supportent, mais restez vigilant");
+  // Limite réelle QR mode byte v40-L : 2953 chars (URL avec minuscules = mode byte forcé)
+  // Seuil d'alerte opérationnel fixé à 2500 chars (marge de sécurité ~15%)
+  if (url.length > 2953) {
+    console.warn("⚠️ DÉPASSEMENT LIMITE QR : URL " + url.length + " chars > 2953 (QR v40-L byte)");
+    console.warn("   Le QR Code ne pourra PAS être généré — utilisez l'URL cliquable.");
+  } else if (url.length > 2500) {
+    console.warn("⚠️ URL proche de la limite QR (" + url.length + "/2953 chars)");
+    console.warn("   QR Code générable mais très dense — testez le scan sur mobile.");
   }
   
   return url;
