@@ -145,10 +145,12 @@ async function onGenerate() {
         encoded = encodeFiche(fiche);
         console.log("📊 Stats compression :", encoded.stats);
 
-        // ⚠️ Vérification taille finale (seuil relevé à 5000 car usage URL prioritaire)
-        if (encoded.stats.base64 > 5000) {
+        // ⚠️ Vérification taille Base64URL (seuil opérationnel : 2400 chars = URL ~2450 chars)
+        // La limite réelle du QR est 2953 chars (mode byte v40-L), pas 4296 (alphanumeric)
+        if (encoded.stats.base64 > 2400) {
             const confirm = window.confirm(
-                `⚠️ Attention : fiche volumineuse (${encoded.stats.base64} caractères compressés).\n` +
+                `⚠️ Attention : fiche volumineuse (${encoded.stats.base64} chars compressés).\n` +
+                `L'URL générée sera proche de la limite QR Code (2953 chars).\n` +
                 `Le QR Code sera très dense — préférez l'URL cliquable pour partager.\n\n` +
                 `Voulez-vous continuer ?`
             );
@@ -185,14 +187,15 @@ async function onGenerate() {
             urlContainer.style.display = "block";
         }
         
-        // Avertissement si URL très longue (seuil relevé — usage URL prioritaire sur QR)
-        if (ficheUrl.length > 4500) {
-            console.warn("⚠️ URL longue:", ficheUrl.length, "caractères");
+        // Avertissement si URL proche de la limite QR réelle (2953 chars mode byte v40-L)
+        if (ficheUrl.length > 2700) {
+            console.warn("⚠️ URL proche limite QR:", ficheUrl.length, "chars (limite: 2953)");
             
             const continueGeneration = confirm(
-                `ℹ️ URL volumineuse (${ficheUrl.length} caractères)\n\n` +
+                `⚠️ URL volumineuse (${ficheUrl.length} caractères)\n\n` +
+                `Limite QR Code : 2953 chars (mode byte, version 40, correction L).\n` +
                 `L'URL cliquable fonctionne normalement.\n` +
-                `Le QR Code sera dense — préférez l'URL pour partager.\n\n` +
+                `Le QR Code sera très dense — préférez l'URL pour partager.\n\n` +
                 `Continuer ?`
             );
             
@@ -220,16 +223,16 @@ async function onGenerate() {
         try {
             console.log("📱 Génération du QR Code avec l'URL...");
             
-            // Taille adaptative selon longueur URL (seuils mis à jour)
-            let qrSize = 512; // Taille par défaut
+            // Taille adaptative selon longueur URL (seuils calés sur limite réelle 2953 chars)
+            let qrSize = 512;
 
-            if (ficheUrl.length > 6000) {
+            if (ficheUrl.length > 2700) {
                 qrSize = 1024;
-                console.log("  - URL très longue, taille QR:", qrSize, "px");
-            } else if (ficheUrl.length > 4000) {
+                console.log("  - URL très proche limite QR, taille max:", qrSize, "px");
+            } else if (ficheUrl.length > 2200) {
                 qrSize = 800;
-                console.log("  - URL longue, taille QR:", qrSize, "px");
-            } else if (ficheUrl.length > 2500) {
+                console.log("  - URL dense, taille QR:", qrSize, "px");
+            } else if (ficheUrl.length > 1500) {
                 qrSize = 650;
                 console.log("  - URL moyenne, taille QR:", qrSize, "px");
             }
@@ -246,20 +249,20 @@ async function onGenerate() {
             successMsg.style.fontWeight = "600";
             successMsg.style.marginTop = "15px";
             
-            if (ficheUrl.length > 4500) {
-                successMsg.style.color = "#ff9f1c"; // Orange - Avertissement
+            if (ficheUrl.length > 2700) {
+                successMsg.style.color = "#ff9f1c";
                 successMsg.innerHTML = `
-                    ⚠️ QR Code généré (${ficheUrl.length} car.)<br>
+                    ⚠️ QR Code généré (${ficheUrl.length}/2953 chars)<br>
                     <small style="font-weight:400;">
                         Densité élevée — préférez l'URL cliquable pour partager.
                     </small>
                 `;
-            } else if (ficheUrl.length > 3000) {
-                successMsg.style.color = "#ff9f1c"; // Orange
+            } else if (ficheUrl.length > 1800) {
+                successMsg.style.color = "#ff9f1c";
                 successMsg.innerHTML = `
-                    ✅ QR Code généré (${ficheUrl.length} car.)<br>
+                    ✅ QR Code généré (${ficheUrl.length} chars)<br>
                     <small style="font-weight:400;">
-                        Densité moyenne — testez le scan sur mobile si besoin.
+                        Densité modérée — testez le scan sur mobile si besoin.
                     </small>
                 `;
             } else {
@@ -281,8 +284,10 @@ async function onGenerate() {
             qrContainer.innerHTML = `
                 <p style='color:#ff4d4d;font-weight:600;'>❌ Erreur lors de la génération du QR Code</p>
                 <p style='font-size:14px;margin-top:10px;'>
-                    L'URL est probablement trop longue (${ficheUrl.length} caractères).<br>
-                    Limite maximale du QR : ~4000 caractères (préférez l'URL pour les fiches longues)
+                    L'URL est probablement trop longue (${ficheUrl.length} chars).<br>
+                    Limite réelle du QR Code : 2953 chars (mode byte, version 40, correction L).<br>
+                    <em>Note : la valeur 4296 souvent citée correspond au mode alphanumeric,
+                    inapplicable aux URLs qui contiennent des minuscules.</em>
                 </p>
                 <p style='font-size:14px;margin-top:10px;background:#fff3cd;padding:10px;border-radius:6px;'>
                     <strong>💡 Solution :</strong><br>
