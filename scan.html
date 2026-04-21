@@ -8,12 +8,10 @@
   <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
   <link rel="stylesheet" href="style.css">
 
-  <!-- Libs QR + Compression -->
+  <!-- Libs compression + décodage QR -->
   <script src="https://unpkg.com/pako@2.1.0/dist/pako.min.js"></script>
-  <script type="module">
-    import QrScanner from "https://cdn.jsdelivr.net/npm/qr-scanner@1.4.2/qr-scanner.min.js";
-    window.QrScanner = QrScanner;
-  </script>
+  <!-- jsQR : décodage QR sans worker, compatible iOS Safari + Android Chrome -->
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
 
   <!-- ===================================================================== -->
   <!-- STYLES POUR LE BOUTON RESET ET LA POPUP DE CONFIRMATION -->
@@ -260,7 +258,7 @@
 
       <!-- Vidéo caméra (masquée par défaut) -->
       <div id="videoContainer" style="display:none;margin-top:15px;position:relative;">
-        <video id="qrVideo" style="width:100%;background:#000;border-radius:12px;display:block;"></video>
+        <video id="qrVideo" playsinline muted autoplay style="width:100%;background:#000;border-radius:12px;display:block;"></video>
         <!-- Cadre de visée CSS fixe — stable, indépendant de QrScanner.js -->
         <div id="qrViewfinder" style="
           position:absolute;
@@ -332,6 +330,7 @@
     </div>
   </div>
 
+  <!-- jsQR chargé en script classique (ligne 13) — uiScan peut l'utiliser immédiatement -->
   <script type="module" src="./src/ui/uiScan.js"></script>
 
 </body>
