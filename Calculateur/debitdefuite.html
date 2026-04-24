@@ -1,1 +1,1227 @@
+<!DOCTYPE html>
 
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Calcul Débit de Fuite | Mémento IA ENSOSP</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+  <style>
+    body{font-family:"Inter",sans-serif;background:#f5f7fb;margin:0;padding:0;color:#111;min-height:100vh;display:flex;flex-direction:column}
+
+```
+/* HEADER */
+header{background:#001F8F;padding:12px 20px;text-align:center;color:white;font-size:16px;font-weight:700;letter-spacing:.5px}
+.header-sub{font-size:12px;font-weight:400;opacity:.8;margin-top:3px}
+
+/* NAV TABS */
+.tabs{display:flex;background:#e9ecf5;padding:10px;gap:10px}
+.tab{flex:1;text-align:center;padding:10px 12px;border-radius:25px;color:#001F8F;font-weight:600;font-size:13px;cursor:pointer;border:none;background:transparent;font-family:"Inter",sans-serif;text-decoration:none;display:inline-block;transition:.2s}
+.tab.active{background:#001F8F;color:white}
+.tab:hover:not(.active){background:#d9dff5}
+
+main{max-width:960px;margin:0 auto;padding:20px;flex:1;width:100%;box-sizing:border-box}
+
+/* WARN */
+.warn{background:#fff3cd;border-left:4px solid #ff9f1c;padding:14px 16px;border-radius:8px;font-size:13px;color:#856404;margin-bottom:20px;line-height:1.7}
+.warn strong{display:block;font-size:14px;margin-bottom:4px}
+
+/* GRID */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:640px){.grid-2{grid-template-columns:1fr}}
+
+/* CARDS */
+.card{background:white;padding:22px;border-radius:15px;margin-bottom:20px;box-shadow:0 3px 8px rgba(0,0,0,.05)}
+.card h2{color:#001F8F;margin:0 0 16px 0;font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px}
+
+/* LABELS & INPUTS */
+label{display:block;font-weight:600;font-size:13px;color:#001F8F;margin-bottom:5px;margin-top:14px}
+label:first-child{margin-top:0}
+input[type=number],select{width:100%;padding:10px 12px;border-radius:10px;border:1px solid #ccd2e3;font-size:15px;font-family:"Inter",sans-serif;color:#111;background:#fff;transition:border-color .2s;appearance:none;box-sizing:border-box}
+input[type=number]{padding-right:72px}
+input[type=number]:focus,select:focus{border-color:#001F8F;outline:none}
+.iw{position:relative}
+.iu{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:12px;font-weight:600;color:#001F8F;background:#e9ecf5;padding:2px 7px;border-radius:6px;pointer-events:none;white-space:nowrap}
+.hint{font-size:11px;color:#888;margin-top:5px;line-height:1.5}
+
+/* SECTION TITLE */
+.section-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#999;margin-bottom:10px;margin-top:4px}
+
+/* REGIME BUTTONS */
+.regime-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:4px}
+@media(max-width:600px){.regime-grid{grid-template-columns:1fr 1fr}}
+.rbtn{padding:10px 6px;border-radius:10px;border:1px solid #ccd2e3;background:white;color:#001F8F;font-size:11px;font-weight:600;font-family:"Inter",sans-serif;cursor:pointer;text-align:center;transition:all .2s;line-height:1.3}
+.rbtn .rbtn-icon{font-size:17px;display:block;margin-bottom:3px}
+.rbtn .rbtn-num{display:inline-block;background:#e9ecf5;color:#888;border-radius:4px;font-size:9px;padding:1px 5px;margin-bottom:3px}
+.rbtn.active{background:#001F8F;color:white;border-color:#001F8F}
+.rbtn.active .rbtn-num{background:rgba(255,255,255,.2);color:rgba(255,255,255,.8)}
+.rbtn:hover:not(.active){background:#e9ecf5}
+
+/* REGIME INFO */
+.regime-info{background:#eef2ff;border-left:3px solid #001F8F;border-radius:8px;padding:9px 13px;font-size:11.5px;color:#001F8F;margin-top:10px;display:none}
+
+/* L/D TOGGLE */
+.ld-block{background:#eef2ff;border-radius:12px;padding:14px 16px;margin-bottom:14px;display:none}
+.ld-block.visible{display:block}
+.ld-btns{display:flex;gap:8px;margin-top:8px}
+.ld-btn{flex:1;padding:9px 6px;border-radius:10px;border:2px solid #ccd2e3;background:white;color:#001F8F;font-size:12px;font-weight:700;font-family:"Inter",sans-serif;cursor:pointer;text-align:center;transition:all .2s;line-height:1.4}
+.ld-btn.active{background:#001F8F;color:white;border-color:#001F8F}
+.ld-btn:hover:not(.active){background:#e9ecf5}
+.ld-info{font-size:10px;color:#001F8F;font-weight:600;margin-top:8px}
+
+/* S COMPUTED */
+.s-tag{display:inline-block;background:#eef2ff;color:#001F8F;font-size:11px;font-weight:700;padding:3px 9px;border-radius:6px;margin-top:4px}
+
+/* CD DISPLAY */
+.cd-row{display:flex;align-items:center;gap:10px;margin-top:6px}
+.cd-pill{background:#001F8F;color:white;font-size:17px;font-weight:800;padding:4px 14px;border-radius:8px;min-width:56px;text-align:center;font-family:"Inter",sans-serif}
+.cd-lbl{font-size:11px;color:#888}
+
+/* PROP CHIPS */
+.prop-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.prop-chip{background:#f5f7fb;border:1px solid #e0e4f0;border-radius:10px;padding:8px 10px;text-align:center}
+.prop-chip .pv{font-size:15px;font-weight:800;color:#001F8F;display:block}
+.prop-chip .pl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#888}
+
+/* FIELD ROW */
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:480px){.field-row{grid-template-columns:1fr}}
+
+/* GENERATE BTN */
+.btn-generate{width:100%;padding:16px;background:#001F8F;color:white;border:none;font-size:16px;font-family:"Inter",sans-serif;border-radius:14px;cursor:pointer;font-weight:700;margin-top:20px;transition:all .2s;box-shadow:0 4px 12px rgba(0,31,143,.3)}
+.btn-generate:hover{background:#002bbf;transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,31,143,.4)}
+.btn-generate:active{transform:translateY(0)}
+.btn-reset{width:100%;padding:12px;background:#e9ecf5;color:#001F8F;border:none;font-size:14px;font-family:"Inter",sans-serif;border-radius:14px;cursor:pointer;font-weight:700;margin-top:10px;transition:all .2s}
+.btn-reset:hover{background:#d9dff5}
+
+/* ERROR */
+.err-box{background:#f8d7da;border-left:4px solid #cc1a00;border-radius:8px;padding:12px 14px;font-size:13px;color:#721c24;margin-top:14px;display:none}
+
+/* RESULTS */
+#results{display:none}
+#results.visible{display:block}
+
+.res-hero{text-align:center;padding:24px 20px;border-radius:15px;background:white;box-shadow:0 3px 8px rgba(0,0,0,.05);margin-bottom:20px;border-top:5px solid #001F8F}
+.res-regime-badge{display:inline-block;background:#001F8F;color:white;font-size:12px;font-weight:700;padding:4px 14px;border-radius:20px;margin-bottom:12px}
+.res-chips{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px}
+.rc{background:#f5f7fb;border-radius:12px;padding:14px;text-align:center;border:1px solid #e0e4f0}
+.rc.primary{background:#001F8F;border-color:#001F8F}
+.rc.duration{background:#d4edda;border-color:#a5d6a7}
+.rc .rc-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#888;margin-bottom:6px}
+.rc.primary .rc-lbl{color:rgba(255,255,255,.7)}
+.rc.duration .rc-lbl{color:#155724}
+.rc .rc-val{font-size:22px;font-weight:800;color:#001F8F;line-height:1}
+.rc.primary .rc-val{color:white}
+.rc.duration .rc-val{color:#155724;font-size:18px}
+.rc .rc-unit{font-size:11px;color:#888;margin-top:2px}
+.rc.primary .rc-unit{color:rgba(255,255,255,.6)}
+
+/* TRACABILITY */
+.formule-box{background:#eef2ff;border-radius:12px;padding:18px 20px;margin-bottom:20px}
+.formule-box h3{color:#001F8F;margin:0 0 12px 0;font-size:12px;text-transform:uppercase;letter-spacing:.5px;font-weight:700}
+.fline{font-family:"Courier New",monospace;font-size:12px;color:#333;background:white;border:1px solid #dde2f0;border-radius:6px;padding:8px 10px;margin-bottom:6px;word-break:break-word;line-height:1.7}
+.fline strong{color:#001F8F;font-weight:700}
+
+/* SCHEMA */
+.schema-card{background:white;border-radius:15px;padding:20px 22px;margin-bottom:20px;box-shadow:0 3px 8px rgba(0,0,0,.05)}
+.schema-card h3{color:#001F8F;margin:0 0 14px 0;font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px}
+#schema-canvas{width:100%;height:300px;display:block;border-radius:10px;background:#EEF4FB}
+
+/* REF TABLE */
+.ref-table-wrap{overflow-x:auto}
+.ref-table{width:100%;border-collapse:collapse;font-size:12px}
+.ref-table thead tr{background:#eef2ff;color:#001F8F}
+.ref-table th,.ref-table td{padding:6px 10px;text-align:left}
+.ref-table td:last-child{text-align:center;font-weight:700;color:#001F8F;font-family:"Courier New",monospace}
+.ref-table tbody tr:nth-child(even){background:#f8f9fc}
+
+/* PLACEHOLDER */
+.placeholder{text-align:center;padding:60px 20px;color:#aaa}
+.placeholder .ph-icon{font-size:44px;margin-bottom:12px;opacity:.3}
+
+/* SEPARATOR */
+.sep{height:1px;background:#e9ecf5;margin:16px 0}
+
+footer{padding:12px;text-align:center;font-size:12px;color:#444;border-top:1px solid #e0e4f0}
+@media(max-width:640px){.card{padding:16px}main{padding:14px}}
+```
+
+  </style>
+</head>
+<body>
+
+<header>
+  Mémento Opérationnel IA – ENSOSP
+  <div class="header-sub">Évaluation débit de fuite · FICHE 4.8 · Source : SDIS 35 Partie 3 · v1.0</div>
+</header>
+
+<nav class="tabs">
+  <a href="index.html" class="tab">🏠 Accueil</a>
+  <a href="scan.html" class="tab">📷 Lecture QR</a>
+  <a href="create.html" class="tab">📝 Création fiche</a>
+  <a href="nrbc.html" class="tab">⚗️ Espace NRBC</a>
+</nav>
+
+<main>
+
+<div class="warn">
+  <strong>⚠️ Avertissement opérationnel — Outil d'aide au raisonnement tactique uniquement</strong>
+  Résultats estimatifs. Tout engagement reste sous l'autorité du COS / du conseiller technique RCH. Vérifier systématiquement les propriétés du produit sur la FDS officielle.
+</div>
+
+<div class="grid-2">
+
+  <!-- COLONNE GAUCHE -->
+
+  <div>
+
+```
+<!-- RÉGIME -->
+<div class="card">
+  <h2 style="justify-content:space-between">
+    <span>1️⃣ Régime de fuite</span>
+    <span style="display:inline-flex;gap:0;border:1.5px solid #ccd2e3;border-radius:8px;overflow:hidden">
+      <button id="btn-pa" onclick="setDpUnit('Pa')" style="padding:4px 12px;font-size:11px;font-weight:700;font-family:'Inter',sans-serif;border:none;cursor:pointer;background:#001F8F;color:white;transition:all .15s">Pa</button>
+      <button id="btn-bar" onclick="setDpUnit('bar')" style="padding:4px 12px;font-size:11px;font-weight:700;font-family:'Inter',sans-serif;border:none;cursor:pointer;background:white;color:#888;transition:all .15s">bar</button>
+    </span>
+  </h2>
+  <div class="regime-grid">
+    <button class="rbtn active" onclick="setRegime(1)" id="rb1">
+      <span class="rbtn-num">R1</span>
+      <span class="rbtn-icon">💧</span>
+      Liquide
+    </button>
+    <button class="rbtn" onclick="setRegime(2)" id="rb2">
+      <span class="rbtn-num">R2</span>
+      <span class="rbtn-icon">❄️</span>
+      Cryogénique
+    </button>
+    <button class="rbtn" onclick="setRegime(3)" id="rb3">
+      <span class="rbtn-num">R3</span>
+      <span class="rbtn-icon">🔵</span>
+      Gaz sous pression
+    </button>
+    <button class="rbtn" onclick="setRegime(4)" id="rb4">
+      <span class="rbtn-num">R4</span>
+      <span class="rbtn-icon">🔴</span>
+      Gaz liquéfié sous pression
+    </button>
+  </div>
+  <div class="regime-info" id="regime-info"></div>
+</div>
+
+<!-- PRODUIT -->
+<div class="card">
+  <h2>2️⃣ Produit</h2>
+  <label style="margin-top:0">Produit <span style="color:#cc1a00">*</span></label>
+  <select id="sel-produit" onchange="onProduitChange()">
+    <option value="">— Sélectionner un produit —</option>
+    <option value="propane">Propane</option>
+    <option value="butane">Butane</option>
+    <option value="ammoniac">Ammoniac</option>
+    <option value="chlore">Chlore</option>
+    <option value="gnl">GNL (cryogénique)</option>
+    <option value="azote">Azote liquide (cryogénique)</option>
+    <option value="oxygene">Oxygène liquide (cryogénique)</option>
+    <option value="ethanol">Éthanol</option>
+    <option value="acide_chlor">Acide chlorhydrique</option>
+    <option value="acide_sulf">Acide sulfurique</option>
+    <option value="soude">Soude 30%</option>
+    <option value="acetone">Acétone</option>
+    <option value="toluene">Toluène</option>
+    <option value="methanol">Méthanol</option>
+    <option value="co2">CO₂ (gaz)</option>
+    <option value="hydrogene">Hydrogène (gaz)</option>
+  </select>
+  <div id="product-props" class="prop-row" style="display:none"></div>
+</div>
+
+<!-- ORIFICE -->
+<div class="card">
+  <h2>3️⃣ Orifice &amp; Section</h2>
+
+  <div class="ld-block" id="field-ld">
+    <label style="margin-top:0">Longueur d'ajustage (rapport L/D) <span style="color:#cc1a00">*</span></label>
+    <div class="ld-btns">
+      <button class="ld-btn active" id="btn-ld-court" onclick="setLD('court')">
+        🔴 L &lt; 3D<br><span style="font-size:10px;font-weight:400">Fuite courte</span>
+      </button>
+      <button class="ld-btn" id="btn-ld-long" onclick="setLD('long')">
+        🟠 L &gt; 3D<br><span style="font-size:10px;font-weight:400">Fuite longue</span>
+      </button>
+    </div>
+    <div class="ld-info" id="ld-info">Q_réel = Q_mono / 3 · Q_gaz = 0.3 × Q_mono</div>
+  </div>
+
+  <label style="margin-top:0">Référence terrain <span style="font-size:11px;font-weight:400;color:#888">(aide au dimensionnement)</span></label>
+  <select id="sel-ref" onchange="onRefChange()">
+    <option value="">— Saisie manuelle —</option>
+    <optgroup label="── Fissures ──">
+      <option value="2">Fissure fine — 3 mm²</option>
+      <option value="4">Fissure moyenne — 12 mm²</option>
+      <option value="6">Fissure large — 30 mm²</option>
+    </optgroup>
+    <optgroup label="── Corrosion ──">
+      <option value="5">Piqûre de corrosion — 20 mm²</option>
+      <option value="10">Trou de corrosion moyen — 78 mm²</option>
+      <option value="20">Trou de corrosion large — 314 mm²</option>
+    </optgroup>
+    <optgroup label="── Robinetterie ──">
+      <option value="3">Presse-étoupe défaillant — 6 mm²</option>
+      <option value="5b">Fuite bride — 20 mm²</option>
+      <option value="10b">Fuite bride importante — 78 mm²</option>
+    </optgroup>
+    <optgroup label="── Flexibles / raccords ──">
+      <option value="4b">Fuite raccord compression — 12 mm²</option>
+      <option value="8">Rupture partielle flexible — 50 mm²</option>
+    </optgroup>
+    <optgroup label="── Soupape / event ──">
+      <option value="25">Soupape ouverte DN25 — 491 mm²</option>
+      <option value="50">Event atmosphérique DN50 — 1963 mm²</option>
+    </optgroup>
+    <optgroup label="── Rupture guillotine ──">
+      <option value="15">Canalisation DN15 — 177 mm²</option>
+      <option value="25b">Canalisation DN25 — 491 mm²</option>
+      <option value="40">Canalisation DN40 — 1257 mm²</option>
+      <option value="50b">Canalisation DN50 — 1963 mm²</option>
+      <option value="80">Canalisation DN80 — 5027 mm²</option>
+      <option value="100">Canalisation DN100 — 7854 mm²</option>
+    </optgroup>
+  </select>
+  <div class="hint" id="ref-hint" style="display:none;color:#856404;font-weight:600">⚠ Valeur estimée — à ajuster selon constat terrain</div>
+
+  <div class="field-row" style="margin-top:14px">
+    <div>
+      <label style="margin-top:0">Diamètre fuite (mm) <span style="color:#cc1a00">*</span></label>
+      <div class="iw">
+        <input type="number" id="inp-d" min="0.1" step="0.1" placeholder="ex: 10" oninput="updateS()" style="padding-right:42px">
+        <span class="iu" style="padding:2px 6px">mm</span>
+      </div>
+      <div id="s-tag" class="s-tag" style="display:none"></div>
+    </div>
+    <div>
+      <label style="margin-top:0">Type d'orifice <span style="color:#cc1a00">*</span></label>
+      <select id="sel-orifice" onchange="updateCd()">
+        <option value="0.62">Orifice mince / aigu — Cd = 0.62</option>
+        <option value="0.50">Orifice de Borda — Cd = 0.50</option>
+        <option value="0.82">Orifice de Poleni — Cd = 0.82</option>
+        <option value="0.96">Orifice arrondi — Cd = 0.96</option>
+        <option value="0.95">Ajustage convergent α=12° — Cd = 0.95</option>
+        <option value="1.00a">Ajustage convergent α=30° — Cd = 1.00</option>
+        <option value="1.00b">Rupture guillotine — Cd = 1.00</option>
+        <option value="1.00c">Venturi — Cd = 1.00</option>
+      </select>
+      <div class="cd-row">
+        <span class="cd-pill" id="cd-display">0.62</span>
+        <span class="cd-lbl">Cd sélectionné</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PARAMÈTRES -->
+<div class="card">
+  <h2>4️⃣ Paramètres</h2>
+  <div class="section-lbl">Commun à tous les régimes</div>
+  <div class="field-row">
+    <div>
+      <label style="margin-top:0">Masse stockée m <span style="color:#cc1a00">*</span></label>
+      <div class="iw"><input type="number" id="inp-m" min="0" step="1" placeholder="ex: 1000"><span class="iu">kg</span></div>
+    </div>
+    <div>
+      <label style="margin-top:0">Différence pression ΔP <span style="color:#cc1a00">*</span></label>
+      <div class="iw"><input type="number" id="inp-dp" min="0" step="1000" placeholder="ex: 100000"><span class="iu" id="dp-unit-lbl">Pa</span></div>
+      <div class="hint" id="dp-hint">Pression manométrique — 1 bar = 100 000 Pa</div>
+    </div>
+  </div>
+
+  <div id="field-dh">
+    <label>Hauteur liquide Δh</label>
+    <div class="iw"><input type="number" id="inp-dh" min="0" step="0.1" placeholder="ex: 2" value="0"><span class="iu">m</span></div>
+  </div>
+
+  <div id="field-theta" style="display:none">
+    <label>Température θ</label>
+    <div class="iw"><input type="number" id="inp-theta" min="1" step="1" placeholder="ex: 293" value="293"><span class="iu">K</span></div>
+    <div class="hint">293 K = 20°C</div>
+  </div>
+
+  <!-- Évaporation flaque — visible R1, R2, R3, R4 -->
+  <div id="fields-gaz" style="display:none">
+    <div class="sep"></div>
+    <div class="section-lbl">Évaporation de flaque (optionnel)</div>
+    <div class="field-row">
+      <div>
+        <label style="margin-top:0">Surface flaque Surf</label>
+        <div class="iw"><input type="number" id="inp-surf" min="0" step="0.1" placeholder="ex: 10"><span class="iu">m²</span></div>
+      </div>
+      <div>
+        <label style="margin-top:0">Rayon flaque R</label>
+        <div class="iw"><input type="number" id="inp-r" min="0" step="0.1" placeholder="ex: 1.8"><span class="iu">m</span></div>
+      </div>
+    </div>
+    <label>Vitesse vent V</label>
+    <div class="iw"><input type="number" id="inp-v" min="0" step="0.5" placeholder="ex: 3"><span class="iu">m/s</span></div>
+  </div>
+</div>
+
+<div id="err-box" class="err-box"></div>
+<button class="btn-generate" onclick="calculate()">⚡ Calculer le débit de fuite</button>
+<button class="btn-reset" onclick="resetAll()">↺ Réinitialiser</button>
+```
+
+  </div>
+
+  <!-- COLONNE DROITE -->
+
+  <div>
+
+```
+<!-- RÉSULTATS -->
+<div id="results">
+  <div class="res-hero">
+    <div class="res-regime-badge" id="res-badge">—</div>
+    <div class="res-chips" id="res-chips"></div>
+  </div>
+  <div class="formule-box">
+    <h3>📋 Traçabilité — Formules substituées</h3>
+    <div id="res-trace"></div>
+  </div>
+
+  <!-- SCHÉMA DE DISPERSION -->
+  <div class="schema-card">
+    <h3>🗺️ Schéma de dispersion</h3>
+    <canvas id="schema-canvas"></canvas>
+  </div>
+</div>
+
+<!-- PLACEHOLDER -->
+<div id="placeholder" class="card">
+  <div class="placeholder">
+    <div class="ph-icon">⚡</div>
+    <div style="font-size:14px;font-weight:600;margin-bottom:6px">Résultats affichés ici</div>
+    <div style="font-size:12px">Remplissez les paramètres et cliquez sur Calculer</div>
+  </div>
+</div>
+
+<!-- TABLEAU Cd RÉFÉRENCE -->
+<div class="card">
+  <h2>📋 Tableau Cd — référence</h2>
+  <div class="ref-table-wrap">
+    <table class="ref-table">
+      <thead>
+        <tr>
+          <th>Type d'orifice</th>
+          <th style="text-align:center">Cd</th>
+        </tr>
+      </thead>
+      <tbody id="cd-tbody"></tbody>
+    </table>
+  </div>
+  <div class="hint" style="margin-top:8px">Source : SDIS 35 — Partie 3 Fuites</div>
+</div>
+```
+
+  </div>
+</div>
+
+</main>
+
+<footer>
+  Mémento Opérationnel IA — ENSOSP · Cne E. Fischer / Cdt A. Tirelle — SDIS 76 / 7e RIISC · v0.19 · Source : SDIS 35 Partie 3 Fuites
+</footer>
+
+<script>
+// ══════════════════════════════════════
+// DATA
+// ══════════════════════════════════════
+
+const PRODUCTS = {
+  propane:    { rho:510,  M:44,   PVS:850000, gaz:false },
+  butane:     { rho:580,  M:58,   PVS:210000, gaz:false },
+  ammoniac:   { rho:682,  M:17,   PVS:857000, gaz:false },
+  chlore:     { rho:1560, M:71,   PVS:673000, gaz:false },
+  gnl:        { rho:430,  M:16,   PVS:null,   gaz:false },
+  azote:      { rho:808,  M:28,   PVS:null,   gaz:false },
+  oxygene:    { rho:1141, M:32,   PVS:null,   gaz:false },
+  ethanol:    { rho:789,  M:46,   PVS:5900,   gaz:false },
+  acide_chlor:{ rho:1190, M:36.5, PVS:16000,  gaz:false },
+  acide_sulf: { rho:1840, M:98,   PVS:0.3,    gaz:false },
+  soude:      { rho:1330, M:40,   PVS:null,   gaz:false },
+  acetone:    { rho:791,  M:58,   PVS:23700,  gaz:false },
+  toluene:    { rho:867,  M:92,   PVS:2900,   gaz:false },
+  methanol:   { rho:792,  M:32,   PVS:12900,  gaz:false },
+  co2:        { rho:1.98, M:44,   PVS:null,   gaz:true  },
+  hydrogene:  { rho:0.09, M:2,    PVS:null,   gaz:true  }
+};
+
+const CD_DATA = [
+  ["Orifice de Borda (1.6D < L < 2D)",  "0.50"],
+  ["Orifice mince / aigu (e << D)",       "0.62"],
+  ["Orifice de Poleni (2D < L < 5D)",    "0.82"],
+  ["Orifice arrondi",                     "0.96"],
+  ["Ajustage convergent α = 12°",         "0.95"],
+  ["Ajustage convergent α = 30°",         "1.00"],
+  ["Rupture guillotine (canalisation)",   "1.00"],
+  ["Venturi (convergent/divergent)",      "1.00"]
+];
+
+const REF_MAP = {
+  "2":{"d":2,"label":"Fissure fine"},
+  "4":{"d":4,"label":"Fissure moyenne"},
+  "6":{"d":6,"label":"Fissure large"},
+  "5":{"d":5,"label":"Piqûre de corrosion"},
+  "10":{"d":10,"label":"Trou de corrosion moyen"},
+  "20":{"d":20,"label":"Trou de corrosion large"},
+  "3":{"d":3,"label":"Presse-étoupe défaillant"},
+  "5b":{"d":5,"label":"Fuite bride"},
+  "10b":{"d":10,"label":"Fuite bride importante"},
+  "4b":{"d":4,"label":"Fuite raccord compression"},
+  "8":{"d":8,"label":"Rupture partielle flexible"},
+  "25":{"d":25,"label":"Soupape ouverte DN25"},
+  "50":{"d":50,"label":"Event atmosphérique DN50"},
+  "15":{"d":15,"label":"Canalisation DN15"},
+  "25b":{"d":25,"label":"Canalisation DN25"},
+  "40":{"d":40,"label":"Canalisation DN40"},
+  "50b":{"d":50,"label":"Canalisation DN50"},
+  "80":{"d":80,"label":"Canalisation DN80"},
+  "100":{"d":100,"label":"Canalisation DN100"}
+};
+
+const REGIME_INFO_TXT = {
+  1:"💧 Liquide non bouillonnant — Q = ρ·Cd·S·√(2g·Δh + 2ΔP/ρ)",
+  2:"❄️ Cryogénique bouillonnant — Q_liq = ρ·Cd·S·√(2g·Δh + 2ΔP/ρ) · Q_gaz = 0.1·Q_liq",
+  3:"🔵 Gaz sous pression — Q = Cd·S·√(ρ_gaz·ΔP/2) + évaporation flaque optionnelle",
+  4:"🔴 Gaz liquéfié L<3D — Q_réel = Q_mono/3 · Q_gaz = 0.3·Q_mono",
+  5:"🟠 Gaz liquéfié L>3D — Q_diph = Q_mono/2.5 · Q_gaz = 0.3·Q_diph"
+};
+
+let regime = 1, ldChoice = 'court', dpUnit = 'Pa', refLabel = '';
+
+// ══════════════════════════════════════
+// INIT
+// ══════════════════════════════════════
+
+function init() {
+  const tbody = document.getElementById('cd-tbody');
+  CD_DATA.forEach(([lbl, val]) => {
+    tbody.innerHTML += `<tr><td>${lbl}</td><td style="text-align:center">${val}</td></tr>`;
+  });
+  setRegime(1);
+  updateCd();
+}
+
+// ══════════════════════════════════════
+// UNIT TOGGLE
+// ══════════════════════════════════════
+
+function setDpUnit(unit) {
+  const val = parseFloat(document.getElementById('inp-dp').value);
+  dpUnit = unit;
+  document.getElementById('btn-pa').style.background  = unit==='Pa'  ? '#001F8F' : 'white';
+  document.getElementById('btn-pa').style.color       = unit==='Pa'  ? 'white'   : '#888';
+  document.getElementById('btn-bar').style.background = unit==='bar' ? '#001F8F' : 'white';
+  document.getElementById('btn-bar').style.color      = unit==='bar' ? 'white'   : '#888';
+  document.getElementById('dp-unit-lbl').textContent = unit;
+  const inp = document.getElementById('inp-dp');
+  if (unit === 'bar') {
+    inp.step = '0.1'; inp.placeholder = 'ex: 1.0';
+    if (!isNaN(val) && val > 0) inp.value = +(val / 1e5).toPrecision(4);
+  } else {
+    inp.step = '1000'; inp.placeholder = 'ex: 100000';
+    if (!isNaN(val) && val > 0) inp.value = Math.round(val * 1e5);
+  }
+  if (regime === 4) {
+    applyDpDefault();
+  } else {
+    document.getElementById('dp-hint').textContent = unit === 'bar'
+      ? 'Pression manométrique en bar — 1 bar = 100 000 Pa'
+      : 'Pression manométrique en pascal — 1 bar = 100 000 Pa';
+  }
+  if (document.getElementById('sel-produit').value) renderProductProps();
+  clearResult();
+}
+
+function getDpPa() {
+  const v = parseFloat(document.getElementById('inp-dp').value);
+  if (isNaN(v) || v < 0) return null;
+  return dpUnit === 'bar' ? v * 1e5 : v;
+}
+
+// ══════════════════════════════════════
+// REGIME
+// ══════════════════════════════════════
+
+function setLD(choice) {
+  ldChoice = choice;
+  const c = choice === 'court';
+  document.getElementById('btn-ld-court').classList.toggle('active', c);
+  document.getElementById('btn-ld-long').classList.toggle('active', !c);
+  document.getElementById('ld-info').textContent = c
+    ? 'Q_réel = Q_mono / 3 · Q_gaz = 0.3 × Q_mono'
+    : 'Q_diph = Q_mono / 2.5 · Q_gaz = 0.3 × Q_diph';
+  regime = 4;
+  clearResult();
+}
+
+function setRegime(n) {
+  regime = n;
+  [1,2,3,4].forEach(i => document.getElementById('rb'+i).classList.toggle('active', i===n));
+
+  const isGaz    = n === 3;
+  const isGazLiq = n === 4;
+
+  document.getElementById('field-ld').classList.toggle('visible', isGazLiq);
+  document.getElementById('field-dh').style.display    = (isGaz || isGazLiq) ? 'none' : '';
+  document.getElementById('field-theta').style.display = isGaz ? '' : 'none';
+  // Flaque visible pour tous les régimes
+  document.getElementById('fields-gaz').style.display  = '';
+
+  const info = document.getElementById('regime-info');
+  info.textContent = isGazLiq ? REGIME_INFO_TXT[ldChoice === 'court' ? 4 : 5] : REGIME_INFO_TXT[n];
+  info.style.display = 'block';
+
+  if (isGazLiq) {
+    applyDpDefault();
+  } else {
+    document.getElementById('dp-hint').textContent = dpUnit === 'bar'
+      ? 'Pression manométrique en bar — 1 bar = 100 000 Pa'
+      : 'Pression manométrique — 1 bar = 100 000 Pa';
+  }
+  clearResult();
+}
+
+// ══════════════════════════════════════
+// PRODUCT
+// ══════════════════════════════════════
+
+function onProduitChange() {
+  const key = document.getElementById('sel-produit').value;
+  const box = document.getElementById('product-props');
+  if (!key) { box.style.display = 'none'; return; }
+  box.style.display = 'grid';
+  renderProductProps();
+  applyDpDefault();
+  clearResult();
+}
+
+function renderProductProps() {
+  const key = document.getElementById('sel-produit').value;
+  if (!key) return;
+  const p = PRODUCTS[key];
+  let pvsDisplay = '—';
+  if (p.PVS !== null && p.PVS !== undefined) {
+    pvsDisplay = dpUnit === 'bar'
+      ? (p.PVS / 1e5).toPrecision(4) + ' bar'
+      : p.PVS.toLocaleString('fr') + ' Pa';
+  }
+  document.getElementById('product-props').innerHTML = `
+    <div class="prop-chip"><span class="pv">${p.rho}</span><span class="pl">ρ (kg/m³)</span></div>
+    <div class="prop-chip"><span class="pv">${p.M}</span><span class="pl">M (kg/kmol)</span></div>
+    <div class="prop-chip"><span class="pv">${pvsDisplay}</span><span class="pl">PVS</span></div>
+  `;
+}
+
+function applyDpDefault() {
+  if (regime !== 4) return;
+  const key = document.getElementById('sel-produit').value;
+  if (!key) return;
+  const p = PRODUCTS[key];
+  if (p.PVS === null || p.PVS === undefined) return;
+  const dp_pa = Math.max(0, p.PVS - 101325);
+  if (dpUnit === 'bar') {
+    document.getElementById('inp-dp').value = +(dp_pa / 1e5).toPrecision(4);
+    document.getElementById('dp-hint').innerHTML =
+      `Valeur par défaut : PVS − P<sub>atm</sub> = ${(p.PVS/1e5).toPrecision(4)} bar − 1,013 bar = <strong>${(dp_pa/1e5).toPrecision(4)} bar</strong> — à ajuster selon conditions réelles`;
+  } else {
+    document.getElementById('inp-dp').value = Math.round(dp_pa);
+    document.getElementById('dp-hint').innerHTML =
+      `Valeur par défaut : PVS − P<sub>atm</sub> = ${p.PVS.toLocaleString('fr')} − 101 325 = <strong>${dp_pa.toLocaleString('fr')} Pa</strong> — à ajuster selon conditions réelles`;
+  }
+}
+
+// ══════════════════════════════════════
+// ORIFICE
+// ══════════════════════════════════════
+
+function getCd() { return parseFloat(document.getElementById('sel-orifice').value); }
+
+function updateCd() {
+  document.getElementById('cd-display').textContent = getCd().toFixed(2);
+  clearResult();
+}
+
+// ══════════════════════════════════════
+// SURFACE
+// ══════════════════════════════════════
+
+function updateS() {
+  const d = parseFloat(document.getElementById('inp-d').value);
+  const tag = document.getElementById('s-tag');
+  if (!isNaN(d) && d > 0) {
+    tag.textContent = 'S = ' + (Math.PI * Math.pow(d/2000, 2)).toExponential(3) + ' m²';
+    tag.style.display = 'inline-block';
+  } else {
+    tag.style.display = 'none';
+  }
+}
+
+function getS() {
+  const d = parseFloat(document.getElementById('inp-d').value);
+  if (isNaN(d) || d <= 0) return null;
+  return Math.PI * Math.pow(d/2000, 2);
+}
+
+// ══════════════════════════════════════
+// REF TERRAIN
+// ══════════════════════════════════════
+
+function onRefChange() {
+  const v = document.getElementById('sel-ref').value;
+  const hint = document.getElementById('ref-hint');
+  if (!v) {
+    document.getElementById('inp-d').value = '';
+    hint.style.display = 'none'; refLabel = ''; updateS(); return;
+  }
+  const r = REF_MAP[v];
+  document.getElementById('inp-d').value = r.d;
+  hint.style.display = 'block';
+  refLabel = `${r.label} (ø éq. ${r.d} mm)`;
+  updateS();
+}
+
+// ══════════════════════════════════════
+// FORMAT
+// ══════════════════════════════════════
+
+function fmtSci(v) {
+  if (v === null || isNaN(v)) return '—';
+  if (v === 0) return '0';
+  if (Math.abs(v) < 0.001 || Math.abs(v) >= 1e6) return v.toExponential(3);
+  return v.toPrecision(4);
+}
+
+function fmtDur(sec) {
+  if (!isFinite(sec) || sec <= 0) return '—';
+  const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = Math.round(sec % 60);
+  return `${String(h).padStart(2,'0')}h${String(m).padStart(2,'0')}m${String(s).padStart(2,'0')}s`;
+}
+
+// ══════════════════════════════════════
+// ERROR / RESULT
+// ══════════════════════════════════════
+
+function showErr(msg) { const e = document.getElementById('err-box'); e.textContent = '⚠ ' + msg; e.style.display = 'block'; }
+function clearErr()   { document.getElementById('err-box').style.display = 'none'; }
+function clearResult() {
+  document.getElementById('results').classList.remove('visible');
+  document.getElementById('placeholder').style.display = '';
+  clearErr();
+}
+
+// ══════════════════════════════════════
+// CALCULATE
+// ══════════════════════════════════════
+
+function calcQevap(prod) {
+  const surf  = parseFloat(document.getElementById('inp-surf').value);
+  const R     = parseFloat(document.getElementById('inp-r').value);
+  const V     = parseFloat(document.getElementById('inp-v').value);
+  const theta = parseFloat(document.getElementById('inp-theta').value) || 293;
+  if (!isNaN(surf) && !isNaN(R) && !isNaN(V) && surf > 0 && R > 0 && V > 0 && prod.PVS !== null && prod.PVS > 0) {
+    return 0.00515e-7 * surf * Math.pow(V, 0.78) * Math.pow(R, 0.11) * (prod.M * prod.PVS) / (8.314 * theta);
+  }
+  return null;
+}
+
+function calculate() {
+  clearErr();
+  const prodKey = document.getElementById('sel-produit').value;
+  if (!prodKey) { showErr("Sélectionnez un produit."); return; }
+  const prod = PRODUCTS[prodKey];
+  const S = getS();
+  if (!S) { showErr("Diamètre de fuite manquant ou invalide (> 0)."); return; }
+  const Cd = getCd();
+  const m  = parseFloat(document.getElementById('inp-m').value);
+  const dP = getDpPa();
+  if (isNaN(m) || m <= 0) { showErr("Masse stockée invalide (> 0)."); return; }
+  if (dP === null || dP < 0) { showErr("ΔP invalide (≥ 0)."); return; }
+
+  const g = 9.81, Rgas = 8314;
+  let chips = [], traces = [], T = null;
+  let schemaData = { regime, ldChoice };
+
+  if (regime === 1) {
+    const dh = parseFloat(document.getElementById('inp-dh').value) || 0;
+    const rho = prod.rho, inner = 2*g*dh + 2*dP/rho;
+    if (inner <= 0) { showErr("2g·Δh + 2ΔP/ρ ≤ 0 : vérifiez Δh et ΔP."); return; }
+    const Q = rho * Cd * S * Math.sqrt(inner); T = m / Q;
+    const Qe = calcQevap(prod);
+    chips = [
+      {label:"Q liquide",    val:fmtSci(Q),       unit:"kg/s", primary:true},
+      {label:"Durée fuite T",val:fmtDur(T),        unit:Math.round(T)+" s", duration:true}
+    ];
+    if (Qe !== null) chips.push({label:"Q évap. flaque", val:fmtSci(Qe), unit:"kg/s"});
+    traces = [
+      `Q = ρ × Cd × S × √(2g·Δh + 2ΔP/ρ)`,
+      `Q = ${rho} × ${Cd} × ${S.toExponential(3)} × √(${inner.toFixed(2)})`,
+      `<strong>Q = ${fmtSci(Q)} kg/s</strong>`,
+      `T = m / Q = ${m} / ${fmtSci(Q)} = <strong>${Math.round(T)} s (${fmtDur(T)})</strong>`
+    ];
+    if (Qe !== null) traces.push(`<strong>Q_évap = ${fmtSci(Qe)} kg/s</strong>`);
+    schemaData = {...schemaData, Q_liq: fmtSci(Q), Q_evap: Qe !== null ? fmtSci(Qe) : null, hasFlaque:true};
+
+  } else if (regime === 2) {
+    const dh = parseFloat(document.getElementById('inp-dh').value) || 0;
+    const rho = prod.rho, inner = 2*g*dh + 2*dP/rho;
+    if (inner <= 0) { showErr("2g·Δh + 2ΔP/ρ ≤ 0 : vérifiez Δh et ΔP."); return; }
+    const Ql = rho * Cd * S * Math.sqrt(inner), Qg = 0.1 * Ql; T = m / Ql;
+    const Qe = calcQevap(prod);
+    chips = [
+      {label:"Q liquide",    val:fmtSci(Ql), unit:"kg/s", primary:true},
+      {label:"Q gaz évaporé",val:fmtSci(Qg), unit:"kg/s"},
+      {label:"Durée fuite T",val:fmtDur(T),  unit:Math.round(T)+" s", duration:true}
+    ];
+    if (Qe !== null) chips.push({label:"Q évap. flaque", val:fmtSci(Qe), unit:"kg/s"});
+    traces = [
+      `Q_liq = ρ × Cd × S × √(2g·Δh + 2ΔP/ρ)`,
+      `Q_liq = ${rho} × ${Cd} × ${S.toExponential(3)} × √(${inner.toFixed(2)})`,
+      `<strong>Q_liq = ${fmtSci(Ql)} kg/s</strong>`,
+      `Q_gaz = 0.1 × Q_liq = <strong>${fmtSci(Qg)} kg/s</strong>`,
+      `T = m / Q_liq = ${m} / ${fmtSci(Ql)} = <strong>${Math.round(T)} s (${fmtDur(T)})</strong>`
+    ];
+    if (Qe !== null) traces.push(`<strong>Q_évap = ${fmtSci(Qe)} kg/s</strong>`);
+    schemaData = {...schemaData, Q_liq: fmtSci(Ql), Q_gaz: fmtSci(Qg), Q_evap: Qe !== null ? fmtSci(Qe) : null, hasFlaque:true, isCryo:true};
+
+  } else if (regime === 3) {
+    const theta = parseFloat(document.getElementById('inp-theta').value) || 293;
+    if (theta <= 0) { showErr("Température invalide (> 0 K)."); return; }
+    if (dP <= 0)    { showErr("ΔP doit être > 0 pour le régime gaz."); return; }
+    let rho_g = prod.rho;
+    if (!prod.gaz) rho_g = dP * prod.M / (Rgas * theta);
+    const Qg = Cd * S * Math.sqrt(rho_g * dP / 2); T = m / Qg;
+    const Qe = calcQevap(prod);
+    chips = [
+      {label:"Q gaz",        val:fmtSci(Qg),   unit:"kg/s", primary:true},
+      {label:"ρ_gaz utilisé",val:fmtSci(rho_g),unit:"kg/m³"},
+      {label:"Durée fuite T",val:fmtDur(T),     unit:Math.round(T)+" s", duration:true}
+    ];
+    if (Qe !== null) chips.push({label:"Q évap. flaque", val:fmtSci(Qe), unit:"kg/s"});
+    traces = [
+      `Q_gaz = Cd × S × √(ρ_gaz × ΔP / 2)`,
+      `Q_gaz = ${Cd} × ${S.toExponential(3)} × √(${fmtSci(rho_g)} × ${dP} / 2)`,
+      `<strong>Q_gaz = ${fmtSci(Qg)} kg/s</strong>`
+    ];
+    if (Qe !== null) traces.push(`<strong>Q_évap = ${fmtSci(Qe)} kg/s</strong>`);
+    traces.push(`T = m / Q_gaz = ${m} / ${fmtSci(Qg)} = <strong>${Math.round(T)} s (${fmtDur(T)})</strong>`);
+    schemaData = {...schemaData, Q_gaz: fmtSci(Qg), Q_evap: Qe !== null ? fmtSci(Qe) : null, hasFlaque: Qe !== null};
+
+  } else if (regime === 4) {
+    if (dP <= 0) { showErr("ΔP doit être > 0."); return; }
+    const rho = prod.rho, Qm = Cd * S * Math.sqrt(2 * rho * dP);
+    const Qe = calcQevap(prod);
+    if (ldChoice === 'court') {
+      const Qr = Qm/3, Qg = 0.3*Qm; T = m/Qm;
+      chips = [
+        {label:"Q mono (jet liq.)",   val:fmtSci(Qm), unit:"kg/s", primary:true},
+        {label:"Q réel (fuite réelle)",val:fmtSci(Qr), unit:"kg/s"},
+        {label:"Q gaz",               val:fmtSci(Qg), unit:"kg/s"},
+        {label:"Durée fuite T",        val:fmtDur(T),  unit:Math.round(T)+" s", duration:true}
+      ];
+      if (Qe !== null) chips.push({label:"Q évap. flaque", val:fmtSci(Qe), unit:"kg/s"});
+      traces = [
+        `Régime : Gaz liquéfié — Fuite courte (L &lt; 3D)`,
+        `Q_mono = Cd × S × √(2 × ρ_liq × ΔP) = <strong>${fmtSci(Qm)} kg/s</strong>`,
+        `Q_réel = Q_mono / 3 = <strong>${fmtSci(Qr)} kg/s</strong>`,
+        `Q_gaz = 0.3 × Q_mono = <strong>${fmtSci(Qg)} kg/s</strong>`,
+        `T = m / Q_mono = ${m} / ${fmtSci(Qm)} = <strong>${Math.round(T)} s (${fmtDur(T)})</strong>`
+      ];
+      if (Qe !== null) traces.push(`<strong>Q_évap = ${fmtSci(Qe)} kg/s</strong>`);
+      schemaData = {...schemaData, Q_mono: fmtSci(Qm), Q_liq: fmtSci(Qr), Q_gaz: fmtSci(Qg), Q_evap: Qe !== null ? fmtSci(Qe) : null, hasFlaque:true};
+    } else {
+      const Qd = Qm/2.5, Qg = 0.3*Qd; T = m/Qd;
+      chips = [
+        {label:"Q mono",       val:fmtSci(Qm), unit:"kg/s"},
+        {label:"Q diphasique", val:fmtSci(Qd), unit:"kg/s", primary:true},
+        {label:"Q gaz",        val:fmtSci(Qg), unit:"kg/s"},
+        {label:"Durée fuite T",val:fmtDur(T),  unit:Math.round(T)+" s", duration:true}
+      ];
+      if (Qe !== null) chips.push({label:"Q évap. flaque", val:fmtSci(Qe), unit:"kg/s"});
+      traces = [
+        `Régime : Gaz liquéfié — Fuite longue (L &gt; 3D)`,
+        `Q_mono = Cd × S × √(2 × ρ_liq × ΔP) = <strong>${fmtSci(Qm)} kg/s</strong>`,
+        `Q_diph = Q_mono / 2.5 = <strong>${fmtSci(Qd)} kg/s</strong>`,
+        `Q_gaz = 0.3 × Q_diph = <strong>${fmtSci(Qg)} kg/s</strong>`,
+        `T = m / Q_diph = ${m} / ${fmtSci(Qd)} = <strong>${Math.round(T)} s (${fmtDur(T)})</strong>`
+      ];
+      if (Qe !== null) traces.push(`<strong>Q_évap = ${fmtSci(Qe)} kg/s</strong>`);
+      schemaData = {...schemaData, Q_mono: fmtSci(Qm), Q_liq: fmtSci(Qd), Q_gaz: fmtSci(Qg), Q_evap: Qe !== null ? fmtSci(Qe) : null, hasFlaque:true, isDiph:true};
+    }
+  }
+
+  if (refLabel) traces.unshift(`Surface de référence : ${refLabel}`);
+  renderResult(chips, traces, schemaData);
+}
+
+// ══════════════════════════════════════
+// RENDER RESULT
+// ══════════════════════════════════════
+
+function renderResult(chips, traces, schemaData) {
+  document.getElementById('placeholder').style.display = 'none';
+  const badge = regime === 4
+    ? (ldChoice === 'court' ? 'Gaz liquéfié L&lt;3D' : 'Gaz liquéfié L&gt;3D')
+    : ['','Liquide','Cryogénique','Gaz sous pression'][regime] || '—';
+  document.getElementById('res-badge').innerHTML = badge;
+  document.getElementById('res-chips').innerHTML = chips.map(c => `
+    <div class="rc ${c.primary?'primary':''} ${c.duration?'duration':''}">
+      <div class="rc-lbl">${c.label}</div>
+      <div class="rc-val">${c.val}</div>
+      <div class="rc-unit">${c.unit}</div>
+    </div>`).join('');
+  document.getElementById('res-trace').innerHTML =
+    traces.map(t => `<div class="fline">${t}</div>`).join('');
+  document.getElementById('results').classList.add('visible');
+  renderSchema(schemaData);
+  document.getElementById('results').scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+// ══════════════════════════════════════
+// SCHÉMA DE DISPERSION
+// ══════════════════════════════════════
+
+function renderSchema(d) {
+  const canvas = document.getElementById('schema-canvas');
+  const W = canvas.parentElement.clientWidth - 44;
+  const H = 300;
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width  = W * dpr;
+  canvas.height = H * dpr;
+  canvas.style.width  = W + 'px';
+  canvas.style.height = H + 'px';
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  // Couleurs
+  const C = {
+    blue:'#001F8F', blue2:'#0033CC', lblue:'#EEF2FF',
+    cyan:'#00B4D8', orange:'#FF6B00', green:'#00875A',
+    grey:'#8E96B0', lgrey:'#E9ECF5', white:'#FFFFFF',
+    gnd:'#C8B89A', gnddark:'#A0886A', sky1:'#CCE4F7', sky2:'#EEF6FB',
+    purple:'#7C3AED'
+  };
+
+  const gndY = Math.round(H * 0.76);
+
+  // Fond ciel
+  const skyGrad = ctx.createLinearGradient(0, 0, 0, gndY);
+  skyGrad.addColorStop(0, C.sky1);
+  skyGrad.addColorStop(1, C.sky2);
+  ctx.fillStyle = skyGrad;
+  ctx.fillRect(0, 0, W, gndY);
+
+  // Sol
+  ctx.fillStyle = C.gnd;
+  ctx.fillRect(0, gndY, W, H - gndY);
+  ctx.fillStyle = C.gnddark;
+  ctx.fillRect(0, gndY, W, 3);
+
+  // ── RÉSERVOIR ──
+  const rx = 52, rw = 36, rh = 62, rtop = gndY - rh;
+  // Corps
+  const resGrad = ctx.createLinearGradient(rx - rw/2, 0, rx + rw/2, 0);
+  resGrad.addColorStop(0, '#0028BB');
+  resGrad.addColorStop(0.5, '#001F8F');
+  resGrad.addColorStop(1, '#001060');
+  ctx.fillStyle = resGrad;
+  ctx.beginPath();
+  roundRect(ctx, rx - rw/2, rtop, rw, rh, 5);
+  ctx.fill();
+  // Reflet
+  ctx.fillStyle = 'rgba(255,255,255,0.13)';
+  ctx.beginPath();
+  roundRect(ctx, rx - rw/2 + 4, rtop + 5, 7, rh - 10, 3);
+  ctx.fill();
+  // Tête ellipse
+  ctx.fillStyle = '#002BBF';
+  ctx.beginPath();
+  ctx.ellipse(rx, rtop, rw/2, 7, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // Label
+  ctx.fillStyle = C.white;
+  ctx.font = 'bold 8px Inter,sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('SOURCE', rx, rtop + rh/2 + 3);
+
+  // Point de fuite
+  const fuitX = rx + rw/2;
+  const fuitY = gndY - 24;
+  ctx.fillStyle = C.orange;
+  ctx.beginPath();
+  ctx.arc(fuitX, fuitY, 5, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = C.white;
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  const isR1  = d.regime === 1;
+  const isR2  = d.regime === 2;
+  const isR3  = d.regime === 3;
+  const isR4  = d.regime === 4;
+  const isCrt = d.ldChoice === 'court';
+
+  const hasLiq    = isR1 || isR2 || isR4;
+  const hasGaz    = isR2 || isR3 || isR4;
+  const hasFlaque = d.hasFlaque;
+  const isCryo    = d.isCryo;
+  const isDiph    = d.isDiph;
+
+  // Zones X de la scène
+  const jetEndX  = fuitX + W * 0.30;
+  const flaqueX  = jetEndX;
+  const cloudCX  = isR3 ? fuitX + W * 0.52 : flaqueX + W * 0.06;
+  const cloudCY  = gndY - 100;
+
+  // ── JET LIQUIDE / DIPHASIQUE ──
+  if (hasLiq) {
+    const jColor = isCryo ? C.cyan : isR4 && isDiph ? C.purple : C.blue2;
+    ctx.save();
+    ctx.beginPath();
+    ctx.moveTo(fuitX, fuitY);
+    ctx.bezierCurveTo(
+      fuitX + W*0.12, fuitY - 8,
+      fuitX + W*0.24, fuitY - 4,
+      jetEndX, gndY - 3
+    );
+    ctx.strokeStyle = jColor;
+    ctx.lineWidth = isDiph ? 6 : 4;
+    if (isCryo) ctx.setLineDash([8,4]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.restore();
+
+    // Label jet
+    const lbl = isR4 && isCrt  ? `Q_réel\n${d.Q_liq||'—'} kg/s`
+              : isR4 && isDiph ? `Q_diph\n${d.Q_liq||'—'} kg/s`
+              : `Q_liq\n${d.Q_liq||'—'} kg/s`;
+    annotation(ctx, fuitX + W*0.14, fuitY - 26, lbl, jColor);
+  }
+
+  // ── JET GAZEUX (R3 uniquement) ──
+  if (isR3) {
+    ctx.save();
+    const jg = ctx.createLinearGradient(fuitX, 0, fuitX + W*0.5, 0);
+    jg.addColorStop(0, 'rgba(0,51,204,0.65)');
+    jg.addColorStop(1, 'rgba(0,51,204,0.04)');
+    ctx.fillStyle = jg;
+    ctx.beginPath();
+    ctx.moveTo(fuitX, fuitY - 7);
+    ctx.lineTo(fuitX + W*0.5, fuitY - 26);
+    ctx.lineTo(fuitX + W*0.5, fuitY + 26);
+    ctx.lineTo(fuitX, fuitY + 7);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+    annotation(ctx, fuitX + W*0.25, fuitY - 32, `Q_gaz\n${d.Q_gaz||'—'} kg/s`, C.blue2);
+  }
+
+  // ── FLAQUE AU SOL ──
+  if (hasFlaque) {
+    const fw = W * 0.20;
+    const fGrad = ctx.createRadialGradient(flaqueX, gndY, 0, flaqueX, gndY, fw/2);
+    const fc = isCryo ? 'rgba(0,180,216,' : 'rgba(0,31,143,';
+    fGrad.addColorStop(0, fc+'0.50)');
+    fGrad.addColorStop(1, fc+'0.04)');
+    ctx.fillStyle = fGrad;
+    ctx.beginPath();
+    ctx.ellipse(flaqueX, gndY + 2, fw/2, 9, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = isCryo ? C.cyan : C.blue;
+    ctx.font = '9px Inter,sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Flaque', flaqueX, gndY + 15);
+  }
+
+  // ── NUAGE GAZEUX ──
+  if (hasGaz || isR3) {
+    const cColor = isCryo ? 'rgba(0,180,216,0.20)' : 'rgba(0,51,204,0.13)';
+    const cW = isR3 ? 88 : 72, cH = isR3 ? 56 : 48;
+    cloud(ctx, cloudCX, cloudCY, cW, cH, cColor, isCryo ? C.cyan : C.blue2);
+
+    // Flèche vent
+    const vVal = parseFloat(document.getElementById('inp-v').value);
+    const vLbl = (!isNaN(vVal) && vVal > 0) ? `${vVal} m/s` : '';
+    const wx = cloudCX + cW/2 + 6, wy = cloudCY - cH/2 - 12;
+    ctx.fillStyle = C.grey;
+    ctx.font = '9px Inter,sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText('↗ Vent' + (vLbl ? ' ' + vLbl : ''), wx, wy);
+
+    // Annotation nuage gaz
+    const gazLbl = isR3
+      ? `Q_gaz\n${d.Q_gaz||'—'} kg/s`
+      : `Q_gaz\n${d.Q_gaz||'—'} kg/s`;
+    annotation(ctx, cloudCX, cloudCY, gazLbl, isCryo ? C.cyan : C.blue2);
+  }
+
+  // ── ÉVAPORATION FLAQUE : flèche verticale + annotation ──
+  if (hasFlaque || isR3) {
+    const evX = isR3 ? cloudCX - 30 : flaqueX + 2;
+    const evColor = d.Q_evap ? C.green : C.grey;
+    const evLbl = `Q_évap\n${d.Q_evap || 'non calculé'}${d.Q_evap ? ' kg/s' : ''}`;
+    // Flèche montante pointillée
+    ctx.save();
+    ctx.strokeStyle = evColor;
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([5, 3]);
+    ctx.beginPath();
+    ctx.moveTo(evX, gndY - 4);
+    ctx.lineTo(evX, cloudCY + 30);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    // Tête de flèche
+    ctx.fillStyle = evColor;
+    ctx.beginPath();
+    ctx.moveTo(evX, cloudCY + 26);
+    ctx.lineTo(evX - 5, cloudCY + 36);
+    ctx.lineTo(evX + 5, cloudCY + 36);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+    annotation(ctx, evX + 52, cloudCY + 30, evLbl, evColor);
+  }
+
+  // ── Q_MONO (gaz liquéfié) ──
+  if (isR4 && d.Q_mono) {
+    ctx.fillStyle = C.orange;
+    ctx.font = 'bold 9px Inter,sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText(`Q_mono = ${d.Q_mono} kg/s`, fuitX + 4, fuitY - 10);
+  }
+
+  // ── LÉGENDE ──
+  legend(ctx, W, H, hasLiq, hasGaz || isR3, hasFlaque || isR3, d.Q_evap, isCryo);
+}
+
+// ── CANVAS HELPERS ──
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+function annotation(ctx, cx, cy, text, color) {
+  const lines = text.split('\n');
+  const pw = 96, lh = 14, ph = lines.length * lh + 10;
+  ctx.save();
+  ctx.shadowColor = 'rgba(0,0,0,0.10)';
+  ctx.shadowBlur  = 5;
+  ctx.fillStyle   = 'rgba(255,255,255,0.93)';
+  ctx.beginPath();
+  roundRect(ctx, cx - pw/2, cy - ph/2, pw, ph, 6);
+  ctx.fill();
+  ctx.shadowBlur = 0;
+  ctx.strokeStyle = color;
+  ctx.lineWidth   = 1.5;
+  ctx.beginPath();
+  roundRect(ctx, cx - pw/2, cy - ph/2, pw, ph, 6);
+  ctx.stroke();
+  ctx.textAlign = 'center';
+  lines.forEach((l, i) => {
+    ctx.font      = i === 0 ? 'bold 10px Inter,sans-serif' : '10px Inter,sans-serif';
+    ctx.fillStyle = color;
+    ctx.fillText(l, cx, cy - ph/2 + 14 + i * lh);
+  });
+  ctx.restore();
+}
+
+function cloud(ctx, cx, cy, w, h, fill, stroke) {
+  ctx.save();
+  const blobs = [
+    [cx - w*0.22, cy + h*0.12, w*0.24],
+    [cx,          cy - h*0.12, w*0.30],
+    [cx + w*0.22, cy + h*0.12, w*0.24],
+    [cx - w*0.08, cy + h*0.22, w*0.19],
+    [cx + w*0.08, cy + h*0.22, w*0.19],
+  ];
+  ctx.beginPath();
+  blobs.forEach(([bx, by, br]) => {
+    ctx.moveTo(bx + br, by);
+    ctx.arc(bx, by, br, 0, Math.PI * 2);
+  });
+  ctx.fillStyle = fill;
+  ctx.fill();
+  ctx.strokeStyle = stroke.replace ? stroke : fill;
+  ctx.lineWidth = 1;
+  ctx.globalAlpha = 0.4;
+  ctx.stroke();
+  ctx.globalAlpha = 1;
+  ctx.restore();
+}
+
+function legend(ctx, W, H, hasLiq, hasGaz, hasEvap, Q_evap, isCryo) {
+  const items = [];
+  if (hasLiq)  items.push({color: isCryo ? '#00B4D8' : '#0033CC', label:'Jet liquide', dash:false});
+  if (hasGaz)  items.push({color: isCryo ? '#00B4D8' : '#0033CC', label:'Nuage gazeux', dash:false});
+  if (hasEvap) items.push({
+    color: Q_evap ? '#00875A' : '#8E96B0',
+    label: Q_evap ? `Q_évap = ${Q_evap} kg/s` : 'Q_évap non calculé',
+    dash: true
+  });
+  if (!items.length) return;
+  ctx.save();
+  const lx = W - 12;
+  const startY = H - 12 - items.length * 17;
+  items.forEach((it, i) => {
+    const y = startY + i * 17;
+    ctx.setLineDash(it.dash ? [4,3] : []);
+    ctx.strokeStyle = it.color;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(lx - 130, y);
+    ctx.lineTo(lx - 114, y);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = it.color;
+    ctx.font = '9px Inter,sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText(it.label, lx - 110, y + 3);
+  });
+  ctx.restore();
+}
+
+// ══════════════════════════════════════
+// RESET
+// ══════════════════════════════════════
+
+function resetAll() {
+  document.getElementById('sel-produit').value = '';
+  document.getElementById('sel-ref').value = '';
+  document.getElementById('sel-orifice').value = '0.62';
+  ['inp-d','inp-m','inp-dp','inp-surf','inp-r','inp-v'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('inp-dh').value = '0';
+  document.getElementById('inp-theta').value = '293';
+  document.getElementById('product-props').style.display = 'none';
+  document.getElementById('ref-hint').style.display = 'none';
+  document.getElementById('s-tag').style.display = 'none';
+  refLabel = ''; ldChoice = 'court';
+  setLD('court');
+  updateCd();
+  setRegime(1);
+  setDpUnit('Pa');
+}
+
+// ══════════════════════════════════════
+init();
+</script>
+
+</body>
+</html>
