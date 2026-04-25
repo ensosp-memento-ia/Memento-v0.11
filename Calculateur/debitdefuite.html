@@ -303,11 +303,11 @@
     <div class="field-row">
       <div>
         <label style="margin-top:0">Surface flaque Surf</label>
-        <div class="iw"><input type="number" id="inp-surf" min="0" step="0.1" placeholder="ex: 10"><span class="iu">m²</span></div>
+        <div class="iw"><input type="number" id="inp-surf" min="0" step="0.1" placeholder="ex: 10" oninput="onSurfChange()"><span class="iu">m²</span></div>
       </div>
       <div>
         <label style="margin-top:0">Rayon flaque R</label>
-        <div class="iw"><input type="number" id="inp-r" min="0" step="0.1" placeholder="ex: 1.8"><span class="iu">m</span></div>
+        <div class="iw"><input type="number" id="inp-r" min="0" step="0.1" placeholder="ex: 1.8" oninput="onRChange()"><span class="iu">m</span></div>
       </div>
     </div>
     <label>Vitesse vent V</label>
@@ -992,6 +992,30 @@ function resetAll() {
   document.getElementById('s-tag').style.display='none';
   refLabel=''; ldChoice='court';
   setLD('court'); updateCd(); setRegime(1); setDpUnit('Pa');
+}
+
+// ══════════════════════════════════════
+// CALCUL AUTOMATIQUE RAYON / SURFACE
+// ══════════════════════════════════════
+
+function onSurfChange() {
+  const surf = parseFloat(document.getElementById('inp-surf').value);
+  const inpR = document.getElementById('inp-r');
+  if (!isNaN(surf) && surf > 0) {
+    inpR.value = +(Math.sqrt(surf / Math.PI)).toPrecision(4);
+  } else {
+    inpR.value = '';
+  }
+}
+
+function onRChange() {
+  const R = parseFloat(document.getElementById('inp-r').value);
+  const inpSurf = document.getElementById('inp-surf');
+  if (!isNaN(R) && R > 0) {
+    inpSurf.value = +(Math.PI * R * R).toPrecision(4);
+  } else {
+    inpSurf.value = '';
+  }
 }
 
 // ══════════════════════════════════════
