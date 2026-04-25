@@ -8,144 +8,94 @@
   <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
   <style>
     body{font-family:"Inter",sans-serif;background:#f5f7fb;margin:0;padding:0;color:#111;min-height:100vh;display:flex;flex-direction:column}
-
-```
-/* HEADER */
-header{background:#001F8F;padding:12px 20px;text-align:center;color:white;font-size:16px;font-weight:700;letter-spacing:.5px}
-.header-sub{font-size:12px;font-weight:400;opacity:.8;margin-top:3px}
-
-/* NAV TABS */
-.tabs{display:flex;background:#e9ecf5;padding:10px;gap:10px}
-.tab{flex:1;text-align:center;padding:10px 12px;border-radius:25px;color:#001F8F;font-weight:600;font-size:13px;cursor:pointer;border:none;background:transparent;font-family:"Inter",sans-serif;text-decoration:none;display:inline-block;transition:.2s}
-.tab.active{background:#001F8F;color:white}
-.tab:hover:not(.active){background:#d9dff5}
-
-main{max-width:960px;margin:0 auto;padding:20px;flex:1;width:100%;box-sizing:border-box}
-
-/* WARN */
-.warn{background:#fff3cd;border-left:4px solid #ff9f1c;padding:14px 16px;border-radius:8px;font-size:13px;color:#856404;margin-bottom:20px;line-height:1.7}
-.warn strong{display:block;font-size:14px;margin-bottom:4px}
-
-/* GRID */
-.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
-@media(max-width:640px){.grid-2{grid-template-columns:1fr}}
-
-/* CARDS */
-.card{background:white;padding:22px;border-radius:15px;margin-bottom:20px;box-shadow:0 3px 8px rgba(0,0,0,.05)}
-.card h2{color:#001F8F;margin:0 0 16px 0;font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px}
-
-/* LABELS & INPUTS */
-label{display:block;font-weight:600;font-size:13px;color:#001F8F;margin-bottom:5px;margin-top:14px}
-label:first-child{margin-top:0}
-input[type=number],select{width:100%;padding:10px 12px;border-radius:10px;border:1px solid #ccd2e3;font-size:15px;font-family:"Inter",sans-serif;color:#111;background:#fff;transition:border-color .2s;appearance:none;box-sizing:border-box}
-input[type=number]{padding-right:72px}
-input[type=number]:focus,select:focus{border-color:#001F8F;outline:none}
-.iw{position:relative}
-.iu{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:12px;font-weight:600;color:#001F8F;background:#e9ecf5;padding:2px 7px;border-radius:6px;pointer-events:none;white-space:nowrap}
-.hint{font-size:11px;color:#888;margin-top:5px;line-height:1.5}
-
-/* SECTION TITLE */
-.section-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#999;margin-bottom:10px;margin-top:4px}
-
-/* REGIME BUTTONS */
-.regime-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:4px}
-@media(max-width:600px){.regime-grid{grid-template-columns:1fr 1fr}}
-.rbtn{padding:10px 6px;border-radius:10px;border:1px solid #ccd2e3;background:white;color:#001F8F;font-size:11px;font-weight:600;font-family:"Inter",sans-serif;cursor:pointer;text-align:center;transition:all .2s;line-height:1.3}
-.rbtn .rbtn-icon{font-size:17px;display:block;margin-bottom:3px}
-.rbtn .rbtn-num{display:inline-block;background:#e9ecf5;color:#888;border-radius:4px;font-size:9px;padding:1px 5px;margin-bottom:3px}
-.rbtn.active{background:#001F8F;color:white;border-color:#001F8F}
-.rbtn.active .rbtn-num{background:rgba(255,255,255,.2);color:rgba(255,255,255,.8)}
-.rbtn:hover:not(.active){background:#e9ecf5}
-
-/* REGIME INFO */
-.regime-info{background:#eef2ff;border-left:3px solid #001F8F;border-radius:8px;padding:9px 13px;font-size:11.5px;color:#001F8F;margin-top:10px;display:none}
-
-/* L/D TOGGLE */
-.ld-block{background:#eef2ff;border-radius:12px;padding:14px 16px;margin-bottom:14px;display:none}
-.ld-block.visible{display:block}
-.ld-btns{display:flex;gap:8px;margin-top:8px}
-.ld-btn{flex:1;padding:9px 6px;border-radius:10px;border:2px solid #ccd2e3;background:white;color:#001F8F;font-size:12px;font-weight:700;font-family:"Inter",sans-serif;cursor:pointer;text-align:center;transition:all .2s;line-height:1.4}
-.ld-btn.active{background:#001F8F;color:white;border-color:#001F8F}
-.ld-btn:hover:not(.active){background:#e9ecf5}
-.ld-info{font-size:10px;color:#001F8F;font-weight:600;margin-top:8px}
-
-/* S COMPUTED */
-.s-tag{display:inline-block;background:#eef2ff;color:#001F8F;font-size:11px;font-weight:700;padding:3px 9px;border-radius:6px;margin-top:4px}
-
-/* CD DISPLAY */
-.cd-row{display:flex;align-items:center;gap:10px;margin-top:6px}
-.cd-pill{background:#001F8F;color:white;font-size:17px;font-weight:800;padding:4px 14px;border-radius:8px;min-width:56px;text-align:center;font-family:"Inter",sans-serif}
-.cd-lbl{font-size:11px;color:#888}
-
-/* PROP CHIPS */
-.prop-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
-.prop-chip{background:#f5f7fb;border:1px solid #e0e4f0;border-radius:10px;padding:8px 10px;text-align:center}
-.prop-chip .pv{font-size:15px;font-weight:800;color:#001F8F;display:block}
-.prop-chip .pl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#888}
-
-/* FIELD ROW */
-.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-@media(max-width:480px){.field-row{grid-template-columns:1fr}}
-
-/* GENERATE BTN */
-.btn-generate{width:100%;padding:16px;background:#001F8F;color:white;border:none;font-size:16px;font-family:"Inter",sans-serif;border-radius:14px;cursor:pointer;font-weight:700;margin-top:20px;transition:all .2s;box-shadow:0 4px 12px rgba(0,31,143,.3)}
-.btn-generate:hover{background:#002bbf;transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,31,143,.4)}
-.btn-generate:active{transform:translateY(0)}
-.btn-reset{width:100%;padding:12px;background:#e9ecf5;color:#001F8F;border:none;font-size:14px;font-family:"Inter",sans-serif;border-radius:14px;cursor:pointer;font-weight:700;margin-top:10px;transition:all .2s}
-.btn-reset:hover{background:#d9dff5}
-
-/* ERROR */
-.err-box{background:#f8d7da;border-left:4px solid #cc1a00;border-radius:8px;padding:12px 14px;font-size:13px;color:#721c24;margin-top:14px;display:none}
-
-/* RESULTS */
-#results{display:none}
-#results.visible{display:block}
-
-.res-hero{text-align:center;padding:24px 20px;border-radius:15px;background:white;box-shadow:0 3px 8px rgba(0,0,0,.05);margin-bottom:20px;border-top:5px solid #001F8F}
-.res-regime-badge{display:inline-block;background:#001F8F;color:white;font-size:12px;font-weight:700;padding:4px 14px;border-radius:20px;margin-bottom:12px}
-.res-chips{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px}
-.rc{background:#f5f7fb;border-radius:12px;padding:14px;text-align:center;border:1px solid #e0e4f0}
-.rc.primary{background:#001F8F;border-color:#001F8F}
-.rc.duration{background:#d4edda;border-color:#a5d6a7}
-.rc .rc-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#888;margin-bottom:6px}
-.rc.primary .rc-lbl{color:rgba(255,255,255,.7)}
-.rc.duration .rc-lbl{color:#155724}
-.rc .rc-val{font-size:22px;font-weight:800;color:#001F8F;line-height:1}
-.rc.primary .rc-val{color:white}
-.rc.duration .rc-val{color:#155724;font-size:18px}
-.rc .rc-unit{font-size:11px;color:#888;margin-top:2px}
-.rc.primary .rc-unit{color:rgba(255,255,255,.6)}
-
-/* TRACABILITY */
-.formule-box{background:#eef2ff;border-radius:12px;padding:18px 20px;margin-bottom:20px}
-.formule-box h3{color:#001F8F;margin:0 0 12px 0;font-size:12px;text-transform:uppercase;letter-spacing:.5px;font-weight:700}
-.fline{font-family:"Courier New",monospace;font-size:12px;color:#333;background:white;border:1px solid #dde2f0;border-radius:6px;padding:8px 10px;margin-bottom:6px;word-break:break-word;line-height:1.7}
-.fline strong{color:#001F8F;font-weight:700}
-
-/* SCHEMA */
-.schema-card{background:white;border-radius:15px;padding:20px 22px;margin-bottom:20px;box-shadow:0 3px 8px rgba(0,0,0,.05)}
-.schema-card h3{color:#001F8F;margin:0 0 14px 0;font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px}
-#schema-canvas{width:100%;height:300px;display:block;border-radius:10px;background:#EEF4FB}
-
-/* REF TABLE */
-.ref-table-wrap{overflow-x:auto}
-.ref-table{width:100%;border-collapse:collapse;font-size:12px}
-.ref-table thead tr{background:#eef2ff;color:#001F8F}
-.ref-table th,.ref-table td{padding:6px 10px;text-align:left}
-.ref-table td:last-child{text-align:center;font-weight:700;color:#001F8F;font-family:"Courier New",monospace}
-.ref-table tbody tr:nth-child(even){background:#f8f9fc}
-
-/* PLACEHOLDER */
-.placeholder{text-align:center;padding:60px 20px;color:#aaa}
-.placeholder .ph-icon{font-size:44px;margin-bottom:12px;opacity:.3}
-
-/* SEPARATOR */
-.sep{height:1px;background:#e9ecf5;margin:16px 0}
-
-footer{padding:12px;text-align:center;font-size:12px;color:#444;border-top:1px solid #e0e4f0}
-@media(max-width:640px){.card{padding:16px}main{padding:14px}}
-```
-
+    header{background:#001F8F;padding:12px 20px;text-align:center;color:white;font-size:16px;font-weight:700;letter-spacing:.5px}
+    .header-sub{font-size:12px;font-weight:400;opacity:.8;margin-top:3px}
+    .tabs{display:flex;background:#e9ecf5;padding:10px;gap:10px}
+    .tab{flex:1;text-align:center;padding:10px 12px;border-radius:25px;color:#001F8F;font-weight:600;font-size:13px;cursor:pointer;border:none;background:transparent;font-family:"Inter",sans-serif;text-decoration:none;display:inline-block;transition:.2s}
+    .tab.active{background:#001F8F;color:white}
+    .tab:hover:not(.active){background:#d9dff5}
+    main{max-width:960px;margin:0 auto;padding:20px;flex:1;width:100%;box-sizing:border-box}
+    .warn{background:#fff3cd;border-left:4px solid #ff9f1c;padding:14px 16px;border-radius:8px;font-size:13px;color:#856404;margin-bottom:20px;line-height:1.7}
+    .warn strong{display:block;font-size:14px;margin-bottom:4px}
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+    @media(max-width:640px){.grid-2{grid-template-columns:1fr}}
+    .card{background:white;padding:22px;border-radius:15px;margin-bottom:20px;box-shadow:0 3px 8px rgba(0,0,0,.05)}
+    .card h2{color:#001F8F;margin:0 0 16px 0;font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px}
+    label{display:block;font-weight:600;font-size:13px;color:#001F8F;margin-bottom:5px;margin-top:14px}
+    label:first-child{margin-top:0}
+    input[type=number],select{width:100%;padding:10px 12px;border-radius:10px;border:1px solid #ccd2e3;font-size:15px;font-family:"Inter",sans-serif;color:#111;background:#fff;transition:border-color .2s;appearance:none;box-sizing:border-box}
+    input[type=number]{padding-right:72px}
+    input[type=number]:focus,select:focus{border-color:#001F8F;outline:none}
+    .iw{position:relative}
+    .iu{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:12px;font-weight:600;color:#001F8F;background:#e9ecf5;padding:2px 7px;border-radius:6px;pointer-events:none;white-space:nowrap}
+    .hint{font-size:11px;color:#888;margin-top:5px;line-height:1.5}
+    .section-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#999;margin-bottom:10px;margin-top:4px}
+    .regime-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:4px}
+    @media(max-width:600px){.regime-grid{grid-template-columns:1fr 1fr}}
+    .rbtn{padding:10px 6px;border-radius:10px;border:1px solid #ccd2e3;background:white;color:#001F8F;font-size:11px;font-weight:600;font-family:"Inter",sans-serif;cursor:pointer;text-align:center;transition:all .2s;line-height:1.3}
+    .rbtn .rbtn-icon{font-size:17px;display:block;margin-bottom:3px}
+    .rbtn .rbtn-num{display:inline-block;background:#e9ecf5;color:#888;border-radius:4px;font-size:9px;padding:1px 5px;margin-bottom:3px}
+    .rbtn.active{background:#001F8F;color:white;border-color:#001F8F}
+    .rbtn.active .rbtn-num{background:rgba(255,255,255,.2);color:rgba(255,255,255,.8)}
+    .rbtn:hover:not(.active){background:#e9ecf5}
+    .regime-info{background:#eef2ff;border-left:3px solid #001F8F;border-radius:8px;padding:9px 13px;font-size:11.5px;color:#001F8F;margin-top:10px;display:none}
+    .ld-block{background:#eef2ff;border-radius:12px;padding:14px 16px;margin-bottom:14px;display:none}
+    .ld-block.visible{display:block}
+    .ld-btns{display:flex;gap:8px;margin-top:8px}
+    .ld-btn{flex:1;padding:9px 6px;border-radius:10px;border:2px solid #ccd2e3;background:white;color:#001F8F;font-size:12px;font-weight:700;font-family:"Inter",sans-serif;cursor:pointer;text-align:center;transition:all .2s;line-height:1.4}
+    .ld-btn.active{background:#001F8F;color:white;border-color:#001F8F}
+    .ld-btn:hover:not(.active){background:#e9ecf5}
+    .ld-info{font-size:10px;color:#001F8F;font-weight:600;margin-top:8px}
+    .s-tag{display:inline-block;background:#eef2ff;color:#001F8F;font-size:11px;font-weight:700;padding:3px 9px;border-radius:6px;margin-top:4px}
+    .cd-row{display:flex;align-items:center;gap:10px;margin-top:6px}
+    .cd-pill{background:#001F8F;color:white;font-size:17px;font-weight:800;padding:4px 14px;border-radius:8px;min-width:56px;text-align:center;font-family:"Inter",sans-serif}
+    .cd-lbl{font-size:11px;color:#888}
+    .prop-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+    .prop-chip{background:#f5f7fb;border:1px solid #e0e4f0;border-radius:10px;padding:8px 10px;text-align:center}
+    .prop-chip .pv{font-size:15px;font-weight:800;color:#001F8F;display:block}
+    .prop-chip .pl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#888}
+    .field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    @media(max-width:480px){.field-row{grid-template-columns:1fr}}
+    .btn-generate{width:100%;padding:16px;background:#001F8F;color:white;border:none;font-size:16px;font-family:"Inter",sans-serif;border-radius:14px;cursor:pointer;font-weight:700;margin-top:20px;transition:all .2s;box-shadow:0 4px 12px rgba(0,31,143,.3)}
+    .btn-generate:hover{background:#002bbf;transform:translateY(-2px);box-shadow:0 6px 16px rgba(0,31,143,.4)}
+    .btn-generate:active{transform:translateY(0)}
+    .btn-reset{width:100%;padding:12px;background:#e9ecf5;color:#001F8F;border:none;font-size:14px;font-family:"Inter",sans-serif;border-radius:14px;cursor:pointer;font-weight:700;margin-top:10px;transition:all .2s}
+    .btn-reset:hover{background:#d9dff5}
+    .err-box{background:#f8d7da;border-left:4px solid #cc1a00;border-radius:8px;padding:12px 14px;font-size:13px;color:#721c24;margin-top:14px;display:none}
+    #results{display:none}
+    #results.visible{display:block}
+    .res-hero{text-align:center;padding:24px 20px;border-radius:15px;background:white;box-shadow:0 3px 8px rgba(0,0,0,.05);margin-bottom:20px;border-top:5px solid #001F8F}
+    .res-regime-badge{display:inline-block;background:#001F8F;color:white;font-size:12px;font-weight:700;padding:4px 14px;border-radius:20px;margin-bottom:12px}
+    .res-chips{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px}
+    .rc{background:#f5f7fb;border-radius:12px;padding:14px;text-align:center;border:1px solid #e0e4f0}
+    .rc.primary{background:#001F8F;border-color:#001F8F}
+    .rc.duration{background:#d4edda;border-color:#a5d6a7}
+    .rc .rc-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#888;margin-bottom:6px}
+    .rc.primary .rc-lbl{color:rgba(255,255,255,.7)}
+    .rc.duration .rc-lbl{color:#155724}
+    .rc .rc-val{font-size:22px;font-weight:800;color:#001F8F;line-height:1}
+    .rc.primary .rc-val{color:white}
+    .rc.duration .rc-val{color:#155724;font-size:18px}
+    .rc .rc-unit{font-size:11px;color:#888;margin-top:2px}
+    .rc.primary .rc-unit{color:rgba(255,255,255,.6)}
+    .formule-box{background:#eef2ff;border-radius:12px;padding:18px 20px;margin-bottom:20px}
+    .formule-box h3{color:#001F8F;margin:0 0 12px 0;font-size:12px;text-transform:uppercase;letter-spacing:.5px;font-weight:700}
+    .fline{font-family:"Courier New",monospace;font-size:12px;color:#333;background:white;border:1px solid #dde2f0;border-radius:6px;padding:8px 10px;margin-bottom:6px;word-break:break-word;line-height:1.7}
+    .fline strong{color:#001F8F;font-weight:700}
+    .schema-card{background:white;border-radius:15px;padding:20px 22px;margin-bottom:20px;box-shadow:0 3px 8px rgba(0,0,0,.05)}
+    .schema-card h3{color:#001F8F;margin:0 0 14px 0;font-size:15px;font-weight:700;display:flex;align-items:center;gap:8px}
+    #schema-canvas{width:100%;height:300px;display:block;border-radius:10px;background:#EEF4FB}
+    .ref-table-wrap{overflow-x:auto}
+    .ref-table{width:100%;border-collapse:collapse;font-size:12px}
+    .ref-table thead tr{background:#eef2ff;color:#001F8F}
+    .ref-table th,.ref-table td{padding:6px 10px;text-align:left}
+    .ref-table td:last-child{text-align:center;font-weight:700;color:#001F8F;font-family:"Courier New",monospace}
+    .ref-table tbody tr:nth-child(even){background:#f8f9fc}
+    .placeholder{text-align:center;padding:60px 20px;color:#aaa}
+    .placeholder .ph-icon{font-size:44px;margin-bottom:12px;opacity:.3}
+    .sep{height:1px;background:#e9ecf5;margin:16px 0}
+    footer{padding:12px;text-align:center;font-size:12px;color:#444;border-top:1px solid #e0e4f0}
+    @media(max-width:640px){.card{padding:16px}main{padding:14px}}
   </style>
 </head>
 <body>
@@ -163,54 +113,31 @@ footer{padding:12px;text-align:center;font-size:12px;color:#444;border-top:1px s
 </nav>
 
 <main>
-
 <div class="warn">
   <strong>⚠️ Avertissement opérationnel — Outil d'aide au raisonnement tactique uniquement</strong>
   Résultats estimatifs. Tout engagement reste sous l'autorité du COS / du conseiller technique RCH. Vérifier systématiquement les propriétés du produit sur la FDS officielle.
 </div>
 
 <div class="grid-2">
-
-  <!-- COLONNE GAUCHE -->
-
   <div>
+    <div class="card">
+      <h2 style="justify-content:space-between">
+        <span>1️⃣ Régime de fuite</span>
+        <span style="display:inline-flex;gap:0;border:1.5px solid #ccd2e3;border-radius:8px;overflow:hidden">
+          <button id="btn-pa" onclick="setDpUnit('Pa')" style="padding:4px 12px;font-size:11px;font-weight:700;font-family:'Inter',sans-serif;border:none;cursor:pointer;background:#001F8F;color:white;transition:all .15s">Pa</button>
+          <button id="btn-bar" onclick="setDpUnit('bar')" style="padding:4px 12px;font-size:11px;font-weight:700;font-family:'Inter',sans-serif;border:none;cursor:pointer;background:white;color:#888;transition:all .15s">bar</button>
+        </span>
+      </h2>
+      <div class="regime-grid">
+        <button class="rbtn active" onclick="setRegime(1)" id="rb1"><span class="rbtn-num">R1</span><span class="rbtn-icon">💧</span>Liquide</button>
+        <button class="rbtn" onclick="setRegime(2)" id="rb2"><span class="rbtn-num">R2</span><span class="rbtn-icon">❄️</span>Cryogénique</button>
+        <button class="rbtn" onclick="setRegime(3)" id="rb3"><span class="rbtn-num">R3</span><span class="rbtn-icon">🔵</span>Gaz sous pression</button>
+        <button class="rbtn" onclick="setRegime(4)" id="rb4"><span class="rbtn-num">R4</span><span class="rbtn-icon">🔴</span>Gaz liquéfié sous pression</button>
+      </div>
+      <div class="regime-info" id="regime-info"></div>
+    </div>
 
 ```
-<!-- RÉGIME -->
-<div class="card">
-  <h2 style="justify-content:space-between">
-    <span>1️⃣ Régime de fuite</span>
-    <span style="display:inline-flex;gap:0;border:1.5px solid #ccd2e3;border-radius:8px;overflow:hidden">
-      <button id="btn-pa" onclick="setDpUnit('Pa')" style="padding:4px 12px;font-size:11px;font-weight:700;font-family:'Inter',sans-serif;border:none;cursor:pointer;background:#001F8F;color:white;transition:all .15s">Pa</button>
-      <button id="btn-bar" onclick="setDpUnit('bar')" style="padding:4px 12px;font-size:11px;font-weight:700;font-family:'Inter',sans-serif;border:none;cursor:pointer;background:white;color:#888;transition:all .15s">bar</button>
-    </span>
-  </h2>
-  <div class="regime-grid">
-    <button class="rbtn active" onclick="setRegime(1)" id="rb1">
-      <span class="rbtn-num">R1</span>
-      <span class="rbtn-icon">💧</span>
-      Liquide
-    </button>
-    <button class="rbtn" onclick="setRegime(2)" id="rb2">
-      <span class="rbtn-num">R2</span>
-      <span class="rbtn-icon">❄️</span>
-      Cryogénique
-    </button>
-    <button class="rbtn" onclick="setRegime(3)" id="rb3">
-      <span class="rbtn-num">R3</span>
-      <span class="rbtn-icon">🔵</span>
-      Gaz sous pression
-    </button>
-    <button class="rbtn" onclick="setRegime(4)" id="rb4">
-      <span class="rbtn-num">R4</span>
-      <span class="rbtn-icon">🔴</span>
-      Gaz liquéfié sous pression
-    </button>
-  </div>
-  <div class="regime-info" id="regime-info"></div>
-</div>
-
-<!-- PRODUIT -->
 <div class="card">
   <h2>2️⃣ Produit</h2>
   <label style="margin-top:0">Produit <span style="color:#cc1a00">*</span></label>
@@ -234,15 +161,12 @@ footer{padding:12px;text-align:center;font-size:12px;color:#444;border-top:1px s
     <option value="hydrogene">Hydrogène (gaz)</option>
     <option value="__custom__">✏️ Produit non listé — saisie manuelle</option>
   </select>
-
-  <!-- Saisie produit personnalisé -->
   <div id="custom-product-block" style="display:none;margin-top:14px;background:#eef2ff;border-radius:12px;padding:14px 16px">
     <div class="section-lbl" style="margin-top:0">Propriétés du produit — saisie manuelle</div>
     <div class="field-row">
       <div>
         <label style="margin-top:0">Nom du produit</label>
-        <input type="text" id="custom-nom" placeholder="ex: Méthane" oninput="onCustomChange()"
-          style="width:100%;padding:10px 12px;border-radius:10px;border:1px solid #ccd2e3;font-size:14px;font-family:'Inter',sans-serif;box-sizing:border-box">
+        <input type="text" id="custom-nom" placeholder="ex: Méthane" oninput="onCustomChange()" style="width:100%;padding:10px 12px;border-radius:10px;border:1px solid #ccd2e3;font-size:14px;font-family:'Inter',sans-serif;box-sizing:border-box">
       </div>
       <div>
         <label style="margin-top:0">ρ liquide (kg/m³) <span style="color:#cc1a00">*</span></label>
@@ -269,27 +193,19 @@ footer{padding:12px;text-align:center;font-size:12px;color:#444;border-top:1px s
       </div>
     </div>
   </div>
-
   <div id="product-props" class="prop-row" style="display:none"></div>
 </div>
 
-<!-- ORIFICE -->
 <div class="card">
   <h2>3️⃣ Orifice &amp; Section</h2>
-
   <div class="ld-block" id="field-ld">
     <label style="margin-top:0">Longueur d'ajustage (rapport L/D) <span style="color:#cc1a00">*</span></label>
     <div class="ld-btns">
-      <button class="ld-btn active" id="btn-ld-court" onclick="setLD('court')">
-        🔴 L &lt; 3D<br><span style="font-size:10px;font-weight:400">Fuite courte</span>
-      </button>
-      <button class="ld-btn" id="btn-ld-long" onclick="setLD('long')">
-        🟠 L &gt; 3D<br><span style="font-size:10px;font-weight:400">Fuite longue</span>
-      </button>
+      <button class="ld-btn active" id="btn-ld-court" onclick="setLD('court')">🔴 L &lt; 3D<br><span style="font-size:10px;font-weight:400">Fuite courte</span></button>
+      <button class="ld-btn" id="btn-ld-long" onclick="setLD('long')">🟠 L &gt; 3D<br><span style="font-size:10px;font-weight:400">Fuite longue</span></button>
     </div>
     <div class="ld-info" id="ld-info">Q_réel = Q_mono / 3 · Q_gaz = 0.3 × Q_mono</div>
   </div>
-
   <label style="margin-top:0">Référence terrain <span style="font-size:11px;font-weight:400;color:#888">(aide au dimensionnement)</span></label>
   <select id="sel-ref" onchange="onRefChange()">
     <option value="">— Saisie manuelle —</option>
@@ -326,7 +242,6 @@ footer{padding:12px;text-align:center;font-size:12px;color:#444;border-top:1px s
     </optgroup>
   </select>
   <div class="hint" id="ref-hint" style="display:none;color:#856404;font-weight:600">⚠ Valeur estimée — à ajuster selon constat terrain</div>
-
   <div class="field-row" style="margin-top:14px">
     <div>
       <label style="margin-top:0">Diamètre fuite (mm) <span style="color:#cc1a00">*</span></label>
@@ -356,7 +271,6 @@ footer{padding:12px;text-align:center;font-size:12px;color:#444;border-top:1px s
   </div>
 </div>
 
-<!-- PARAMÈTRES -->
 <div class="card">
   <h2>4️⃣ Paramètres</h2>
   <div class="section-lbl">Commun à tous les régimes</div>
@@ -371,22 +285,18 @@ footer{padding:12px;text-align:center;font-size:12px;color:#444;border-top:1px s
       <div class="hint" id="dp-hint">Pression manométrique — 1 bar = 100 000 Pa</div>
     </div>
   </div>
-
   <div id="field-dh">
     <label>Hauteur liquide Δh</label>
     <div class="iw"><input type="number" id="inp-dh" min="0" step="0.1" placeholder="ex: 2" value="0"><span class="iu">m</span></div>
   </div>
-
   <div id="field-theta" style="display:none">
     <label>Température <span id="theta-lbl-unit">θ (°C)</span></label>
     <div class="iw">
       <input type="number" id="inp-theta" min="-273" step="1" placeholder="ex: 20" value="20" oninput="updateThetaHint()">
       <span class="iu" id="theta-iu">°C</span>
     </div>
-    <div class="hint" id="theta-hint">→ 293 K (utilisé dans le calcul)</div>
+    <div class="hint" id="theta-hint">→ 293.15 K (utilisé dans le calcul)</div>
   </div>
-
-  <!-- Évaporation flaque — visible R1, R2, R3, R4 -->
   <div id="fields-gaz" style="display:none">
     <div class="sep"></div>
     <div class="section-lbl">Évaporation de flaque (optionnel)</div>
@@ -412,59 +322,40 @@ footer{padding:12px;text-align:center;font-size:12px;color:#444;border-top:1px s
 
   </div>
 
-  <!-- COLONNE DROITE -->
-
   <div>
-
-```
-<!-- RÉSULTATS -->
-<div id="results">
-  <div class="res-hero">
-    <div class="res-regime-badge" id="res-badge">—</div>
-    <div class="res-chips" id="res-chips"></div>
-  </div>
-  <div class="formule-box">
-    <h3>📋 Traçabilité — Formules substituées</h3>
-    <div id="res-trace"></div>
-  </div>
-
-  <!-- SCHÉMA DE DISPERSION -->
-  <div class="schema-card">
-    <h3>🗺️ Schéma de dispersion</h3>
-    <canvas id="schema-canvas"></canvas>
-  </div>
-</div>
-
-<!-- PLACEHOLDER -->
-<div id="placeholder" class="card">
-  <div class="placeholder">
-    <div class="ph-icon">⚡</div>
-    <div style="font-size:14px;font-weight:600;margin-bottom:6px">Résultats affichés ici</div>
-    <div style="font-size:12px">Remplissez les paramètres et cliquez sur Calculer</div>
-  </div>
-</div>
-
-<!-- TABLEAU Cd RÉFÉRENCE -->
-<div class="card">
-  <h2>📋 Tableau Cd — référence</h2>
-  <div class="ref-table-wrap">
-    <table class="ref-table">
-      <thead>
-        <tr>
-          <th>Type d'orifice</th>
-          <th style="text-align:center">Cd</th>
-        </tr>
-      </thead>
-      <tbody id="cd-tbody"></tbody>
-    </table>
-  </div>
-  <div class="hint" style="margin-top:8px">Source : SDIS 35 — Partie 3 Fuites</div>
-</div>
-```
-
+    <div id="results">
+      <div class="res-hero">
+        <div class="res-regime-badge" id="res-badge">—</div>
+        <div class="res-chips" id="res-chips"></div>
+      </div>
+      <div class="formule-box">
+        <h3>📋 Traçabilité — Formules substituées</h3>
+        <div id="res-trace"></div>
+      </div>
+      <div class="schema-card">
+        <h3>🗺️ Schéma de dispersion</h3>
+        <canvas id="schema-canvas"></canvas>
+      </div>
+    </div>
+    <div id="placeholder" class="card">
+      <div class="placeholder">
+        <div class="ph-icon">⚡</div>
+        <div style="font-size:14px;font-weight:600;margin-bottom:6px">Résultats affichés ici</div>
+        <div style="font-size:12px">Remplissez les paramètres et cliquez sur Calculer</div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>📋 Tableau Cd — référence</h2>
+      <div class="ref-table-wrap">
+        <table class="ref-table">
+          <thead><tr><th>Type d'orifice</th><th style="text-align:center">Cd</th></tr></thead>
+          <tbody id="cd-tbody"></tbody>
+        </table>
+      </div>
+      <div class="hint" style="margin-top:8px">Source : SDIS 35 — Partie 3 Fuites</div>
+    </div>
   </div>
 </div>
-
 </main>
 
 <footer>
@@ -495,6 +386,7 @@ const PRODUCTS = {
   hydrogene:  { rho:0.09, M:2,    PVS:null,   gaz:true  }
 };
 
+// CORRECTION BUG : tableau simple uniquement — pas d'objets SVG
 const CD_DATA = [
   ["Orifice de Borda (1.6D &lt; L &lt; 2D)",  "0.50"],
   ["Orifice mince / aigu (e &lt;&lt; D)",       "0.62"],
@@ -504,175 +396,6 @@ const CD_DATA = [
   ["Ajustage convergent α = 30°",                "≈ 1.00"],
   ["Rupture guillotine (canalisation)",           "1.00"],
   ["Venturi (convergent/divergent)",              "&gt; 1 = f(α)"]
-];
-      <defs><marker id="a1" markerWidth="5" markerHeight="5" refX="5" refY="2.5" orient="auto"><path d="M0,0 L5,2.5 L0,5 Z" fill="#333"/></marker></defs>
-      <!-- paroi amont haut -->
-      <line x1="2" y1="6" x2="28" y2="6" stroke="#222" stroke-width="1.8"/>
-      <!-- épaulement intérieur haut : descend, puis part vers la droite (tube rentrant) -->
-      <line x1="28" y1="2" x2="28" y2="14" stroke="#222" stroke-width="1.8"/>
-      <line x1="28" y1="14" x2="44" y2="14" stroke="#222" stroke-width="1.8"/>
-      <!-- paroi amont bas -->
-      <line x1="2" y1="34" x2="28" y2="34" stroke="#222" stroke-width="1.8"/>
-      <!-- épaulement intérieur bas : monte, puis part vers la droite -->
-      <line x1="28" y1="38" x2="28" y2="26" stroke="#222" stroke-width="1.8"/>
-      <line x1="28" y1="26" x2="44" y2="26" stroke="#222" stroke-width="1.8"/>
-      <!-- paroi aval haut et bas — tube de sortie -->
-      <line x1="44" y1="14" x2="44" y2="6" stroke="#222" stroke-width="1.8"/>
-      <line x1="44" y1="26" x2="44" y2="34" stroke="#222" stroke-width="1.8"/>
-      <line x1="44" y1="6" x2="62" y2="6" stroke="#222" stroke-width="1.8"/>
-      <line x1="44" y1="34" x2="62" y2="34" stroke="#222" stroke-width="1.8"/>
-      <!-- flèche écoulement -->
-      <line x1="8" y1="20" x2="54" y2="20" stroke="#333" stroke-width="1.5" marker-end="url(#a1)"/>
-    </svg>`
-  },
-  {
-    label: "Orifice mince ou aigu (e &lt;&lt; D)<br><small style='font-weight:400;color:#888'>e : épaisseur de la paroi</small>",
-    val: "0.62",
-    // Paroi très fine (trait unique), jet avec contraction (vena contracta)
-    svg: `<svg width="64" height="40" viewBox="0 0 64 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <defs><marker id="a2" markerWidth="5" markerHeight="5" refX="5" refY="2.5" orient="auto"><path d="M0,0 L5,2.5 L0,5 Z" fill="#333"/></marker></defs>
-      <!-- paroi amont haut et bas -->
-      <line x1="2" y1="8" x2="30" y2="8" stroke="#222" stroke-width="1.8"/>
-      <line x1="2" y1="32" x2="30" y2="32" stroke="#222" stroke-width="1.8"/>
-      <!-- paroi fine (trait unique) -->
-      <line x1="30" y1="2" x2="30" y2="16" stroke="#222" stroke-width="2"/>
-      <line x1="30" y1="24" x2="30" y2="38" stroke="#222" stroke-width="2"/>
-      <!-- jet contracté après la paroi (vena contracta) -->
-      <line x1="30" y1="8" x2="62" y2="8" stroke="#222" stroke-width="1.8"/>
-      <line x1="30" y1="32" x2="62" y2="32" stroke="#222" stroke-width="1.8"/>
-      <!-- contraction du jet côté aval : les bords se resserrent légèrement -->
-      <line x1="30" y1="16" x2="48" y2="18" stroke="#222" stroke-width="1.4"/>
-      <line x1="30" y1="24" x2="48" y2="22" stroke="#222" stroke-width="1.4"/>
-      <!-- flèche écoulement -->
-      <line x1="8" y1="20" x2="26" y2="20" stroke="#333" stroke-width="1.5" marker-end="url(#a2)"/>
-      <line x1="34" y1="20" x2="56" y2="20" stroke="#333" stroke-width="1.5" marker-end="url(#a2)"/>
-    </svg>`
-  },
-  {
-    label: "Orifice de Poleni (2D &lt; L &lt; 5D)",
-    val: "0.82",
-    // Deux épaulements successifs : marche haute + marche basse + canal + sortie
-    svg: `<svg width="64" height="40" viewBox="0 0 64 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <defs><marker id="a3" markerWidth="5" markerHeight="5" refX="5" refY="2.5" orient="auto"><path d="M0,0 L5,2.5 L0,5 Z" fill="#333"/></marker></defs>
-      <!-- paroi amont -->
-      <line x1="2" y1="8" x2="20" y2="8" stroke="#222" stroke-width="1.8"/>
-      <line x1="2" y1="32" x2="20" y2="32" stroke="#222" stroke-width="1.8"/>
-      <!-- 1er épaulement haut (descend) -->
-      <line x1="20" y1="2" x2="20" y2="15" stroke="#222" stroke-width="1.8"/>
-      <line x1="20" y1="15" x2="34" y2="15" stroke="#222" stroke-width="1.8"/>
-      <!-- 1er épaulement bas (monte) -->
-      <line x1="20" y1="38" x2="20" y2="25" stroke="#222" stroke-width="1.8"/>
-      <line x1="20" y1="25" x2="34" y2="25" stroke="#222" stroke-width="1.8"/>
-      <!-- 2e épaulement : retour vers dimensions aval -->
-      <line x1="34" y1="15" x2="34" y2="8" stroke="#222" stroke-width="1.8"/>
-      <line x1="34" y1="25" x2="34" y2="32" stroke="#222" stroke-width="1.8"/>
-      <!-- paroi aval -->
-      <line x1="34" y1="8" x2="62" y2="8" stroke="#222" stroke-width="1.8"/>
-      <line x1="34" y1="32" x2="62" y2="32" stroke="#222" stroke-width="1.8"/>
-      <!-- flèche -->
-      <line x1="6" y1="20" x2="56" y2="20" stroke="#333" stroke-width="1.5" marker-end="url(#a3)"/>
-    </svg>`
-  },
-  {
-    label: "Orifice arrondi",
-    val: "0.96",
-    // Congé arrondi côté entrée (en U) — asymétrique : arrondi amont, droit aval
-    svg: `<svg width="64" height="40" viewBox="0 0 64 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <defs><marker id="a4" markerWidth="5" markerHeight="5" refX="5" refY="2.5" orient="auto"><path d="M0,0 L5,2.5 L0,5 Z" fill="#333"/></marker></defs>
-      <!-- paroi amont haut et bas -->
-      <line x1="2" y1="8" x2="28" y2="8" stroke="#222" stroke-width="1.8"/>
-      <line x1="2" y1="32" x2="28" y2="32" stroke="#222" stroke-width="1.8"/>
-      <!-- congé arrondi haut : courbe de (28,8) vers (34,14) -->
-      <path d="M28,8 Q28,16 34,16" stroke="#222" stroke-width="1.8" fill="none"/>
-      <!-- congé arrondi bas : courbe de (28,32) vers (34,24) -->
-      <path d="M28,32 Q28,24 34,24" stroke="#222" stroke-width="1.8" fill="none"/>
-      <!-- canal droit aval -->
-      <line x1="34" y1="16" x2="34" y2="8" stroke="#222" stroke-width="1.8"/>
-      <line x1="34" y1="24" x2="34" y2="32" stroke="#222" stroke-width="1.8"/>
-      <line x1="34" y1="8" x2="62" y2="8" stroke="#222" stroke-width="1.8"/>
-      <line x1="34" y1="32" x2="62" y2="32" stroke="#222" stroke-width="1.8"/>
-      <!-- flèche -->
-      <line x1="8" y1="20" x2="54" y2="20" stroke="#333" stroke-width="1.5" marker-end="url(#a4)"/>
-    </svg>`
-  },
-  {
-    label: "Ajustage convergent (α = 12° ou 30°)",
-    val: "0.95 / ≈1.00",
-    // Parois convergentes symétriques haut et bas vers un orifice central
-    svg: `<svg width="64" height="40" viewBox="0 0 64 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <defs><marker id="a5" markerWidth="5" markerHeight="5" refX="5" refY="2.5" orient="auto"><path d="M0,0 L5,2.5 L0,5 Z" fill="#333"/></marker></defs>
-      <!-- paroi amont haut et bas -->
-      <line x1="2" y1="6" x2="18" y2="6" stroke="#222" stroke-width="1.8"/>
-      <line x1="2" y1="34" x2="18" y2="34" stroke="#222" stroke-width="1.8"/>
-      <!-- convergent haut -->
-      <line x1="18" y1="6" x2="34" y2="16" stroke="#222" stroke-width="1.8"/>
-      <!-- convergent bas -->
-      <line x1="18" y1="34" x2="34" y2="24" stroke="#222" stroke-width="1.8"/>
-      <!-- orifice (canal court droit) -->
-      <line x1="34" y1="16" x2="40" y2="16" stroke="#222" stroke-width="1.8"/>
-      <line x1="34" y1="24" x2="40" y2="24" stroke="#222" stroke-width="1.8"/>
-      <!-- paroi aval haut et bas -->
-      <line x1="40" y1="16" x2="40" y2="6" stroke="#222" stroke-width="1.8"/>
-      <line x1="40" y1="24" x2="40" y2="34" stroke="#222" stroke-width="1.8"/>
-      <line x1="40" y1="6" x2="62" y2="6" stroke="#222" stroke-width="1.8"/>
-      <line x1="40" y1="34" x2="62" y2="34" stroke="#222" stroke-width="1.8"/>
-      <!-- angle α -->
-      <text x="8" y="22" font-size="8" fill="#666" font-family="Inter,sans-serif" font-style="italic">α</text>
-      <!-- flèche -->
-      <line x1="4" y1="20" x2="56" y2="20" stroke="#333" stroke-width="1.5" marker-end="url(#a5)"/>
-    </svg>`
-  },
-  {
-    label: "Rupture guillotine parfaite (canalisation)",
-    val: "1.00",
-    // Canalisation coupée nette — deux tronçons avec espace de rupture
-    svg: `<svg width="64" height="40" viewBox="0 0 64 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <defs><marker id="a6" markerWidth="5" markerHeight="5" refX="5" refY="2.5" orient="auto"><path d="M0,0 L5,2.5 L0,5 Z" fill="#333"/></marker></defs>
-      <!-- tronçon amont haut et bas -->
-      <line x1="2" y1="10" x2="28" y2="10" stroke="#222" stroke-width="1.8"/>
-      <line x1="2" y1="30" x2="28" y2="30" stroke="#222" stroke-width="1.8"/>
-      <!-- face de rupture amont -->
-      <line x1="28" y1="6" x2="28" y2="34" stroke="#222" stroke-width="2"/>
-      <!-- tronçon aval haut et bas -->
-      <line x1="36" y1="10" x2="62" y2="10" stroke="#222" stroke-width="1.8"/>
-      <line x1="36" y1="30" x2="62" y2="30" stroke="#222" stroke-width="1.8"/>
-      <!-- face de rupture aval -->
-      <line x1="36" y1="6" x2="36" y2="34" stroke="#222" stroke-width="2"/>
-      <!-- flèche écoulement -->
-      <line x1="6" y1="20" x2="56" y2="20" stroke="#333" stroke-width="1.5" marker-end="url(#a6)"/>
-    </svg>`
-  },
-  {
-    label: "Venturi (ajustage convergent puis divergent)",
-    val: "&gt; 1 = f(α)",
-    // Convergent puis divergent — forme losange, flèches de recirculation
-    svg: `<svg width="64" height="40" viewBox="0 0 64 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <defs><marker id="a7" markerWidth="5" markerHeight="5" refX="5" refY="2.5" orient="auto"><path d="M0,0 L5,2.5 L0,5 Z" fill="#333"/></marker>
-      <marker id="a7r" markerWidth="5" markerHeight="5" refX="0" refY="2.5" orient="auto"><path d="M5,0 L0,2.5 L5,5 Z" fill="#888"/></marker></defs>
-      <!-- paroi amont haut et bas -->
-      <line x1="2" y1="8" x2="14" y2="8" stroke="#222" stroke-width="1.8"/>
-      <line x1="2" y1="32" x2="14" y2="32" stroke="#222" stroke-width="1.8"/>
-      <!-- convergent haut et bas -->
-      <line x1="14" y1="8" x2="32" y2="18" stroke="#222" stroke-width="1.8"/>
-      <line x1="14" y1="32" x2="32" y2="22" stroke="#222" stroke-width="1.8"/>
-      <!-- col (gorge) -->
-      <line x1="32" y1="18" x2="32" y2="22" stroke="#222" stroke-width="1.8"/>
-      <!-- divergent haut et bas -->
-      <line x1="32" y1="18" x2="50" y2="8" stroke="#222" stroke-width="1.8"/>
-      <line x1="32" y1="22" x2="50" y2="32" stroke="#222" stroke-width="1.8"/>
-      <!-- paroi aval -->
-      <line x1="50" y1="8" x2="62" y2="8" stroke="#222" stroke-width="1.8"/>
-      <line x1="50" y1="32" x2="62" y2="32" stroke="#222" stroke-width="1.8"/>
-      <!-- flèches de recirculation haut -->
-      <path d="M20,8 Q18,13 22,14" stroke="#888" stroke-width="1" fill="none" marker-end="url(#a7r)"/>
-      <!-- flèches de recirculation bas -->
-      <path d="M20,32 Q18,27 22,26" stroke="#888" stroke-width="1" fill="none" marker-end="url(#a7r)"/>
-      <!-- angle α -->
-      <text x="6" y="22" font-size="8" fill="#666" font-family="Inter,sans-serif" font-style="italic">α</text>
-      <!-- flèche écoulement -->
-      <line x1="4" y1="20" x2="56" y2="20" stroke="#333" stroke-width="1.5" marker-end="url(#a7)"/>
-    </svg>`
-  }
 ];
 
 const REF_MAP = {
@@ -698,11 +421,11 @@ const REF_MAP = {
 };
 
 const REGIME_INFO_TXT = {
-  1:"💧 Liquide non bouillonnant — Q_liq = ρ·Cd·S·√(2g·Δh + 2ΔP/ρ) · Q_évap = 0.00515×10⁻⁷·Surf·V⁰·⁷⁸·R⁻⁰·¹¹·(M·PVS)/(8.314·θ) (optionnel)",
+  1:"💧 Liquide non bouillonnant — Q_liq = ρ·Cd·S·√(2g·Δh + 2ΔP/ρ) · Q_évap = 0.00515×10⁻⁷·Surf·V⁰˙⁷⁸·R⁻⁰˙¹¹·(M·PVS)/(8.314·θ) (optionnel)",
   2:"❄️ Cryogénique bouillonnant — Q_liq = ρ·Cd·S·√(2g·Δh + 2ΔP/ρ) · Q_gaz = 0.1·Q_liq",
   3:"🔵 Gaz sous pression — Q = Cd·S·√(ρ_gaz·ΔP/2)",
-  4:"🔴 Gaz liquéfié sous pression — Q_mono = Cd·S·√(2·ρ·ΔP) | L<3D : Q_réel = Q_mono/3 · Q_gaz = 0.3·Q_mono | L>3D : Q_diph = Q_mono/2.5 · Q_gaz = 0.3·Q_diph",
-  5:"🔴 Gaz liquéfié sous pression — Q_mono = Cd·S·√(2·ρ·ΔP) | L<3D : Q_réel = Q_mono/3 · Q_gaz = 0.3·Q_mono | L>3D : Q_diph = Q_mono/2.5 · Q_gaz = 0.3·Q_diph"
+  4:"🔴 Gaz liquéfié — Q_mono = Cd·S·√(2·ρ·ΔP) | L<3D : Q_gaz = 0.3·Q_mono | L>3D : Q_diph = Q_mono/2.5 · Q_gaz = 0.3·Q_diph",
+  5:"🔴 Gaz liquéfié — Q_mono = Cd·S·√(2·ρ·ΔP) | L<3D : Q_gaz = 0.3·Q_mono | L>3D : Q_diph = Q_mono/2.5 · Q_gaz = 0.3·Q_diph"
 };
 
 let regime = 1, ldChoice = 'court', dpUnit = 'Pa', refLabel = '';
@@ -740,9 +463,8 @@ function setDpUnit(unit) {
     inp.step = '1000'; inp.placeholder = 'ex: 100000';
     if (!isNaN(val) && val > 0) inp.value = Math.round(val * 1e5);
   }
-  if (regime === 4) {
-    applyDpDefault();
-  } else {
+  if (regime === 4) { applyDpDefault(); }
+  else {
     document.getElementById('dp-hint').textContent = unit === 'bar'
       ? 'Pression manométrique en bar — 1 bar = 100 000 Pa'
       : 'Pression manométrique en pascal — 1 bar = 100 000 Pa';
@@ -776,23 +498,16 @@ function setLD(choice) {
 function setRegime(n) {
   regime = n;
   [1,2,3,4].forEach(i => document.getElementById('rb'+i).classList.toggle('active', i===n));
-
-  const isGaz    = n === 3;
-  const isGazLiq = n === 4;
-
+  const isGaz = n === 3, isGazLiq = n === 4;
   document.getElementById('field-ld').classList.toggle('visible', isGazLiq);
   document.getElementById('field-dh').style.display    = (isGaz || isGazLiq) ? 'none' : '';
   document.getElementById('field-theta').style.display = (isGaz || n === 1) ? '' : 'none';
-  // Flaque uniquement pour R1
   document.getElementById('fields-gaz').style.display  = n === 1 ? '' : 'none';
-
   const info = document.getElementById('regime-info');
   info.textContent = isGazLiq ? REGIME_INFO_TXT[ldChoice === 'court' ? 4 : 5] : REGIME_INFO_TXT[n];
   info.style.display = 'block';
-
-  if (isGazLiq) {
-    applyDpDefault();
-  } else {
+  if (isGazLiq) { applyDpDefault(); }
+  else {
     document.getElementById('dp-hint').textContent = dpUnit === 'bar'
       ? 'Pression manométrique en bar — 1 bar = 100 000 Pa'
       : 'Pression manométrique — 1 bar = 100 000 Pa';
@@ -807,69 +522,38 @@ function setRegime(n) {
 function getActiveProd() {
   const key = document.getElementById('sel-produit').value;
   if (key === '__custom__') {
-    const rho     = parseFloat(document.getElementById('custom-rho').value)     || 0;
-    const M       = parseFloat(document.getElementById('custom-M').value)       || 0;
-    const rhoGaz  = parseFloat(document.getElementById('custom-rho-gaz').value) || null;
-    const PVS     = parseFloat(document.getElementById('custom-PVS').value);
-    return {
-      rho,
-      M,
-      PVS: isNaN(PVS) || PVS <= 0 ? null : PVS,
-      rhoGaz: (rhoGaz && rhoGaz > 0) ? rhoGaz : null,
-      gaz: false,
-      custom: true
-    };
+    const rho    = parseFloat(document.getElementById('custom-rho').value)     || 0;
+    const M      = parseFloat(document.getElementById('custom-M').value)       || 0;
+    const rhoGaz = parseFloat(document.getElementById('custom-rho-gaz').value) || null;
+    const PVS    = parseFloat(document.getElementById('custom-PVS').value);
+    return { rho, M, PVS: isNaN(PVS)||PVS<=0?null:PVS,
+             rhoGaz:(rhoGaz&&rhoGaz>0)?rhoGaz:null, gaz:false, custom:true };
   }
   if (!key || !PRODUCTS[key]) return null;
   return { ...PRODUCTS[key], rhoGaz: null, custom: false };
 }
 
-function onCustomChange() {
-  renderProductProps();
-  clearResult();
-}
+function onCustomChange() { renderProductProps(); clearResult(); }
 
 function onProduitChange() {
   const key = document.getElementById('sel-produit').value;
   const box = document.getElementById('product-props');
-  const customBlock = document.getElementById('custom-product-block');
-
-  if (!key) {
-    box.style.display = 'none';
-    customBlock.style.display = 'none';
-    return;
-  }
-
-  if (key === '__custom__') {
-    customBlock.style.display = 'block';
-    renderProductProps();
-    clearResult();
-    return;
-  }
-
-  customBlock.style.display = 'none';
-  box.style.display = 'grid';
-  renderProductProps();
-  applyDpDefault();
-  clearResult();
+  const cb  = document.getElementById('custom-product-block');
+  if (!key) { box.style.display='none'; cb.style.display='none'; return; }
+  if (key === '__custom__') { cb.style.display='block'; renderProductProps(); clearResult(); return; }
+  cb.style.display='none'; box.style.display='grid';
+  renderProductProps(); applyDpDefault(); clearResult();
 }
 
 function renderProductProps() {
   const prod = getActiveProd();
   const box  = document.getElementById('product-props');
-  if (!prod) { box.style.display = 'none'; return; }
-
-  // Pour produit custom, chips affichés sous le bloc de saisie
-  if (prod.custom) {
-    box.style.display = 'none'; // chips inutiles, tout est visible dans le bloc
-    return;
-  }
-
+  if (!prod || prod.custom) { box.style.display='none'; return; }
   let pvsDisplay = '—';
   if (prod.PVS !== null && prod.PVS !== undefined) {
     pvsDisplay = dpUnit === 'bar'
-      ? (prod.PVS / 1e5).toPrecision(4) + ' bar'
-      : prod.PVS.toLocaleString('fr') + ' Pa';
+      ? (prod.PVS/1e5).toPrecision(4)+' bar'
+      : prod.PVS.toLocaleString('fr')+' Pa';
   }
   box.style.display = 'grid';
   box.innerHTML = `
@@ -882,10 +566,10 @@ function renderProductProps() {
 function applyDpDefault() {
   if (regime !== 4) return;
   const prod = getActiveProd();
-  if (!prod || prod.PVS === null || prod.PVS === undefined) return;
+  if (!prod || prod.PVS===null || prod.PVS===undefined) return;
   const dp_pa = Math.max(0, prod.PVS - 101325);
   if (dpUnit === 'bar') {
-    document.getElementById('inp-dp').value = +(dp_pa / 1e5).toPrecision(4);
+    document.getElementById('inp-dp').value = +(dp_pa/1e5).toPrecision(4);
     document.getElementById('dp-hint').innerHTML =
       `Valeur par défaut : PVS − P<sub>atm</sub> = ${(prod.PVS/1e5).toPrecision(4)} bar − 1,013 bar = <strong>${(dp_pa/1e5).toPrecision(4)} bar</strong> — à ajuster selon conditions réelles`;
   } else {
@@ -896,29 +580,19 @@ function applyDpDefault() {
 }
 
 // ══════════════════════════════════════
-// ORIFICE
+// ORIFICE / SURFACE
 // ══════════════════════════════════════
 
 function getCd() { return parseFloat(document.getElementById('sel-orifice').value); }
-
-function updateCd() {
-  document.getElementById('cd-display').textContent = getCd().toFixed(2);
-  clearResult();
-}
-
-// ══════════════════════════════════════
-// SURFACE
-// ══════════════════════════════════════
+function updateCd() { document.getElementById('cd-display').textContent = getCd().toFixed(2); clearResult(); }
 
 function updateS() {
   const d = parseFloat(document.getElementById('inp-d').value);
   const tag = document.getElementById('s-tag');
   if (!isNaN(d) && d > 0) {
-    tag.textContent = 'S = ' + (Math.PI * Math.pow(d/2000, 2)).toExponential(3) + ' m²';
+    tag.textContent = 'S = ' + (Math.PI*Math.pow(d/2000,2)).toExponential(3) + ' m²';
     tag.style.display = 'inline-block';
-  } else {
-    tag.style.display = 'none';
-  }
+  } else { tag.style.display = 'none'; }
 }
 
 function getS() {
@@ -934,10 +608,7 @@ function getS() {
 function onRefChange() {
   const v = document.getElementById('sel-ref').value;
   const hint = document.getElementById('ref-hint');
-  if (!v) {
-    document.getElementById('inp-d').value = '';
-    hint.style.display = 'none'; refLabel = ''; updateS(); return;
-  }
+  if (!v) { document.getElementById('inp-d').value=''; hint.style.display='none'; refLabel=''; updateS(); return; }
   const r = REF_MAP[v];
   document.getElementById('inp-d').value = r.d;
   hint.style.display = 'block';
@@ -950,15 +621,15 @@ function onRefChange() {
 // ══════════════════════════════════════
 
 function fmtSci(v) {
-  if (v === null || isNaN(v)) return '—';
-  if (v === 0) return '0';
-  if (Math.abs(v) < 0.001 || Math.abs(v) >= 1e6) return v.toExponential(3);
+  if (v===null||isNaN(v)) return '—';
+  if (v===0) return '0';
+  if (Math.abs(v)<0.001||Math.abs(v)>=1e6) return v.toExponential(3);
   return v.toPrecision(4);
 }
 
 function fmtDur(sec) {
-  if (!isFinite(sec) || sec <= 0) return '—';
-  const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = Math.round(sec % 60);
+  if (!isFinite(sec)||sec<=0) return '—';
+  const h=Math.floor(sec/3600), m=Math.floor((sec%3600)/60), s=Math.round(sec%60);
   return `${String(h).padStart(2,'0')}h${String(m).padStart(2,'0')}m${String(s).padStart(2,'0')}s`;
 }
 
@@ -966,45 +637,47 @@ function fmtDur(sec) {
 // ERROR / RESULT
 // ══════════════════════════════════════
 
-function showErr(msg) { const e = document.getElementById('err-box'); e.textContent = '⚠ ' + msg; e.style.display = 'block'; }
-function clearErr()   { document.getElementById('err-box').style.display = 'none'; }
+function showErr(msg) { const e=document.getElementById('err-box'); e.textContent='⚠ '+msg; e.style.display='block'; }
+function clearErr()   { document.getElementById('err-box').style.display='none'; }
 function clearResult() {
   document.getElementById('results').classList.remove('visible');
-  document.getElementById('placeholder').style.display = '';
+  document.getElementById('placeholder').style.display='';
   clearErr();
+}
+
+// ══════════════════════════════════════
+// THETA
+// ══════════════════════════════════════
+
+function getThetaK() {
+  const v = parseFloat(document.getElementById('inp-theta').value);
+  return isNaN(v) ? 293.15 : v + 273.15;
+}
+
+function updateThetaHint() {
+  const v = parseFloat(document.getElementById('inp-theta').value);
+  document.getElementById('theta-hint').textContent =
+    isNaN(v) ? '→ — K' : `→ ${(v+273.15).toFixed(2)} K (utilisé dans le calcul)`;
+}
+
+// ══════════════════════════════════════
+// QEVAP
+// ══════════════════════════════════════
+
+function calcQevap(prod) {
+  if (regime !== 1) return null;
+  const surf=parseFloat(document.getElementById('inp-surf').value);
+  const R=parseFloat(document.getElementById('inp-r').value);
+  const V=parseFloat(document.getElementById('inp-v').value);
+  const theta=getThetaK();
+  if (!isNaN(surf)&&!isNaN(R)&&!isNaN(V)&&surf>0&&R>0&&V>0&&prod.PVS!==null&&prod.PVS>0)
+    return 0.00515e-7 * surf * Math.pow(V,0.78) * Math.pow(R,-0.11) * (prod.M*prod.PVS) / (8.314*theta);
+  return null;
 }
 
 // ══════════════════════════════════════
 // CALCULATE
 // ══════════════════════════════════════
-
-function getThetaK() {
-  // Champ saisi en °C, converti en K
-  const v = parseFloat(document.getElementById('inp-theta').value);
-  return isNaN(v) ? 293 : v + 273.15;
-}
-
-function updateThetaHint() {
-  const v = parseFloat(document.getElementById('inp-theta').value);
-  const hint = document.getElementById('theta-hint');
-  if (!isNaN(v)) {
-    hint.textContent = `→ ${(v + 273.15).toFixed(2)} K (utilisé dans le calcul)`;
-  } else {
-    hint.textContent = '→ — K';
-  }
-}
-
-function calcQevap(prod) {
-  if (regime !== 1) return null;
-  const surf  = parseFloat(document.getElementById('inp-surf').value);
-  const R     = parseFloat(document.getElementById('inp-r').value);
-  const V     = parseFloat(document.getElementById('inp-v').value);
-  const theta = getThetaK();
-  if (!isNaN(surf) && !isNaN(R) && !isNaN(V) && surf > 0 && R > 0 && V > 0 && prod.PVS !== null && prod.PVS > 0) {
-    return 0.00515e-7 * surf * Math.pow(V, 0.78) * Math.pow(R, -0.11) * (prod.M * prod.PVS) / (8.314 * theta);
-  }
-  return null;
-}
 
 function calculate() {
   clearErr();
@@ -1012,145 +685,117 @@ function calculate() {
   if (!prodKey) { showErr("Sélectionnez un produit."); return; }
   const prod = getActiveProd();
   if (!prod) { showErr("Produit invalide."); return; }
-
-  // Validation produit custom
   if (prod.custom) {
-    if (!prod.rho || prod.rho <= 0) { showErr("Produit personnalisé : ρ liquide requis (> 0)."); return; }
-    if (!prod.M   || prod.M   <= 0) { showErr("Produit personnalisé : masse molaire M requise (> 0)."); return; }
-    if (regime === 3 && (!prod.rhoGaz || prod.rhoGaz <= 0)) {
-      showErr("Produit personnalisé en régime gaz : ρ gaz CNT requis (> 0)."); return;
-    }
+    if (!prod.rho||prod.rho<=0) { showErr("Produit personnalisé : ρ liquide requis (> 0)."); return; }
+    if (!prod.M||prod.M<=0)     { showErr("Produit personnalisé : masse molaire M requise (> 0)."); return; }
+    if (regime===3&&(!prod.rhoGaz||prod.rhoGaz<=0)) { showErr("Produit personnalisé en régime gaz : ρ gaz CNT requis (> 0)."); return; }
   }
-
-  const nomProd = prod.custom
-    ? (document.getElementById('custom-nom').value.trim() || 'Produit personnalisé')
-    : prodKey;
-  const S = getS();
+  const S=getS();
   if (!S) { showErr("Diamètre de fuite manquant ou invalide (> 0)."); return; }
-  const Cd = getCd();
-  const m  = parseFloat(document.getElementById('inp-m').value);
-  const dP = getDpPa();
-  if (isNaN(m) || m <= 0) { showErr("Masse stockée invalide (> 0)."); return; }
-  if (dP === null || dP < 0) { showErr("ΔP invalide (≥ 0)."); return; }
+  const Cd=getCd(), m=parseFloat(document.getElementById('inp-m').value), dP=getDpPa();
+  if (isNaN(m)||m<=0) { showErr("Masse stockée invalide (> 0)."); return; }
+  if (dP===null||dP<0) { showErr("ΔP invalide (≥ 0)."); return; }
 
-  const g = 9.81, Rgas = 8314;
-  let chips = [], traces = [], T = null;
+  const g=9.81, Rgas=8314;
+  let chips=[], traces=[], T=null;
   let schemaData = { regime, ldChoice };
 
   if (regime === 1) {
-    const dh = parseFloat(document.getElementById('inp-dh').value) || 0;
-    const rho = prod.rho, inner = 2*g*dh + 2*dP/rho;
-    if (inner <= 0) { showErr("2g·Δh + 2ΔP/ρ ≤ 0 : vérifiez Δh et ΔP."); return; }
-    const Q = rho * Cd * S * Math.sqrt(inner); T = m / Q;
-    const Qe = calcQevap(prod);
-    const thetaK = getThetaK();
-    const surf = parseFloat(document.getElementById('inp-surf').value);
-    const R    = parseFloat(document.getElementById('inp-r').value);
-    const V    = parseFloat(document.getElementById('inp-v').value);
-    chips = [
-      {label:"Q liquide",    val:fmtSci(Q),  unit:"kg/s", primary:true},
-      {label:"Durée fuite T",val:fmtDur(T),  unit:Math.round(T)+" s", duration:true}
-    ];
-    if (Qe !== null) chips.push({label:"Q évap. flaque", val:fmtSci(Qe), unit:"kg/s"});
-    traces = [
+    const dh=parseFloat(document.getElementById('inp-dh').value)||0;
+    const rho=prod.rho, inner=2*g*dh+2*dP/rho;
+    if (inner<=0) { showErr("2g·Δh + 2ΔP/ρ ≤ 0 : vérifiez Δh et ΔP."); return; }
+    const Q=rho*Cd*S*Math.sqrt(inner); T=m/Q;
+    const Qe=calcQevap(prod), tK=getThetaK();
+    const surf=parseFloat(document.getElementById('inp-surf').value);
+    const R=parseFloat(document.getElementById('inp-r').value);
+    const V=parseFloat(document.getElementById('inp-v').value);
+    chips=[{label:"Q liquide",val:fmtSci(Q),unit:"kg/s",primary:true},{label:"Durée fuite T",val:fmtDur(T),unit:Math.round(T)+" s",duration:true}];
+    if (Qe!==null) chips.push({label:"Q évap. flaque",val:fmtSci(Qe),unit:"kg/s"});
+    traces=[
       `Q_liq = ρ × Cd × S × √(2g·Δh + 2ΔP/ρ)`,
       `Q_liq = ${rho} × ${Cd} × ${S.toExponential(3)} × √(${inner.toFixed(2)})`,
       `<strong>Q_liq = ${fmtSci(Q)} kg/s</strong>`,
       `T = m / Q_liq = ${m} / ${fmtSci(Q)} = <strong>${Math.round(T)} s (${fmtDur(T)})</strong>`
     ];
-    if (Qe !== null) {
+    if (Qe!==null) {
       traces.push(`Q_évap = 0.00515×10⁻⁷ × Surf × V^0.78 × R^-0.11 × (M×PVS) / (8.314×θ)`);
-      traces.push(`Q_évap = 0.00515×10⁻⁷ × ${surf} × ${V}^0.78 × ${R}^-0.11 × (${prod.M}×${prod.PVS}) / (8.314×${thetaK.toFixed(2)})`);
+      traces.push(`Q_évap = 0.00515×10⁻⁷ × ${surf} × ${V}^0.78 × ${R}^-0.11 × (${prod.M}×${prod.PVS}) / (8.314×${tK.toFixed(2)})`);
       traces.push(`<strong>Q_évap = ${fmtSci(Qe)} kg/s</strong>`);
-    } else if (!isNaN(surf) || !isNaN(R) || !isNaN(V)) {
+    } else if (!isNaN(surf)||!isNaN(R)||!isNaN(V)) {
       traces.push(`Q_évap = non calculé (Surf, R et V requis + PVS produit)`);
     }
-    schemaData = {...schemaData, Q_liq: fmtSci(Q), Q_evap: Qe !== null ? fmtSci(Qe) : null, hasFlaque:true};
+    schemaData={...schemaData, Q_liq:fmtSci(Q), Q_evap:Qe!==null?fmtSci(Qe):null, hasFlaque:true};
 
   } else if (regime === 2) {
-    const dh = parseFloat(document.getElementById('inp-dh').value) || 0;
-    const rho = prod.rho, inner = 2*g*dh + 2*dP/rho;
-    if (inner <= 0) { showErr("2g·Δh + 2ΔP/ρ ≤ 0 : vérifiez Δh et ΔP."); return; }
-    const Ql = rho * Cd * S * Math.sqrt(inner), Qg = 0.1 * Ql; T = m / Ql;
-    chips = [
-      {label:"Q liquide",    val:fmtSci(Ql), unit:"kg/s", primary:true},
-      {label:"Q gaz évaporé",val:fmtSci(Qg), unit:"kg/s"},
-      {label:"Durée fuite T",val:fmtDur(T),  unit:Math.round(T)+" s", duration:true}
-    ];
-    traces = [
+    const dh=parseFloat(document.getElementById('inp-dh').value)||0;
+    const rho=prod.rho, inner=2*g*dh+2*dP/rho;
+    if (inner<=0) { showErr("2g·Δh + 2ΔP/ρ ≤ 0 : vérifiez Δh et ΔP."); return; }
+    const Ql=rho*Cd*S*Math.sqrt(inner), Qg=0.1*Ql; T=m/Ql;
+    chips=[{label:"Q liquide",val:fmtSci(Ql),unit:"kg/s",primary:true},
+           {label:"Q gaz évaporé",val:fmtSci(Qg),unit:"kg/s"},
+           {label:"Durée fuite T",val:fmtDur(T),unit:Math.round(T)+" s",duration:true}];
+    traces=[
       `Q_liq = ρ × Cd × S × √(2g·Δh + 2ΔP/ρ)`,
       `Q_liq = ${rho} × ${Cd} × ${S.toExponential(3)} × √(${inner.toFixed(2)})`,
       `<strong>Q_liq = ${fmtSci(Ql)} kg/s</strong>`,
       `Q_gaz = 0.1 × Q_liq = <strong>${fmtSci(Qg)} kg/s</strong>`,
       `T = m / Q_liq = ${m} / ${fmtSci(Ql)} = <strong>${Math.round(T)} s (${fmtDur(T)})</strong>`
     ];
-    schemaData = {...schemaData, Q_liq: fmtSci(Ql), Q_gaz: fmtSci(Qg), Q_evap: null, hasFlaque:true, isCryo:true};
+    schemaData={...schemaData, Q_liq:fmtSci(Ql), Q_gaz:fmtSci(Qg), Q_evap:null, hasFlaque:true, isCryo:true};
 
   } else if (regime === 3) {
-    const theta = getThetaK();
-    if (theta <= 0) { showErr("Température invalide (> 0 K)."); return; }
-    if (dP <= 0)    { showErr("ΔP doit être > 0 pour le régime gaz."); return; }
-
-    // Avertissement : si ΔP ≥ PVS du produit, le produit est à l'état liquéfié → R4 conseillé
-    if (prod.PVS !== null && prod.PVS !== undefined && dP >= prod.PVS) {
-      showErr(`⚠ ΔP (${(dpUnit === 'bar' ? (dP/1e5).toPrecision(3)+' bar' : Math.round(dP)+' Pa')}) ≥ PVS du produit (${dpUnit === 'bar' ? (prod.PVS/1e5).toPrecision(3)+' bar' : prod.PVS.toLocaleString('fr')+' Pa'}) — le produit est vraisemblablement à l'état liquéfié sous pression. Envisagez le régime R4 — Gaz liquéfié sous pression.`);
+    const theta=getThetaK();
+    if (theta<=0) { showErr("Température invalide (> 0 K)."); return; }
+    if (dP<=0)    { showErr("ΔP doit être > 0 pour le régime gaz."); return; }
+    if (prod.PVS!==null&&prod.PVS!==undefined&&dP>=prod.PVS) {
+      showErr(`⚠ ΔP (${dpUnit==='bar'?(dP/1e5).toPrecision(3)+' bar':Math.round(dP)+' Pa'}) ≥ PVS du produit (${dpUnit==='bar'?(prod.PVS/1e5).toPrecision(3)+' bar':prod.PVS.toLocaleString('fr')+' Pa'}) — le produit est vraisemblablement à l'état liquéfié sous pression. Envisagez le régime R4 — Gaz liquéfié sous pression.`);
       return;
     }
-    let rho_g = prod.rho;
-    // ρ gaz en CNT : priorité à rhoGaz saisi (custom), sinon tabulé (gaz=true), sinon calcul loi gaz parfaits à CNT
-    if (prod.rhoGaz && prod.rhoGaz > 0) {
-      rho_g = prod.rhoGaz;
-    } else if (!prod.gaz) {
-      rho_g = 101325 * prod.M / (Rgas * 293.15);
-    }
-    const Qg = Cd * S * Math.sqrt(rho_g * dP / 2); T = m / Qg;
-    chips = [
-      {label:"Q gaz",        val:fmtSci(Qg),   unit:"kg/s", primary:true},
-      {label:"ρ_gaz utilisé",val:fmtSci(rho_g),unit:"kg/m³"},
-      {label:"Durée fuite T",val:fmtDur(T),     unit:Math.round(T)+" s", duration:true}
-    ];
-    traces = [
+    let rho_g=prod.rho;
+    if (prod.rhoGaz&&prod.rhoGaz>0) { rho_g=prod.rhoGaz; }
+    else if (!prod.gaz) { rho_g=101325*prod.M/(Rgas*293.15); }
+    const Qg=Cd*S*Math.sqrt(rho_g*dP/2); T=m/Qg;
+    chips=[{label:"Q gaz",val:fmtSci(Qg),unit:"kg/s",primary:true},
+           {label:"ρ_gaz utilisé",val:fmtSci(rho_g),unit:"kg/m³"},
+           {label:"Durée fuite T",val:fmtDur(T),unit:Math.round(T)+" s",duration:true}];
+    traces=[
       `ρ_gaz (CNT, 20°C) = P_atm × M / (R × T_ref) = 101325 × ${prod.M} / (8314 × 293.15) = ${fmtSci(rho_g)} kg/m³`,
       `Q_gaz = Cd × S × √(ρ_gaz × ΔP / 2)`,
       `Q_gaz = ${Cd} × ${S.toExponential(3)} × √(${fmtSci(rho_g)} × ${dP} / 2)`,
-      `<strong>Q_gaz = ${fmtSci(Qg)} kg/s</strong>`
+      `<strong>Q_gaz = ${fmtSci(Qg)} kg/s</strong>`,
+      `T = m / Q_gaz = ${m} / ${fmtSci(Qg)} = <strong>${Math.round(T)} s (${fmtDur(T)})</strong>`
     ];
-    traces.push(`T = m / Q_gaz = ${m} / ${fmtSci(Qg)} = <strong>${Math.round(T)} s (${fmtDur(T)})</strong>`);
-    schemaData = {...schemaData, Q_gaz: fmtSci(Qg), Q_evap: null, hasFlaque: false};
+    schemaData={...schemaData, Q_gaz:fmtSci(Qg), Q_evap:null, hasFlaque:false};
 
   } else if (regime === 4) {
-    if (dP <= 0) { showErr("ΔP doit être > 0."); return; }
-    const rho = prod.rho, Qm = Cd * S * Math.sqrt(2 * rho * dP);
-    if (ldChoice === 'court') {
-      const Qg = 0.3*Qm; T = m/Qm;
-      chips = [
-        {label:"Q mono (jet liq.)", val:fmtSci(Qm), unit:"kg/s", primary:true},
-        {label:"Q gaz",             val:fmtSci(Qg), unit:"kg/s"},
-        {label:"Durée fuite T",     val:fmtDur(T),  unit:Math.round(T)+" s", duration:true}
-      ];
-      traces = [
+    if (dP<=0) { showErr("ΔP doit être > 0."); return; }
+    const rho=prod.rho, Qm=Cd*S*Math.sqrt(2*rho*dP);
+    if (ldChoice==='court') {
+      const Qg=0.3*Qm; T=m/Qm;
+      chips=[{label:"Q mono (jet liq.)",val:fmtSci(Qm),unit:"kg/s",primary:true},
+             {label:"Q gaz",val:fmtSci(Qg),unit:"kg/s"},
+             {label:"Durée fuite T",val:fmtDur(T),unit:Math.round(T)+" s",duration:true}];
+      traces=[
         `Régime : Gaz liquéfié — Fuite courte (L &lt; 3D)`,
         `Q_mono = Cd × S × √(2 × ρ_liq × ΔP) = <strong>${fmtSci(Qm)} kg/s</strong>`,
         `Q_gaz = 0.3 × Q_mono = <strong>${fmtSci(Qg)} kg/s</strong>`,
         `T = m / Q_mono = ${m} / ${fmtSci(Qm)} = <strong>${Math.round(T)} s (${fmtDur(T)})</strong>`
       ];
-      schemaData = {...schemaData, Q_mono: fmtSci(Qm), Q_gaz: fmtSci(Qg), Q_evap: null, hasFlaque:true};
+      schemaData={...schemaData, Q_mono:fmtSci(Qm), Q_gaz:fmtSci(Qg), Q_evap:null, hasFlaque:true};
     } else {
-      const Qd = Qm/2.5, Qg = 0.3*Qd; T = m/Qd;
-      chips = [
-        {label:"Q mono",       val:fmtSci(Qm), unit:"kg/s"},
-        {label:"Q diphasique", val:fmtSci(Qd), unit:"kg/s", primary:true},
-        {label:"Q gaz",        val:fmtSci(Qg), unit:"kg/s"},
-        {label:"Durée fuite T",val:fmtDur(T),  unit:Math.round(T)+" s", duration:true}
-      ];
-      traces = [
+      const Qd=Qm/2.5, Qg=0.3*Qd; T=m/Qd;
+      chips=[{label:"Q mono",val:fmtSci(Qm),unit:"kg/s"},
+             {label:"Q diphasique",val:fmtSci(Qd),unit:"kg/s",primary:true},
+             {label:"Q gaz",val:fmtSci(Qg),unit:"kg/s"},
+             {label:"Durée fuite T",val:fmtDur(T),unit:Math.round(T)+" s",duration:true}];
+      traces=[
         `Régime : Gaz liquéfié — Fuite longue (L &gt; 3D)`,
         `Q_mono = Cd × S × √(2 × ρ_liq × ΔP) = <strong>${fmtSci(Qm)} kg/s</strong>`,
         `Q_diph = Q_mono / 2.5 = <strong>${fmtSci(Qd)} kg/s</strong>`,
         `Q_gaz = 0.3 × Q_diph = <strong>${fmtSci(Qg)} kg/s</strong>`,
         `T = m / Q_diph = ${m} / ${fmtSci(Qd)} = <strong>${Math.round(T)} s (${fmtDur(T)})</strong>`
       ];
-      schemaData = {...schemaData, Q_mono: fmtSci(Qm), Q_liq: fmtSci(Qd), Q_gaz: fmtSci(Qg), Q_evap: null, hasFlaque:true, isDiph:true};
+      schemaData={...schemaData, Q_mono:fmtSci(Qm), Q_liq:fmtSci(Qd), Q_gaz:fmtSci(Qg), Q_evap:null, hasFlaque:true, isDiph:true};
     }
   }
 
@@ -1163,328 +808,166 @@ function calculate() {
 // ══════════════════════════════════════
 
 function renderResult(chips, traces, schemaData) {
-  document.getElementById('placeholder').style.display = 'none';
-  const badge = regime === 4
-    ? (ldChoice === 'court' ? 'Gaz liquéfié L&lt;3D' : 'Gaz liquéfié L&gt;3D')
-    : ['','Liquide','Cryogénique','Gaz sous pression'][regime] || '—';
-  document.getElementById('res-badge').innerHTML = badge;
-  document.getElementById('res-chips').innerHTML = chips.map(c => `
+  document.getElementById('placeholder').style.display='none';
+  const badge=regime===4
+    ?(ldChoice==='court'?'Gaz liquéfié L&lt;3D':'Gaz liquéfié L&gt;3D')
+    :['','Liquide','Cryogénique','Gaz sous pression'][regime]||'—';
+  document.getElementById('res-badge').innerHTML=badge;
+  document.getElementById('res-chips').innerHTML=chips.map(c=>`
     <div class="rc ${c.primary?'primary':''} ${c.duration?'duration':''}">
       <div class="rc-lbl">${c.label}</div>
       <div class="rc-val">${c.val}</div>
       <div class="rc-unit">${c.unit}</div>
     </div>`).join('');
-  document.getElementById('res-trace').innerHTML =
-    traces.map(t => `<div class="fline">${t}</div>`).join('');
+  document.getElementById('res-trace').innerHTML=
+    traces.map(t=>`<div class="fline">${t}</div>`).join('');
   document.getElementById('results').classList.add('visible');
   renderSchema(schemaData);
-  document.getElementById('results').scrollIntoView({behavior:'smooth', block:'nearest'});
+  document.getElementById('results').scrollIntoView({behavior:'smooth',block:'nearest'});
 }
 
 // ══════════════════════════════════════
-// SCHÉMA DE DISPERSION
+// SCHEMA
 // ══════════════════════════════════════
 
 function renderSchema(d) {
-  const canvas = document.getElementById('schema-canvas');
-  const W = canvas.parentElement.clientWidth - 44;
-  const H = 300;
-  const dpr = window.devicePixelRatio || 1;
-  canvas.width  = W * dpr;
-  canvas.height = H * dpr;
-  canvas.style.width  = W + 'px';
-  canvas.style.height = H + 'px';
-  const ctx = canvas.getContext('2d');
-  ctx.scale(dpr, dpr);
-
-  // Couleurs
-  const C = {
-    blue:'#001F8F', blue2:'#0033CC', lblue:'#EEF2FF',
-    cyan:'#00B4D8', orange:'#FF6B00', green:'#00875A',
-    grey:'#8E96B0', lgrey:'#E9ECF5', white:'#FFFFFF',
-    gnd:'#C8B89A', gnddark:'#A0886A', sky1:'#CCE4F7', sky2:'#EEF6FB',
-    purple:'#7C3AED'
-  };
-
-  const gndY = Math.round(H * 0.76);
-
-  // Fond ciel
-  const skyGrad = ctx.createLinearGradient(0, 0, 0, gndY);
-  skyGrad.addColorStop(0, C.sky1);
-  skyGrad.addColorStop(1, C.sky2);
-  ctx.fillStyle = skyGrad;
-  ctx.fillRect(0, 0, W, gndY);
-
-  // Sol
-  ctx.fillStyle = C.gnd;
-  ctx.fillRect(0, gndY, W, H - gndY);
-  ctx.fillStyle = C.gnddark;
-  ctx.fillRect(0, gndY, W, 3);
-
-  // ── RÉSERVOIR ──
-  const rx = 52, rw = 36, rh = 62, rtop = gndY - rh;
-  // Corps
-  const resGrad = ctx.createLinearGradient(rx - rw/2, 0, rx + rw/2, 0);
-  resGrad.addColorStop(0, '#0028BB');
-  resGrad.addColorStop(0.5, '#001F8F');
-  resGrad.addColorStop(1, '#001060');
-  ctx.fillStyle = resGrad;
-  ctx.beginPath();
-  roundRect(ctx, rx - rw/2, rtop, rw, rh, 5);
-  ctx.fill();
-  // Reflet
-  ctx.fillStyle = 'rgba(255,255,255,0.13)';
-  ctx.beginPath();
-  roundRect(ctx, rx - rw/2 + 4, rtop + 5, 7, rh - 10, 3);
-  ctx.fill();
-  // Tête ellipse
-  ctx.fillStyle = '#002BBF';
-  ctx.beginPath();
-  ctx.ellipse(rx, rtop, rw/2, 7, 0, 0, Math.PI * 2);
-  ctx.fill();
-  // Label
-  ctx.fillStyle = C.white;
-  ctx.font = 'bold 8px Inter,sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillText('SOURCE', rx, rtop + rh/2 + 3);
-
-  // Point de fuite
-  const fuitX = rx + rw/2;
-  const fuitY = gndY - 24;
-  ctx.fillStyle = C.orange;
-  ctx.beginPath();
-  ctx.arc(fuitX, fuitY, 5, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.strokeStyle = C.white;
-  ctx.lineWidth = 1.5;
-  ctx.stroke();
-
-  const isR1  = d.regime === 1;
-  const isR2  = d.regime === 2;
-  const isR3  = d.regime === 3;
-  const isR4  = d.regime === 4;
-  const isCrt = d.ldChoice === 'court';
-
-  const hasLiq    = isR1 || isR2 || isR4;
-  const hasGaz    = isR2 || isR3 || isR4;
-  const hasFlaque = d.hasFlaque;
-  const isCryo    = d.isCryo;
-  const isDiph    = d.isDiph;
-
-  // Zones X de la scène
-  const jetEndX  = fuitX + W * 0.30;
-  const flaqueX  = jetEndX;
-  const cloudCX  = isR3 ? fuitX + W * 0.52 : flaqueX + W * 0.06;
-  const cloudCY  = gndY - 100;
-
-  // ── JET LIQUIDE / DIPHASIQUE ──
+  const canvas=document.getElementById('schema-canvas');
+  const W=canvas.parentElement.clientWidth-44, H=300, dpr=window.devicePixelRatio||1;
+  canvas.width=W*dpr; canvas.height=H*dpr;
+  canvas.style.width=W+'px'; canvas.style.height=H+'px';
+  const ctx=canvas.getContext('2d'); ctx.scale(dpr,dpr);
+  const C={blue:'#001F8F',blue2:'#0033CC',cyan:'#00B4D8',orange:'#FF6B00',green:'#00875A',
+           grey:'#8E96B0',white:'#FFFFFF',gnd:'#C8B89A',gnddark:'#A0886A',
+           sky1:'#CCE4F7',sky2:'#EEF6FB',purple:'#7C3AED'};
+  const gndY=Math.round(H*0.76);
+  const sg=ctx.createLinearGradient(0,0,0,gndY);
+  sg.addColorStop(0,C.sky1); sg.addColorStop(1,C.sky2);
+  ctx.fillStyle=sg; ctx.fillRect(0,0,W,gndY);
+  ctx.fillStyle=C.gnd; ctx.fillRect(0,gndY,W,H-gndY);
+  ctx.fillStyle=C.gnddark; ctx.fillRect(0,gndY,W,3);
+  const rx=52,rw=36,rh=62,rtop=gndY-rh;
+  const rg=ctx.createLinearGradient(rx-rw/2,0,rx+rw/2,0);
+  rg.addColorStop(0,'#0028BB'); rg.addColorStop(0.5,'#001F8F'); rg.addColorStop(1,'#001060');
+  ctx.fillStyle=rg; ctx.beginPath(); rrect(ctx,rx-rw/2,rtop,rw,rh,5); ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,0.13)'; ctx.beginPath(); rrect(ctx,rx-rw/2+4,rtop+5,7,rh-10,3); ctx.fill();
+  ctx.fillStyle='#002BBF'; ctx.beginPath(); ctx.ellipse(rx,rtop,rw/2,7,0,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle=C.white; ctx.font='bold 8px Inter,sans-serif'; ctx.textAlign='center';
+  ctx.fillText('SOURCE',rx,rtop+rh/2+3);
+  const fuitX=rx+rw/2, fuitY=gndY-24;
+  ctx.fillStyle=C.orange; ctx.beginPath(); ctx.arc(fuitX,fuitY,5,0,Math.PI*2); ctx.fill();
+  ctx.strokeStyle=C.white; ctx.lineWidth=1.5; ctx.stroke();
+  const isR1=d.regime===1,isR2=d.regime===2,isR3=d.regime===3,isR4=d.regime===4;
+  const isCrt=d.ldChoice==='court';
+  const hasLiq=isR1||isR2||isR4, hasGaz=isR2||isR3||isR4;
+  const isCryo=d.isCryo, isDiph=d.isDiph;
+  const jetEndX=fuitX+W*0.30, flaqueX=jetEndX;
+  const cloudCX=isR3?fuitX+W*0.52:flaqueX+W*0.06, cloudCY=gndY-100;
   if (hasLiq) {
-    const jColor = isCryo ? C.cyan : isR4 && isDiph ? C.purple : C.blue2;
-    ctx.save();
-    ctx.beginPath();
-    ctx.moveTo(fuitX, fuitY);
-    ctx.bezierCurveTo(
-      fuitX + W*0.12, fuitY - 8,
-      fuitX + W*0.24, fuitY - 4,
-      jetEndX, gndY - 3
-    );
-    ctx.strokeStyle = jColor;
-    ctx.lineWidth = isDiph ? 6 : 4;
+    const jc=isCryo?C.cyan:isR4&&isDiph?C.purple:C.blue2;
+    ctx.save(); ctx.beginPath(); ctx.moveTo(fuitX,fuitY);
+    ctx.bezierCurveTo(fuitX+W*0.12,fuitY-8,fuitX+W*0.24,fuitY-4,jetEndX,gndY-3);
+    ctx.strokeStyle=jc; ctx.lineWidth=isDiph?6:4;
     if (isCryo) ctx.setLineDash([8,4]);
-    ctx.stroke();
-    ctx.setLineDash([]);
-    ctx.restore();
-
-    // Label jet
-    const lbl = isR4 && isCrt  ? `Q_mono\n${d.Q_mono||'—'} kg/s`
-              : isR4 && isDiph ? `Q_diph\n${d.Q_liq||'—'} kg/s`
-              : `Q_liq\n${d.Q_liq||'—'} kg/s`;
-    annotation(ctx, fuitX + W*0.14, fuitY - 26, lbl, jColor);
+    ctx.stroke(); ctx.setLineDash([]); ctx.restore();
+    const lbl=isR4&&isCrt?`Q_mono\n${d.Q_mono||'—'} kg/s`
+             :isR4&&isDiph?`Q_diph\n${d.Q_liq||'—'} kg/s`
+             :`Q_liq\n${d.Q_liq||'—'} kg/s`;
+    annot(ctx,fuitX+W*0.14,fuitY-26,lbl,jc);
   }
-
-  // ── JET GAZEUX (R3 uniquement) ──
   if (isR3) {
     ctx.save();
-    const jg = ctx.createLinearGradient(fuitX, 0, fuitX + W*0.5, 0);
-    jg.addColorStop(0, 'rgba(0,51,204,0.65)');
-    jg.addColorStop(1, 'rgba(0,51,204,0.04)');
-    ctx.fillStyle = jg;
-    ctx.beginPath();
-    ctx.moveTo(fuitX, fuitY - 7);
-    ctx.lineTo(fuitX + W*0.5, fuitY - 26);
-    ctx.lineTo(fuitX + W*0.5, fuitY + 26);
-    ctx.lineTo(fuitX, fuitY + 7);
-    ctx.closePath();
-    ctx.fill();
-    ctx.restore();
-    annotation(ctx, fuitX + W*0.25, fuitY - 32, `Q_gaz\n${d.Q_gaz||'—'} kg/s`, C.blue2);
+    const jg=ctx.createLinearGradient(fuitX,0,fuitX+W*0.5,0);
+    jg.addColorStop(0,'rgba(0,51,204,0.65)'); jg.addColorStop(1,'rgba(0,51,204,0.04)');
+    ctx.fillStyle=jg; ctx.beginPath();
+    ctx.moveTo(fuitX,fuitY-7); ctx.lineTo(fuitX+W*0.5,fuitY-26);
+    ctx.lineTo(fuitX+W*0.5,fuitY+26); ctx.lineTo(fuitX,fuitY+7);
+    ctx.closePath(); ctx.fill(); ctx.restore();
+    annot(ctx,fuitX+W*0.25,fuitY-32,`Q_gaz\n${d.Q_gaz||'—'} kg/s`,C.blue2);
   }
-
-  // ── FLAQUE AU SOL ──
-  if (hasFlaque) {
-    const fw = W * 0.20;
-    const fGrad = ctx.createRadialGradient(flaqueX, gndY, 0, flaqueX, gndY, fw/2);
-    const fc = isCryo ? 'rgba(0,180,216,' : 'rgba(0,31,143,';
-    fGrad.addColorStop(0, fc+'0.50)');
-    fGrad.addColorStop(1, fc+'0.04)');
-    ctx.fillStyle = fGrad;
-    ctx.beginPath();
-    ctx.ellipse(flaqueX, gndY + 2, fw/2, 9, 0, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = isCryo ? C.cyan : C.blue;
-    ctx.font = '9px Inter,sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('Flaque', flaqueX, gndY + 15);
+  if (d.hasFlaque) {
+    const fw=W*0.20, fc=isCryo?'rgba(0,180,216,':'rgba(0,31,143,';
+    const fg=ctx.createRadialGradient(flaqueX,gndY,0,flaqueX,gndY,fw/2);
+    fg.addColorStop(0,fc+'0.50)'); fg.addColorStop(1,fc+'0.04)');
+    ctx.fillStyle=fg; ctx.beginPath();
+    ctx.ellipse(flaqueX,gndY+2,fw/2,9,0,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle=isCryo?C.cyan:C.blue; ctx.font='9px Inter,sans-serif'; ctx.textAlign='center';
+    ctx.fillText('Flaque',flaqueX,gndY+15);
   }
-
-  // ── NUAGE GAZEUX — R2 et R4 uniquement (pas R3) ──
-  if (hasGaz && !isR3) {
-    const cColor = isCryo ? 'rgba(0,180,216,0.20)' : 'rgba(0,51,204,0.13)';
-    const cW = 72, cH = 48;
-    cloud(ctx, cloudCX, cloudCY, cW, cH, cColor, isCryo ? C.cyan : C.blue2);
-
-    // Flèche vent
-    const vVal = parseFloat(document.getElementById('inp-v').value);
-    const vLbl = (!isNaN(vVal) && vVal > 0) ? `${vVal} m/s` : '';
-    const wx = cloudCX + cW/2 + 6, wy = cloudCY - cH/2 - 12;
-    ctx.fillStyle = C.grey;
-    ctx.font = '9px Inter,sans-serif';
-    ctx.textAlign = 'left';
-    ctx.fillText('↗ Vent' + (vLbl ? ' ' + vLbl : ''), wx, wy);
-
-    annotation(ctx, cloudCX, cloudCY, `Q_gaz\n${d.Q_gaz||'—'} kg/s`, isCryo ? C.cyan : C.blue2);
+  if (hasGaz&&!isR3) {
+    const cColor=isCryo?'rgba(0,180,216,0.20)':'rgba(0,51,204,0.13)';
+    cloud(ctx,cloudCX,cloudCY,72,48,cColor,isCryo?C.cyan:C.blue2);
+    const vVal=parseFloat(document.getElementById('inp-v').value);
+    ctx.fillStyle=C.grey; ctx.font='9px Inter,sans-serif'; ctx.textAlign='left';
+    ctx.fillText('↗ Vent'+(!isNaN(vVal)&&vVal>0?' '+vVal+' m/s':''),cloudCX+42,cloudCY-36);
+    annot(ctx,cloudCX,cloudCY,`Q_gaz\n${d.Q_gaz||'—'} kg/s`,isCryo?C.cyan:C.blue2);
   }
-
-  // ── ÉVAPORATION FLAQUE : flèche verticale + annotation — R1 uniquement ──
-  if (hasFlaque && d.regime === 1) {
-    const evX = isR3 ? cloudCX - 30 : flaqueX + 2;
-    const evColor = d.Q_evap ? C.green : C.grey;
-    const evLbl = `Q_évap\n${d.Q_evap || 'non calculé'}${d.Q_evap ? ' kg/s' : ''}`;
-    // Flèche montante pointillée
-    ctx.save();
-    ctx.strokeStyle = evColor;
-    ctx.lineWidth = 1.5;
-    ctx.setLineDash([5, 3]);
-    ctx.beginPath();
-    ctx.moveTo(evX, gndY - 4);
-    ctx.lineTo(evX, cloudCY + 30);
-    ctx.stroke();
+  if (d.hasFlaque&&d.regime===1) {
+    const evX=flaqueX+2, evC=d.Q_evap?C.green:C.grey;
+    const evL=`Q_évap\n${d.Q_evap||'non calculé'}${d.Q_evap?' kg/s':''}`;
+    ctx.save(); ctx.strokeStyle=evC; ctx.lineWidth=1.5; ctx.setLineDash([5,3]);
+    ctx.beginPath(); ctx.moveTo(evX,gndY-4); ctx.lineTo(evX,cloudCY+30); ctx.stroke();
     ctx.setLineDash([]);
-    // Tête de flèche
-    ctx.fillStyle = evColor;
-    ctx.beginPath();
-    ctx.moveTo(evX, cloudCY + 26);
-    ctx.lineTo(evX - 5, cloudCY + 36);
-    ctx.lineTo(evX + 5, cloudCY + 36);
-    ctx.closePath();
-    ctx.fill();
-    ctx.restore();
-    annotation(ctx, evX + 52, cloudCY + 30, evLbl, evColor);
+    ctx.fillStyle=evC; ctx.beginPath();
+    ctx.moveTo(evX,cloudCY+26); ctx.lineTo(evX-5,cloudCY+36); ctx.lineTo(evX+5,cloudCY+36);
+    ctx.closePath(); ctx.fill(); ctx.restore();
+    annot(ctx,evX+52,cloudCY+30,evL,evC);
   }
-
-  // ── Q_MONO (gaz liquéfié) ──
-  if (isR4 && d.Q_mono) {
-    ctx.fillStyle = C.orange;
-    ctx.font = 'bold 9px Inter,sans-serif';
-    ctx.textAlign = 'left';
-    ctx.fillText(`Q_mono = ${d.Q_mono} kg/s`, fuitX + 4, fuitY - 10);
+  if (isR4&&d.Q_mono) {
+    ctx.fillStyle=C.orange; ctx.font='bold 9px Inter,sans-serif'; ctx.textAlign='left';
+    ctx.fillText(`Q_mono = ${d.Q_mono} kg/s`,fuitX+4,fuitY-10);
   }
-
-  // ── LÉGENDE ──
-  legend(ctx, W, H, hasLiq, hasGaz && !isR3, hasFlaque && d.regime === 1, d.Q_evap, isCryo);
+  legend(ctx,W,H,hasLiq,hasGaz&&!isR3,d.hasFlaque&&d.regime===1,d.Q_evap,isCryo);
 }
 
-// ── CANVAS HELPERS ──
-
-function roundRect(ctx, x, y, w, h, r) {
-  ctx.moveTo(x + r, y);
-  ctx.lineTo(x + w - r, y);
-  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-  ctx.lineTo(x + w, y + h - r);
-  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-  ctx.lineTo(x + r, y + h);
-  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-  ctx.lineTo(x, y + r);
-  ctx.quadraticCurveTo(x, y, x + r, y);
-  ctx.closePath();
+function rrect(ctx,x,y,w,h,r) {
+  ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y); ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r); ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  ctx.lineTo(x+r,y+h); ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+  ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y); ctx.closePath();
 }
 
-function annotation(ctx, cx, cy, text, color) {
-  const lines = text.split('\n');
-  const pw = 96, lh = 14, ph = lines.length * lh + 10;
-  ctx.save();
-  ctx.shadowColor = 'rgba(0,0,0,0.10)';
-  ctx.shadowBlur  = 5;
-  ctx.fillStyle   = 'rgba(255,255,255,0.93)';
-  ctx.beginPath();
-  roundRect(ctx, cx - pw/2, cy - ph/2, pw, ph, 6);
-  ctx.fill();
-  ctx.shadowBlur = 0;
-  ctx.strokeStyle = color;
-  ctx.lineWidth   = 1.5;
-  ctx.beginPath();
-  roundRect(ctx, cx - pw/2, cy - ph/2, pw, ph, 6);
-  ctx.stroke();
-  ctx.textAlign = 'center';
-  lines.forEach((l, i) => {
-    ctx.font      = i === 0 ? 'bold 10px Inter,sans-serif' : '10px Inter,sans-serif';
-    ctx.fillStyle = color;
-    ctx.fillText(l, cx, cy - ph/2 + 14 + i * lh);
+function annot(ctx,cx,cy,text,color) {
+  const lines=text.split('\n'), pw=96, lh=14, ph=lines.length*lh+10;
+  ctx.save(); ctx.shadowColor='rgba(0,0,0,0.10)'; ctx.shadowBlur=5;
+  ctx.fillStyle='rgba(255,255,255,0.93)'; ctx.beginPath(); rrect(ctx,cx-pw/2,cy-ph/2,pw,ph,6); ctx.fill();
+  ctx.shadowBlur=0; ctx.strokeStyle=color; ctx.lineWidth=1.5;
+  ctx.beginPath(); rrect(ctx,cx-pw/2,cy-ph/2,pw,ph,6); ctx.stroke();
+  ctx.textAlign='center';
+  lines.forEach((l,i)=>{
+    ctx.font=i===0?'bold 10px Inter,sans-serif':'10px Inter,sans-serif';
+    ctx.fillStyle=color; ctx.fillText(l,cx,cy-ph/2+14+i*lh);
   });
   ctx.restore();
 }
 
-function cloud(ctx, cx, cy, w, h, fill, stroke) {
+function cloud(ctx,cx,cy,w,h,fill,stroke) {
   ctx.save();
-  const blobs = [
-    [cx - w*0.22, cy + h*0.12, w*0.24],
-    [cx,          cy - h*0.12, w*0.30],
-    [cx + w*0.22, cy + h*0.12, w*0.24],
-    [cx - w*0.08, cy + h*0.22, w*0.19],
-    [cx + w*0.08, cy + h*0.22, w*0.19],
-  ];
+  const blobs=[[cx-w*0.22,cy+h*0.12,w*0.24],[cx,cy-h*0.12,w*0.30],
+               [cx+w*0.22,cy+h*0.12,w*0.24],[cx-w*0.08,cy+h*0.22,w*0.19],[cx+w*0.08,cy+h*0.22,w*0.19]];
   ctx.beginPath();
-  blobs.forEach(([bx, by, br]) => {
-    ctx.moveTo(bx + br, by);
-    ctx.arc(bx, by, br, 0, Math.PI * 2);
-  });
-  ctx.fillStyle = fill;
-  ctx.fill();
-  ctx.strokeStyle = stroke.replace ? stroke : fill;
-  ctx.lineWidth = 1;
-  ctx.globalAlpha = 0.4;
-  ctx.stroke();
-  ctx.globalAlpha = 1;
+  blobs.forEach(([bx,by,br])=>{ctx.moveTo(bx+br,by); ctx.arc(bx,by,br,0,Math.PI*2);});
+  ctx.fillStyle=fill; ctx.fill();
+  ctx.strokeStyle=fill; ctx.lineWidth=1; ctx.globalAlpha=0.4; ctx.stroke(); ctx.globalAlpha=1;
   ctx.restore();
 }
 
-function legend(ctx, W, H, hasLiq, hasGaz, hasEvap, Q_evap, isCryo) {
-  const items = [];
-  if (hasLiq)  items.push({color: isCryo ? '#00B4D8' : '#0033CC', label:'Jet liquide', dash:false});
-  if (hasGaz)  items.push({color: isCryo ? '#00B4D8' : '#0033CC', label:'Nuage gazeux', dash:false});
-  if (hasEvap) items.push({
-    color: Q_evap ? '#00875A' : '#8E96B0',
-    label: Q_evap ? `Q_évap = ${Q_evap} kg/s` : 'Q_évap non calculé',
-    dash: true
-  });
+function legend(ctx,W,H,hasLiq,hasGaz,hasEvap,Q_evap,isCryo) {
+  const items=[];
+  if (hasLiq) items.push({color:isCryo?'#00B4D8':'#0033CC',label:'Jet liquide',dash:false});
+  if (hasGaz) items.push({color:isCryo?'#00B4D8':'#0033CC',label:'Nuage gazeux',dash:false});
+  if (hasEvap) items.push({color:Q_evap?'#00875A':'#8E96B0',
+    label:Q_evap?`Q_évap = ${Q_evap} kg/s`:'Q_évap non calculé',dash:true});
   if (!items.length) return;
   ctx.save();
-  const lx = W - 12;
-  const startY = H - 12 - items.length * 17;
-  items.forEach((it, i) => {
-    const y = startY + i * 17;
-    ctx.setLineDash(it.dash ? [4,3] : []);
-    ctx.strokeStyle = it.color;
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(lx - 130, y);
-    ctx.lineTo(lx - 114, y);
-    ctx.stroke();
-    ctx.setLineDash([]);
-    ctx.fillStyle = it.color;
-    ctx.font = '9px Inter,sans-serif';
-    ctx.textAlign = 'left';
-    ctx.fillText(it.label, lx - 110, y + 3);
+  const lx=W-12, startY=H-12-items.length*17;
+  items.forEach((it,i)=>{
+    const y=startY+i*17;
+    ctx.setLineDash(it.dash?[4,3]:[]);
+    ctx.strokeStyle=it.color; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo(lx-130,y); ctx.lineTo(lx-114,y); ctx.stroke();
+    ctx.setLineDash([]); ctx.fillStyle=it.color;
+    ctx.font='9px Inter,sans-serif'; ctx.textAlign='left';
+    ctx.fillText(it.label,lx-110,y+3);
   });
   ctx.restore();
 }
@@ -1494,26 +977,21 @@ function legend(ctx, W, H, hasLiq, hasGaz, hasEvap, Q_evap, isCryo) {
 // ══════════════════════════════════════
 
 function resetAll() {
-  document.getElementById('sel-produit').value = '';
-  document.getElementById('custom-product-block').style.display = 'none';
-  document.getElementById('custom-nom').value = '';
-  document.getElementById('custom-rho').value = '';
-  document.getElementById('custom-M').value = '';
-  document.getElementById('custom-rho-gaz').value = '';
-  document.getElementById('custom-PVS').value = '';
-  document.getElementById('sel-ref').value = '';
-  document.getElementById('sel-orifice').value = '0.62';
-  ['inp-d','inp-m','inp-dp','inp-surf','inp-r','inp-v'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('inp-dh').value = '0';
-  document.getElementById('inp-theta').value = '293';
-  document.getElementById('product-props').style.display = 'none';
-  document.getElementById('ref-hint').style.display = 'none';
-  document.getElementById('s-tag').style.display = 'none';
-  refLabel = ''; ldChoice = 'court';
-  setLD('court');
-  updateCd();
-  setRegime(1);
-  setDpUnit('Pa');
+  document.getElementById('sel-produit').value='';
+  document.getElementById('custom-product-block').style.display='none';
+  ['custom-nom','custom-rho','custom-M','custom-rho-gaz','custom-PVS'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+  document.getElementById('sel-ref').value='';
+  document.getElementById('sel-orifice').value='0.62';
+  ['inp-d','inp-m','inp-dp','inp-surf','inp-r','inp-v'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('inp-dh').value='0';
+  document.getElementById('inp-theta').value='20';
+  document.getElementById('product-props').style.display='none';
+  document.getElementById('ref-hint').style.display='none';
+  document.getElementById('s-tag').style.display='none';
+  refLabel=''; ldChoice='court';
+  setLD('court'); updateCd(); setRegime(1); setDpUnit('Pa');
 }
 
 // ══════════════════════════════════════
