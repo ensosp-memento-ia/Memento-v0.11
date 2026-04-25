@@ -232,7 +232,44 @@ footer{padding:12px;text-align:center;font-size:12px;color:#444;border-top:1px s
     <option value="methanol">Méthanol</option>
     <option value="co2">CO₂ (gaz)</option>
     <option value="hydrogene">Hydrogène (gaz)</option>
+    <option value="__custom__">✏️ Produit non listé — saisie manuelle</option>
   </select>
+
+  <!-- Saisie produit personnalisé -->
+  <div id="custom-product-block" style="display:none;margin-top:14px;background:#eef2ff;border-radius:12px;padding:14px 16px">
+    <div class="section-lbl" style="margin-top:0">Propriétés du produit — saisie manuelle</div>
+    <div class="field-row">
+      <div>
+        <label style="margin-top:0">Nom du produit</label>
+        <input type="text" id="custom-nom" placeholder="ex: Méthane" oninput="onCustomChange()"
+          style="width:100%;padding:10px 12px;border-radius:10px;border:1px solid #ccd2e3;font-size:14px;font-family:'Inter',sans-serif;box-sizing:border-box">
+      </div>
+      <div>
+        <label style="margin-top:0">ρ liquide (kg/m³) <span style="color:#cc1a00">*</span></label>
+        <div class="iw"><input type="number" id="custom-rho" min="0" step="1" placeholder="ex: 422" oninput="onCustomChange()"><span class="iu">kg/m³</span></div>
+      </div>
+    </div>
+    <div class="field-row">
+      <div>
+        <label style="margin-top:0">M — Masse molaire (kg/kmol) <span style="color:#cc1a00">*</span></label>
+        <div class="iw"><input type="number" id="custom-M" min="0" step="0.1" placeholder="ex: 16" oninput="onCustomChange()"><span class="iu">kg/kmol</span></div>
+      </div>
+      <div>
+        <label style="margin-top:0">ρ gaz CNT (kg/m³)</label>
+        <div class="iw"><input type="number" id="custom-rho-gaz" min="0" step="0.01" placeholder="ex: 0.72" oninput="onCustomChange()"><span class="iu">kg/m³</span></div>
+      </div>
+    </div>
+    <div class="field-row">
+      <div>
+        <label style="margin-top:0">PVS à 20°C (Pa)</label>
+        <div class="iw"><input type="number" id="custom-PVS" min="0" step="100" placeholder="ex: 101325" oninput="onCustomChange()"><span class="iu">Pa</span></div>
+      </div>
+      <div style="display:flex;align-items:flex-end;padding-bottom:2px">
+        <div class="hint" style="color:#856404">⚠ Vérifier les valeurs sur la FDS officielle</div>
+      </div>
+    </div>
+  </div>
+
   <div id="product-props" class="prop-row" style="display:none"></div>
 </div>
 
@@ -341,9 +378,12 @@ footer{padding:12px;text-align:center;font-size:12px;color:#444;border-top:1px s
   </div>
 
   <div id="field-theta" style="display:none">
-    <label>Température θ</label>
-    <div class="iw"><input type="number" id="inp-theta" min="1" step="1" placeholder="ex: 293" value="293"><span class="iu">K</span></div>
-    <div class="hint">293 K = 20°C</div>
+    <label>Température <span id="theta-lbl-unit">θ (°C)</span></label>
+    <div class="iw">
+      <input type="number" id="inp-theta" min="-273" step="1" placeholder="ex: 20" value="20" oninput="updateThetaHint()">
+      <span class="iu" id="theta-iu">°C</span>
+    </div>
+    <div class="hint" id="theta-hint">→ 293 K (utilisé dans le calcul)</div>
   </div>
 
   <!-- Évaporation flaque — visible R1, R2, R3, R4 -->
@@ -437,7 +477,7 @@ footer{padding:12px;text-align:center;font-size:12px;color:#444;border-top:1px s
 // ══════════════════════════════════════
 
 const PRODUCTS = {
-  propane:    { rho:510,  M:44,   PVS:850000, gaz:false },
+  propane:    { rho:493,  M:44,   PVS:850000, gaz:false },
   butane:     { rho:580,  M:58,   PVS:210000, gaz:false },
   ammoniac:   { rho:682,  M:17,   PVS:857000, gaz:false },
   chlore:     { rho:1560, M:71,   PVS:673000, gaz:false },
@@ -451,19 +491,188 @@ const PRODUCTS = {
   acetone:    { rho:791,  M:58,   PVS:23700,  gaz:false },
   toluene:    { rho:867,  M:92,   PVS:2900,   gaz:false },
   methanol:   { rho:792,  M:32,   PVS:12900,  gaz:false },
-  co2:        { rho:1.98, M:44,   PVS:null,   gaz:true  },
+  co2:        { rho:1.83, M:44,   PVS:null,   gaz:true  },
   hydrogene:  { rho:0.09, M:2,    PVS:null,   gaz:true  }
 };
 
 const CD_DATA = [
-  ["Orifice de Borda (1.6D < L < 2D)",  "0.50"],
-  ["Orifice mince / aigu (e << D)",       "0.62"],
-  ["Orifice de Poleni (2D < L < 5D)",    "0.82"],
-  ["Orifice arrondi",                     "0.96"],
-  ["Ajustage convergent α = 12°",         "0.95"],
-  ["Ajustage convergent α = 30°",         "1.00"],
-  ["Rupture guillotine (canalisation)",   "1.00"],
-  ["Venturi (convergent/divergent)",      "1.00"]
+  ["Orifice de Borda (1.6D &lt; L &lt; 2D)",  "0.50"],
+  ["Orifice mince / aigu (e &lt;&lt; D)",       "0.62"],
+  ["Orifice de Poleni (2D &lt; L &lt; 5D)",    "0.82"],
+  ["Orifice arrondi",                            "0.96"],
+  ["Ajustage convergent α = 12°",                "0.95"],
+  ["Ajustage convergent α = 30°",                "≈ 1.00"],
+  ["Rupture guillotine (canalisation)",           "1.00"],
+  ["Venturi (convergent/divergent)",              "&gt; 1 = f(α)"]
+];
+      <defs><marker id="a1" markerWidth="5" markerHeight="5" refX="5" refY="2.5" orient="auto"><path d="M0,0 L5,2.5 L0,5 Z" fill="#333"/></marker></defs>
+      <!-- paroi amont haut -->
+      <line x1="2" y1="6" x2="28" y2="6" stroke="#222" stroke-width="1.8"/>
+      <!-- épaulement intérieur haut : descend, puis part vers la droite (tube rentrant) -->
+      <line x1="28" y1="2" x2="28" y2="14" stroke="#222" stroke-width="1.8"/>
+      <line x1="28" y1="14" x2="44" y2="14" stroke="#222" stroke-width="1.8"/>
+      <!-- paroi amont bas -->
+      <line x1="2" y1="34" x2="28" y2="34" stroke="#222" stroke-width="1.8"/>
+      <!-- épaulement intérieur bas : monte, puis part vers la droite -->
+      <line x1="28" y1="38" x2="28" y2="26" stroke="#222" stroke-width="1.8"/>
+      <line x1="28" y1="26" x2="44" y2="26" stroke="#222" stroke-width="1.8"/>
+      <!-- paroi aval haut et bas — tube de sortie -->
+      <line x1="44" y1="14" x2="44" y2="6" stroke="#222" stroke-width="1.8"/>
+      <line x1="44" y1="26" x2="44" y2="34" stroke="#222" stroke-width="1.8"/>
+      <line x1="44" y1="6" x2="62" y2="6" stroke="#222" stroke-width="1.8"/>
+      <line x1="44" y1="34" x2="62" y2="34" stroke="#222" stroke-width="1.8"/>
+      <!-- flèche écoulement -->
+      <line x1="8" y1="20" x2="54" y2="20" stroke="#333" stroke-width="1.5" marker-end="url(#a1)"/>
+    </svg>`
+  },
+  {
+    label: "Orifice mince ou aigu (e &lt;&lt; D)<br><small style='font-weight:400;color:#888'>e : épaisseur de la paroi</small>",
+    val: "0.62",
+    // Paroi très fine (trait unique), jet avec contraction (vena contracta)
+    svg: `<svg width="64" height="40" viewBox="0 0 64 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs><marker id="a2" markerWidth="5" markerHeight="5" refX="5" refY="2.5" orient="auto"><path d="M0,0 L5,2.5 L0,5 Z" fill="#333"/></marker></defs>
+      <!-- paroi amont haut et bas -->
+      <line x1="2" y1="8" x2="30" y2="8" stroke="#222" stroke-width="1.8"/>
+      <line x1="2" y1="32" x2="30" y2="32" stroke="#222" stroke-width="1.8"/>
+      <!-- paroi fine (trait unique) -->
+      <line x1="30" y1="2" x2="30" y2="16" stroke="#222" stroke-width="2"/>
+      <line x1="30" y1="24" x2="30" y2="38" stroke="#222" stroke-width="2"/>
+      <!-- jet contracté après la paroi (vena contracta) -->
+      <line x1="30" y1="8" x2="62" y2="8" stroke="#222" stroke-width="1.8"/>
+      <line x1="30" y1="32" x2="62" y2="32" stroke="#222" stroke-width="1.8"/>
+      <!-- contraction du jet côté aval : les bords se resserrent légèrement -->
+      <line x1="30" y1="16" x2="48" y2="18" stroke="#222" stroke-width="1.4"/>
+      <line x1="30" y1="24" x2="48" y2="22" stroke="#222" stroke-width="1.4"/>
+      <!-- flèche écoulement -->
+      <line x1="8" y1="20" x2="26" y2="20" stroke="#333" stroke-width="1.5" marker-end="url(#a2)"/>
+      <line x1="34" y1="20" x2="56" y2="20" stroke="#333" stroke-width="1.5" marker-end="url(#a2)"/>
+    </svg>`
+  },
+  {
+    label: "Orifice de Poleni (2D &lt; L &lt; 5D)",
+    val: "0.82",
+    // Deux épaulements successifs : marche haute + marche basse + canal + sortie
+    svg: `<svg width="64" height="40" viewBox="0 0 64 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs><marker id="a3" markerWidth="5" markerHeight="5" refX="5" refY="2.5" orient="auto"><path d="M0,0 L5,2.5 L0,5 Z" fill="#333"/></marker></defs>
+      <!-- paroi amont -->
+      <line x1="2" y1="8" x2="20" y2="8" stroke="#222" stroke-width="1.8"/>
+      <line x1="2" y1="32" x2="20" y2="32" stroke="#222" stroke-width="1.8"/>
+      <!-- 1er épaulement haut (descend) -->
+      <line x1="20" y1="2" x2="20" y2="15" stroke="#222" stroke-width="1.8"/>
+      <line x1="20" y1="15" x2="34" y2="15" stroke="#222" stroke-width="1.8"/>
+      <!-- 1er épaulement bas (monte) -->
+      <line x1="20" y1="38" x2="20" y2="25" stroke="#222" stroke-width="1.8"/>
+      <line x1="20" y1="25" x2="34" y2="25" stroke="#222" stroke-width="1.8"/>
+      <!-- 2e épaulement : retour vers dimensions aval -->
+      <line x1="34" y1="15" x2="34" y2="8" stroke="#222" stroke-width="1.8"/>
+      <line x1="34" y1="25" x2="34" y2="32" stroke="#222" stroke-width="1.8"/>
+      <!-- paroi aval -->
+      <line x1="34" y1="8" x2="62" y2="8" stroke="#222" stroke-width="1.8"/>
+      <line x1="34" y1="32" x2="62" y2="32" stroke="#222" stroke-width="1.8"/>
+      <!-- flèche -->
+      <line x1="6" y1="20" x2="56" y2="20" stroke="#333" stroke-width="1.5" marker-end="url(#a3)"/>
+    </svg>`
+  },
+  {
+    label: "Orifice arrondi",
+    val: "0.96",
+    // Congé arrondi côté entrée (en U) — asymétrique : arrondi amont, droit aval
+    svg: `<svg width="64" height="40" viewBox="0 0 64 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs><marker id="a4" markerWidth="5" markerHeight="5" refX="5" refY="2.5" orient="auto"><path d="M0,0 L5,2.5 L0,5 Z" fill="#333"/></marker></defs>
+      <!-- paroi amont haut et bas -->
+      <line x1="2" y1="8" x2="28" y2="8" stroke="#222" stroke-width="1.8"/>
+      <line x1="2" y1="32" x2="28" y2="32" stroke="#222" stroke-width="1.8"/>
+      <!-- congé arrondi haut : courbe de (28,8) vers (34,14) -->
+      <path d="M28,8 Q28,16 34,16" stroke="#222" stroke-width="1.8" fill="none"/>
+      <!-- congé arrondi bas : courbe de (28,32) vers (34,24) -->
+      <path d="M28,32 Q28,24 34,24" stroke="#222" stroke-width="1.8" fill="none"/>
+      <!-- canal droit aval -->
+      <line x1="34" y1="16" x2="34" y2="8" stroke="#222" stroke-width="1.8"/>
+      <line x1="34" y1="24" x2="34" y2="32" stroke="#222" stroke-width="1.8"/>
+      <line x1="34" y1="8" x2="62" y2="8" stroke="#222" stroke-width="1.8"/>
+      <line x1="34" y1="32" x2="62" y2="32" stroke="#222" stroke-width="1.8"/>
+      <!-- flèche -->
+      <line x1="8" y1="20" x2="54" y2="20" stroke="#333" stroke-width="1.5" marker-end="url(#a4)"/>
+    </svg>`
+  },
+  {
+    label: "Ajustage convergent (α = 12° ou 30°)",
+    val: "0.95 / ≈1.00",
+    // Parois convergentes symétriques haut et bas vers un orifice central
+    svg: `<svg width="64" height="40" viewBox="0 0 64 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs><marker id="a5" markerWidth="5" markerHeight="5" refX="5" refY="2.5" orient="auto"><path d="M0,0 L5,2.5 L0,5 Z" fill="#333"/></marker></defs>
+      <!-- paroi amont haut et bas -->
+      <line x1="2" y1="6" x2="18" y2="6" stroke="#222" stroke-width="1.8"/>
+      <line x1="2" y1="34" x2="18" y2="34" stroke="#222" stroke-width="1.8"/>
+      <!-- convergent haut -->
+      <line x1="18" y1="6" x2="34" y2="16" stroke="#222" stroke-width="1.8"/>
+      <!-- convergent bas -->
+      <line x1="18" y1="34" x2="34" y2="24" stroke="#222" stroke-width="1.8"/>
+      <!-- orifice (canal court droit) -->
+      <line x1="34" y1="16" x2="40" y2="16" stroke="#222" stroke-width="1.8"/>
+      <line x1="34" y1="24" x2="40" y2="24" stroke="#222" stroke-width="1.8"/>
+      <!-- paroi aval haut et bas -->
+      <line x1="40" y1="16" x2="40" y2="6" stroke="#222" stroke-width="1.8"/>
+      <line x1="40" y1="24" x2="40" y2="34" stroke="#222" stroke-width="1.8"/>
+      <line x1="40" y1="6" x2="62" y2="6" stroke="#222" stroke-width="1.8"/>
+      <line x1="40" y1="34" x2="62" y2="34" stroke="#222" stroke-width="1.8"/>
+      <!-- angle α -->
+      <text x="8" y="22" font-size="8" fill="#666" font-family="Inter,sans-serif" font-style="italic">α</text>
+      <!-- flèche -->
+      <line x1="4" y1="20" x2="56" y2="20" stroke="#333" stroke-width="1.5" marker-end="url(#a5)"/>
+    </svg>`
+  },
+  {
+    label: "Rupture guillotine parfaite (canalisation)",
+    val: "1.00",
+    // Canalisation coupée nette — deux tronçons avec espace de rupture
+    svg: `<svg width="64" height="40" viewBox="0 0 64 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs><marker id="a6" markerWidth="5" markerHeight="5" refX="5" refY="2.5" orient="auto"><path d="M0,0 L5,2.5 L0,5 Z" fill="#333"/></marker></defs>
+      <!-- tronçon amont haut et bas -->
+      <line x1="2" y1="10" x2="28" y2="10" stroke="#222" stroke-width="1.8"/>
+      <line x1="2" y1="30" x2="28" y2="30" stroke="#222" stroke-width="1.8"/>
+      <!-- face de rupture amont -->
+      <line x1="28" y1="6" x2="28" y2="34" stroke="#222" stroke-width="2"/>
+      <!-- tronçon aval haut et bas -->
+      <line x1="36" y1="10" x2="62" y2="10" stroke="#222" stroke-width="1.8"/>
+      <line x1="36" y1="30" x2="62" y2="30" stroke="#222" stroke-width="1.8"/>
+      <!-- face de rupture aval -->
+      <line x1="36" y1="6" x2="36" y2="34" stroke="#222" stroke-width="2"/>
+      <!-- flèche écoulement -->
+      <line x1="6" y1="20" x2="56" y2="20" stroke="#333" stroke-width="1.5" marker-end="url(#a6)"/>
+    </svg>`
+  },
+  {
+    label: "Venturi (ajustage convergent puis divergent)",
+    val: "&gt; 1 = f(α)",
+    // Convergent puis divergent — forme losange, flèches de recirculation
+    svg: `<svg width="64" height="40" viewBox="0 0 64 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs><marker id="a7" markerWidth="5" markerHeight="5" refX="5" refY="2.5" orient="auto"><path d="M0,0 L5,2.5 L0,5 Z" fill="#333"/></marker>
+      <marker id="a7r" markerWidth="5" markerHeight="5" refX="0" refY="2.5" orient="auto"><path d="M5,0 L0,2.5 L5,5 Z" fill="#888"/></marker></defs>
+      <!-- paroi amont haut et bas -->
+      <line x1="2" y1="8" x2="14" y2="8" stroke="#222" stroke-width="1.8"/>
+      <line x1="2" y1="32" x2="14" y2="32" stroke="#222" stroke-width="1.8"/>
+      <!-- convergent haut et bas -->
+      <line x1="14" y1="8" x2="32" y2="18" stroke="#222" stroke-width="1.8"/>
+      <line x1="14" y1="32" x2="32" y2="22" stroke="#222" stroke-width="1.8"/>
+      <!-- col (gorge) -->
+      <line x1="32" y1="18" x2="32" y2="22" stroke="#222" stroke-width="1.8"/>
+      <!-- divergent haut et bas -->
+      <line x1="32" y1="18" x2="50" y2="8" stroke="#222" stroke-width="1.8"/>
+      <line x1="32" y1="22" x2="50" y2="32" stroke="#222" stroke-width="1.8"/>
+      <!-- paroi aval -->
+      <line x1="50" y1="8" x2="62" y2="8" stroke="#222" stroke-width="1.8"/>
+      <line x1="50" y1="32" x2="62" y2="32" stroke="#222" stroke-width="1.8"/>
+      <!-- flèches de recirculation haut -->
+      <path d="M20,8 Q18,13 22,14" stroke="#888" stroke-width="1" fill="none" marker-end="url(#a7r)"/>
+      <!-- flèches de recirculation bas -->
+      <path d="M20,32 Q18,27 22,26" stroke="#888" stroke-width="1" fill="none" marker-end="url(#a7r)"/>
+      <!-- angle α -->
+      <text x="6" y="22" font-size="8" fill="#666" font-family="Inter,sans-serif" font-style="italic">α</text>
+      <!-- flèche écoulement -->
+      <line x1="4" y1="20" x2="56" y2="20" stroke="#333" stroke-width="1.5" marker-end="url(#a7)"/>
+    </svg>`
+  }
 ];
 
 const REF_MAP = {
@@ -489,11 +698,11 @@ const REF_MAP = {
 };
 
 const REGIME_INFO_TXT = {
-  1:"💧 Liquide non bouillonnant — Q = ρ·Cd·S·√(2g·Δh + 2ΔP/ρ)",
+  1:"💧 Liquide non bouillonnant — Q_liq = ρ·Cd·S·√(2g·Δh + 2ΔP/ρ) · Q_évap = 0.00515×10⁻⁷·Surf·V⁰·⁷⁸·R⁻⁰·¹¹·(M·PVS)/(8.314·θ) (optionnel)",
   2:"❄️ Cryogénique bouillonnant — Q_liq = ρ·Cd·S·√(2g·Δh + 2ΔP/ρ) · Q_gaz = 0.1·Q_liq",
-  3:"🔵 Gaz sous pression — Q = Cd·S·√(ρ_gaz·ΔP/2) + évaporation flaque optionnelle",
-  4:"🔴 Gaz liquéfié L<3D — Q_réel = Q_mono/3 · Q_gaz = 0.3·Q_mono",
-  5:"🟠 Gaz liquéfié L>3D — Q_diph = Q_mono/2.5 · Q_gaz = 0.3·Q_diph"
+  3:"🔵 Gaz sous pression — Q = Cd·S·√(ρ_gaz·ΔP/2)",
+  4:"🔴 Gaz liquéfié sous pression — Q_mono = Cd·S·√(2·ρ·ΔP) | L<3D : Q_réel = Q_mono/3 · Q_gaz = 0.3·Q_mono | L>3D : Q_diph = Q_mono/2.5 · Q_gaz = 0.3·Q_diph",
+  5:"🔴 Gaz liquéfié sous pression — Q_mono = Cd·S·√(2·ρ·ΔP) | L<3D : Q_réel = Q_mono/3 · Q_gaz = 0.3·Q_mono | L>3D : Q_diph = Q_mono/2.5 · Q_gaz = 0.3·Q_diph"
 };
 
 let regime = 1, ldChoice = 'court', dpUnit = 'Pa', refLabel = '';
@@ -505,7 +714,7 @@ let regime = 1, ldChoice = 'court', dpUnit = 'Pa', refLabel = '';
 function init() {
   const tbody = document.getElementById('cd-tbody');
   CD_DATA.forEach(([lbl, val]) => {
-    tbody.innerHTML += `<tr><td>${lbl}</td><td style="text-align:center">${val}</td></tr>`;
+    tbody.innerHTML += `<tr><td>${lbl}</td><td style="text-align:center;font-weight:700;color:#001F8F;font-family:'Courier New',monospace">${val}</td></tr>`;
   });
   setRegime(1);
   updateCd();
@@ -573,9 +782,9 @@ function setRegime(n) {
 
   document.getElementById('field-ld').classList.toggle('visible', isGazLiq);
   document.getElementById('field-dh').style.display    = (isGaz || isGazLiq) ? 'none' : '';
-  document.getElementById('field-theta').style.display = isGaz ? '' : 'none';
-  // Flaque visible pour tous les régimes
-  document.getElementById('fields-gaz').style.display  = '';
+  document.getElementById('field-theta').style.display = (isGaz || n === 1) ? '' : 'none';
+  // Flaque uniquement pour R1
+  document.getElementById('fields-gaz').style.display  = n === 1 ? '' : 'none';
 
   const info = document.getElementById('regime-info');
   info.textContent = isGazLiq ? REGIME_INFO_TXT[ldChoice === 'court' ? 4 : 5] : REGIME_INFO_TXT[n];
@@ -595,10 +804,50 @@ function setRegime(n) {
 // PRODUCT
 // ══════════════════════════════════════
 
+function getActiveProd() {
+  const key = document.getElementById('sel-produit').value;
+  if (key === '__custom__') {
+    const rho     = parseFloat(document.getElementById('custom-rho').value)     || 0;
+    const M       = parseFloat(document.getElementById('custom-M').value)       || 0;
+    const rhoGaz  = parseFloat(document.getElementById('custom-rho-gaz').value) || null;
+    const PVS     = parseFloat(document.getElementById('custom-PVS').value);
+    return {
+      rho,
+      M,
+      PVS: isNaN(PVS) || PVS <= 0 ? null : PVS,
+      rhoGaz: (rhoGaz && rhoGaz > 0) ? rhoGaz : null,
+      gaz: false,
+      custom: true
+    };
+  }
+  if (!key || !PRODUCTS[key]) return null;
+  return { ...PRODUCTS[key], rhoGaz: null, custom: false };
+}
+
+function onCustomChange() {
+  renderProductProps();
+  clearResult();
+}
+
 function onProduitChange() {
   const key = document.getElementById('sel-produit').value;
   const box = document.getElementById('product-props');
-  if (!key) { box.style.display = 'none'; return; }
+  const customBlock = document.getElementById('custom-product-block');
+
+  if (!key) {
+    box.style.display = 'none';
+    customBlock.style.display = 'none';
+    return;
+  }
+
+  if (key === '__custom__') {
+    customBlock.style.display = 'block';
+    renderProductProps();
+    clearResult();
+    return;
+  }
+
+  customBlock.style.display = 'none';
   box.style.display = 'grid';
   renderProductProps();
   applyDpDefault();
@@ -606,37 +855,43 @@ function onProduitChange() {
 }
 
 function renderProductProps() {
-  const key = document.getElementById('sel-produit').value;
-  if (!key) return;
-  const p = PRODUCTS[key];
-  let pvsDisplay = '—';
-  if (p.PVS !== null && p.PVS !== undefined) {
-    pvsDisplay = dpUnit === 'bar'
-      ? (p.PVS / 1e5).toPrecision(4) + ' bar'
-      : p.PVS.toLocaleString('fr') + ' Pa';
+  const prod = getActiveProd();
+  const box  = document.getElementById('product-props');
+  if (!prod) { box.style.display = 'none'; return; }
+
+  // Pour produit custom, chips affichés sous le bloc de saisie
+  if (prod.custom) {
+    box.style.display = 'none'; // chips inutiles, tout est visible dans le bloc
+    return;
   }
-  document.getElementById('product-props').innerHTML = `
-    <div class="prop-chip"><span class="pv">${p.rho}</span><span class="pl">ρ (kg/m³)</span></div>
-    <div class="prop-chip"><span class="pv">${p.M}</span><span class="pl">M (kg/kmol)</span></div>
+
+  let pvsDisplay = '—';
+  if (prod.PVS !== null && prod.PVS !== undefined) {
+    pvsDisplay = dpUnit === 'bar'
+      ? (prod.PVS / 1e5).toPrecision(4) + ' bar'
+      : prod.PVS.toLocaleString('fr') + ' Pa';
+  }
+  box.style.display = 'grid';
+  box.innerHTML = `
+    <div class="prop-chip"><span class="pv">${prod.rho}</span><span class="pl">ρ liq (kg/m³)</span></div>
+    <div class="prop-chip"><span class="pv">${prod.M}</span><span class="pl">M (kg/kmol)</span></div>
     <div class="prop-chip"><span class="pv">${pvsDisplay}</span><span class="pl">PVS</span></div>
   `;
 }
 
 function applyDpDefault() {
   if (regime !== 4) return;
-  const key = document.getElementById('sel-produit').value;
-  if (!key) return;
-  const p = PRODUCTS[key];
-  if (p.PVS === null || p.PVS === undefined) return;
-  const dp_pa = Math.max(0, p.PVS - 101325);
+  const prod = getActiveProd();
+  if (!prod || prod.PVS === null || prod.PVS === undefined) return;
+  const dp_pa = Math.max(0, prod.PVS - 101325);
   if (dpUnit === 'bar') {
     document.getElementById('inp-dp').value = +(dp_pa / 1e5).toPrecision(4);
     document.getElementById('dp-hint').innerHTML =
-      `Valeur par défaut : PVS − P<sub>atm</sub> = ${(p.PVS/1e5).toPrecision(4)} bar − 1,013 bar = <strong>${(dp_pa/1e5).toPrecision(4)} bar</strong> — à ajuster selon conditions réelles`;
+      `Valeur par défaut : PVS − P<sub>atm</sub> = ${(prod.PVS/1e5).toPrecision(4)} bar − 1,013 bar = <strong>${(dp_pa/1e5).toPrecision(4)} bar</strong> — à ajuster selon conditions réelles`;
   } else {
     document.getElementById('inp-dp').value = Math.round(dp_pa);
     document.getElementById('dp-hint').innerHTML =
-      `Valeur par défaut : PVS − P<sub>atm</sub> = ${p.PVS.toLocaleString('fr')} − 101 325 = <strong>${dp_pa.toLocaleString('fr')} Pa</strong> — à ajuster selon conditions réelles`;
+      `Valeur par défaut : PVS − P<sub>atm</sub> = ${prod.PVS.toLocaleString('fr')} − 101 325 = <strong>${dp_pa.toLocaleString('fr')} Pa</strong> — à ajuster selon conditions réelles`;
   }
 }
 
@@ -723,13 +978,30 @@ function clearResult() {
 // CALCULATE
 // ══════════════════════════════════════
 
+function getThetaK() {
+  // Champ saisi en °C, converti en K
+  const v = parseFloat(document.getElementById('inp-theta').value);
+  return isNaN(v) ? 293 : v + 273.15;
+}
+
+function updateThetaHint() {
+  const v = parseFloat(document.getElementById('inp-theta').value);
+  const hint = document.getElementById('theta-hint');
+  if (!isNaN(v)) {
+    hint.textContent = `→ ${(v + 273.15).toFixed(2)} K (utilisé dans le calcul)`;
+  } else {
+    hint.textContent = '→ — K';
+  }
+}
+
 function calcQevap(prod) {
+  if (regime !== 1) return null;
   const surf  = parseFloat(document.getElementById('inp-surf').value);
   const R     = parseFloat(document.getElementById('inp-r').value);
   const V     = parseFloat(document.getElementById('inp-v').value);
-  const theta = parseFloat(document.getElementById('inp-theta').value) || 293;
+  const theta = getThetaK();
   if (!isNaN(surf) && !isNaN(R) && !isNaN(V) && surf > 0 && R > 0 && V > 0 && prod.PVS !== null && prod.PVS > 0) {
-    return 0.00515e-7 * surf * Math.pow(V, 0.78) * Math.pow(R, 0.11) * (prod.M * prod.PVS) / (8.314 * theta);
+    return 0.00515e-7 * surf * Math.pow(V, 0.78) * Math.pow(R, -0.11) * (prod.M * prod.PVS) / (8.314 * theta);
   }
   return null;
 }
@@ -738,7 +1010,21 @@ function calculate() {
   clearErr();
   const prodKey = document.getElementById('sel-produit').value;
   if (!prodKey) { showErr("Sélectionnez un produit."); return; }
-  const prod = PRODUCTS[prodKey];
+  const prod = getActiveProd();
+  if (!prod) { showErr("Produit invalide."); return; }
+
+  // Validation produit custom
+  if (prod.custom) {
+    if (!prod.rho || prod.rho <= 0) { showErr("Produit personnalisé : ρ liquide requis (> 0)."); return; }
+    if (!prod.M   || prod.M   <= 0) { showErr("Produit personnalisé : masse molaire M requise (> 0)."); return; }
+    if (regime === 3 && (!prod.rhoGaz || prod.rhoGaz <= 0)) {
+      showErr("Produit personnalisé en régime gaz : ρ gaz CNT requis (> 0)."); return;
+    }
+  }
+
+  const nomProd = prod.custom
+    ? (document.getElementById('custom-nom').value.trim() || 'Produit personnalisé')
+    : prodKey;
   const S = getS();
   if (!S) { showErr("Diamètre de fuite manquant ou invalide (> 0)."); return; }
   const Cd = getCd();
@@ -757,18 +1043,28 @@ function calculate() {
     if (inner <= 0) { showErr("2g·Δh + 2ΔP/ρ ≤ 0 : vérifiez Δh et ΔP."); return; }
     const Q = rho * Cd * S * Math.sqrt(inner); T = m / Q;
     const Qe = calcQevap(prod);
+    const thetaK = getThetaK();
+    const surf = parseFloat(document.getElementById('inp-surf').value);
+    const R    = parseFloat(document.getElementById('inp-r').value);
+    const V    = parseFloat(document.getElementById('inp-v').value);
     chips = [
-      {label:"Q liquide",    val:fmtSci(Q),       unit:"kg/s", primary:true},
-      {label:"Durée fuite T",val:fmtDur(T),        unit:Math.round(T)+" s", duration:true}
+      {label:"Q liquide",    val:fmtSci(Q),  unit:"kg/s", primary:true},
+      {label:"Durée fuite T",val:fmtDur(T),  unit:Math.round(T)+" s", duration:true}
     ];
     if (Qe !== null) chips.push({label:"Q évap. flaque", val:fmtSci(Qe), unit:"kg/s"});
     traces = [
-      `Q = ρ × Cd × S × √(2g·Δh + 2ΔP/ρ)`,
-      `Q = ${rho} × ${Cd} × ${S.toExponential(3)} × √(${inner.toFixed(2)})`,
-      `<strong>Q = ${fmtSci(Q)} kg/s</strong>`,
-      `T = m / Q = ${m} / ${fmtSci(Q)} = <strong>${Math.round(T)} s (${fmtDur(T)})</strong>`
+      `Q_liq = ρ × Cd × S × √(2g·Δh + 2ΔP/ρ)`,
+      `Q_liq = ${rho} × ${Cd} × ${S.toExponential(3)} × √(${inner.toFixed(2)})`,
+      `<strong>Q_liq = ${fmtSci(Q)} kg/s</strong>`,
+      `T = m / Q_liq = ${m} / ${fmtSci(Q)} = <strong>${Math.round(T)} s (${fmtDur(T)})</strong>`
     ];
-    if (Qe !== null) traces.push(`<strong>Q_évap = ${fmtSci(Qe)} kg/s</strong>`);
+    if (Qe !== null) {
+      traces.push(`Q_évap = 0.00515×10⁻⁷ × Surf × V^0.78 × R^-0.11 × (M×PVS) / (8.314×θ)`);
+      traces.push(`Q_évap = 0.00515×10⁻⁷ × ${surf} × ${V}^0.78 × ${R}^-0.11 × (${prod.M}×${prod.PVS}) / (8.314×${thetaK.toFixed(2)})`);
+      traces.push(`<strong>Q_évap = ${fmtSci(Qe)} kg/s</strong>`);
+    } else if (!isNaN(surf) || !isNaN(R) || !isNaN(V)) {
+      traces.push(`Q_évap = non calculé (Surf, R et V requis + PVS produit)`);
+    }
     schemaData = {...schemaData, Q_liq: fmtSci(Q), Q_evap: Qe !== null ? fmtSci(Qe) : null, hasFlaque:true};
 
   } else if (regime === 2) {
@@ -776,13 +1072,11 @@ function calculate() {
     const rho = prod.rho, inner = 2*g*dh + 2*dP/rho;
     if (inner <= 0) { showErr("2g·Δh + 2ΔP/ρ ≤ 0 : vérifiez Δh et ΔP."); return; }
     const Ql = rho * Cd * S * Math.sqrt(inner), Qg = 0.1 * Ql; T = m / Ql;
-    const Qe = calcQevap(prod);
     chips = [
       {label:"Q liquide",    val:fmtSci(Ql), unit:"kg/s", primary:true},
       {label:"Q gaz évaporé",val:fmtSci(Qg), unit:"kg/s"},
       {label:"Durée fuite T",val:fmtDur(T),  unit:Math.round(T)+" s", duration:true}
     ];
-    if (Qe !== null) chips.push({label:"Q évap. flaque", val:fmtSci(Qe), unit:"kg/s"});
     traces = [
       `Q_liq = ρ × Cd × S × √(2g·Δh + 2ΔP/ρ)`,
       `Q_liq = ${rho} × ${Cd} × ${S.toExponential(3)} × √(${inner.toFixed(2)})`,
@@ -790,54 +1084,57 @@ function calculate() {
       `Q_gaz = 0.1 × Q_liq = <strong>${fmtSci(Qg)} kg/s</strong>`,
       `T = m / Q_liq = ${m} / ${fmtSci(Ql)} = <strong>${Math.round(T)} s (${fmtDur(T)})</strong>`
     ];
-    if (Qe !== null) traces.push(`<strong>Q_évap = ${fmtSci(Qe)} kg/s</strong>`);
-    schemaData = {...schemaData, Q_liq: fmtSci(Ql), Q_gaz: fmtSci(Qg), Q_evap: Qe !== null ? fmtSci(Qe) : null, hasFlaque:true, isCryo:true};
+    schemaData = {...schemaData, Q_liq: fmtSci(Ql), Q_gaz: fmtSci(Qg), Q_evap: null, hasFlaque:true, isCryo:true};
 
   } else if (regime === 3) {
-    const theta = parseFloat(document.getElementById('inp-theta').value) || 293;
+    const theta = getThetaK();
     if (theta <= 0) { showErr("Température invalide (> 0 K)."); return; }
     if (dP <= 0)    { showErr("ΔP doit être > 0 pour le régime gaz."); return; }
+
+    // Avertissement : si ΔP ≥ PVS du produit, le produit est à l'état liquéfié → R4 conseillé
+    if (prod.PVS !== null && prod.PVS !== undefined && dP >= prod.PVS) {
+      showErr(`⚠ ΔP (${(dpUnit === 'bar' ? (dP/1e5).toPrecision(3)+' bar' : Math.round(dP)+' Pa')}) ≥ PVS du produit (${dpUnit === 'bar' ? (prod.PVS/1e5).toPrecision(3)+' bar' : prod.PVS.toLocaleString('fr')+' Pa'}) — le produit est vraisemblablement à l'état liquéfié sous pression. Envisagez le régime R4 — Gaz liquéfié sous pression.`);
+      return;
+    }
     let rho_g = prod.rho;
-    if (!prod.gaz) rho_g = dP * prod.M / (Rgas * theta);
+    // ρ gaz en CNT : priorité à rhoGaz saisi (custom), sinon tabulé (gaz=true), sinon calcul loi gaz parfaits à CNT
+    if (prod.rhoGaz && prod.rhoGaz > 0) {
+      rho_g = prod.rhoGaz;
+    } else if (!prod.gaz) {
+      rho_g = 101325 * prod.M / (Rgas * 293.15);
+    }
     const Qg = Cd * S * Math.sqrt(rho_g * dP / 2); T = m / Qg;
-    const Qe = calcQevap(prod);
     chips = [
       {label:"Q gaz",        val:fmtSci(Qg),   unit:"kg/s", primary:true},
       {label:"ρ_gaz utilisé",val:fmtSci(rho_g),unit:"kg/m³"},
       {label:"Durée fuite T",val:fmtDur(T),     unit:Math.round(T)+" s", duration:true}
     ];
-    if (Qe !== null) chips.push({label:"Q évap. flaque", val:fmtSci(Qe), unit:"kg/s"});
     traces = [
+      `ρ_gaz (CNT, 20°C) = P_atm × M / (R × T_ref) = 101325 × ${prod.M} / (8314 × 293.15) = ${fmtSci(rho_g)} kg/m³`,
       `Q_gaz = Cd × S × √(ρ_gaz × ΔP / 2)`,
       `Q_gaz = ${Cd} × ${S.toExponential(3)} × √(${fmtSci(rho_g)} × ${dP} / 2)`,
       `<strong>Q_gaz = ${fmtSci(Qg)} kg/s</strong>`
     ];
-    if (Qe !== null) traces.push(`<strong>Q_évap = ${fmtSci(Qe)} kg/s</strong>`);
     traces.push(`T = m / Q_gaz = ${m} / ${fmtSci(Qg)} = <strong>${Math.round(T)} s (${fmtDur(T)})</strong>`);
-    schemaData = {...schemaData, Q_gaz: fmtSci(Qg), Q_evap: Qe !== null ? fmtSci(Qe) : null, hasFlaque: Qe !== null};
+    schemaData = {...schemaData, Q_gaz: fmtSci(Qg), Q_evap: null, hasFlaque: false};
 
   } else if (regime === 4) {
     if (dP <= 0) { showErr("ΔP doit être > 0."); return; }
     const rho = prod.rho, Qm = Cd * S * Math.sqrt(2 * rho * dP);
-    const Qe = calcQevap(prod);
     if (ldChoice === 'court') {
-      const Qr = Qm/3, Qg = 0.3*Qm; T = m/Qm;
+      const Qg = 0.3*Qm; T = m/Qm;
       chips = [
-        {label:"Q mono (jet liq.)",   val:fmtSci(Qm), unit:"kg/s", primary:true},
-        {label:"Q réel (fuite réelle)",val:fmtSci(Qr), unit:"kg/s"},
-        {label:"Q gaz",               val:fmtSci(Qg), unit:"kg/s"},
-        {label:"Durée fuite T",        val:fmtDur(T),  unit:Math.round(T)+" s", duration:true}
+        {label:"Q mono (jet liq.)", val:fmtSci(Qm), unit:"kg/s", primary:true},
+        {label:"Q gaz",             val:fmtSci(Qg), unit:"kg/s"},
+        {label:"Durée fuite T",     val:fmtDur(T),  unit:Math.round(T)+" s", duration:true}
       ];
-      if (Qe !== null) chips.push({label:"Q évap. flaque", val:fmtSci(Qe), unit:"kg/s"});
       traces = [
         `Régime : Gaz liquéfié — Fuite courte (L &lt; 3D)`,
         `Q_mono = Cd × S × √(2 × ρ_liq × ΔP) = <strong>${fmtSci(Qm)} kg/s</strong>`,
-        `Q_réel = Q_mono / 3 = <strong>${fmtSci(Qr)} kg/s</strong>`,
         `Q_gaz = 0.3 × Q_mono = <strong>${fmtSci(Qg)} kg/s</strong>`,
         `T = m / Q_mono = ${m} / ${fmtSci(Qm)} = <strong>${Math.round(T)} s (${fmtDur(T)})</strong>`
       ];
-      if (Qe !== null) traces.push(`<strong>Q_évap = ${fmtSci(Qe)} kg/s</strong>`);
-      schemaData = {...schemaData, Q_mono: fmtSci(Qm), Q_liq: fmtSci(Qr), Q_gaz: fmtSci(Qg), Q_evap: Qe !== null ? fmtSci(Qe) : null, hasFlaque:true};
+      schemaData = {...schemaData, Q_mono: fmtSci(Qm), Q_gaz: fmtSci(Qg), Q_evap: null, hasFlaque:true};
     } else {
       const Qd = Qm/2.5, Qg = 0.3*Qd; T = m/Qd;
       chips = [
@@ -846,7 +1143,6 @@ function calculate() {
         {label:"Q gaz",        val:fmtSci(Qg), unit:"kg/s"},
         {label:"Durée fuite T",val:fmtDur(T),  unit:Math.round(T)+" s", duration:true}
       ];
-      if (Qe !== null) chips.push({label:"Q évap. flaque", val:fmtSci(Qe), unit:"kg/s"});
       traces = [
         `Régime : Gaz liquéfié — Fuite longue (L &gt; 3D)`,
         `Q_mono = Cd × S × √(2 × ρ_liq × ΔP) = <strong>${fmtSci(Qm)} kg/s</strong>`,
@@ -854,8 +1150,7 @@ function calculate() {
         `Q_gaz = 0.3 × Q_diph = <strong>${fmtSci(Qg)} kg/s</strong>`,
         `T = m / Q_diph = ${m} / ${fmtSci(Qd)} = <strong>${Math.round(T)} s (${fmtDur(T)})</strong>`
       ];
-      if (Qe !== null) traces.push(`<strong>Q_évap = ${fmtSci(Qe)} kg/s</strong>`);
-      schemaData = {...schemaData, Q_mono: fmtSci(Qm), Q_liq: fmtSci(Qd), Q_gaz: fmtSci(Qg), Q_evap: Qe !== null ? fmtSci(Qe) : null, hasFlaque:true, isDiph:true};
+      schemaData = {...schemaData, Q_mono: fmtSci(Qm), Q_liq: fmtSci(Qd), Q_gaz: fmtSci(Qg), Q_evap: null, hasFlaque:true, isDiph:true};
     }
   }
 
@@ -1001,7 +1296,7 @@ function renderSchema(d) {
     ctx.restore();
 
     // Label jet
-    const lbl = isR4 && isCrt  ? `Q_réel\n${d.Q_liq||'—'} kg/s`
+    const lbl = isR4 && isCrt  ? `Q_mono\n${d.Q_mono||'—'} kg/s`
               : isR4 && isDiph ? `Q_diph\n${d.Q_liq||'—'} kg/s`
               : `Q_liq\n${d.Q_liq||'—'} kg/s`;
     annotation(ctx, fuitX + W*0.14, fuitY - 26, lbl, jColor);
@@ -1042,10 +1337,10 @@ function renderSchema(d) {
     ctx.fillText('Flaque', flaqueX, gndY + 15);
   }
 
-  // ── NUAGE GAZEUX ──
-  if (hasGaz || isR3) {
+  // ── NUAGE GAZEUX — R2 et R4 uniquement (pas R3) ──
+  if (hasGaz && !isR3) {
     const cColor = isCryo ? 'rgba(0,180,216,0.20)' : 'rgba(0,51,204,0.13)';
-    const cW = isR3 ? 88 : 72, cH = isR3 ? 56 : 48;
+    const cW = 72, cH = 48;
     cloud(ctx, cloudCX, cloudCY, cW, cH, cColor, isCryo ? C.cyan : C.blue2);
 
     // Flèche vent
@@ -1057,15 +1352,11 @@ function renderSchema(d) {
     ctx.textAlign = 'left';
     ctx.fillText('↗ Vent' + (vLbl ? ' ' + vLbl : ''), wx, wy);
 
-    // Annotation nuage gaz
-    const gazLbl = isR3
-      ? `Q_gaz\n${d.Q_gaz||'—'} kg/s`
-      : `Q_gaz\n${d.Q_gaz||'—'} kg/s`;
-    annotation(ctx, cloudCX, cloudCY, gazLbl, isCryo ? C.cyan : C.blue2);
+    annotation(ctx, cloudCX, cloudCY, `Q_gaz\n${d.Q_gaz||'—'} kg/s`, isCryo ? C.cyan : C.blue2);
   }
 
-  // ── ÉVAPORATION FLAQUE : flèche verticale + annotation ──
-  if (hasFlaque || isR3) {
+  // ── ÉVAPORATION FLAQUE : flèche verticale + annotation — R1 uniquement ──
+  if (hasFlaque && d.regime === 1) {
     const evX = isR3 ? cloudCX - 30 : flaqueX + 2;
     const evColor = d.Q_evap ? C.green : C.grey;
     const evLbl = `Q_évap\n${d.Q_evap || 'non calculé'}${d.Q_evap ? ' kg/s' : ''}`;
@@ -1100,7 +1391,7 @@ function renderSchema(d) {
   }
 
   // ── LÉGENDE ──
-  legend(ctx, W, H, hasLiq, hasGaz || isR3, hasFlaque || isR3, d.Q_evap, isCryo);
+  legend(ctx, W, H, hasLiq, hasGaz && !isR3, hasFlaque && d.regime === 1, d.Q_evap, isCryo);
 }
 
 // ── CANVAS HELPERS ──
@@ -1204,6 +1495,12 @@ function legend(ctx, W, H, hasLiq, hasGaz, hasEvap, Q_evap, isCryo) {
 
 function resetAll() {
   document.getElementById('sel-produit').value = '';
+  document.getElementById('custom-product-block').style.display = 'none';
+  document.getElementById('custom-nom').value = '';
+  document.getElementById('custom-rho').value = '';
+  document.getElementById('custom-M').value = '';
+  document.getElementById('custom-rho-gaz').value = '';
+  document.getElementById('custom-PVS').value = '';
   document.getElementById('sel-ref').value = '';
   document.getElementById('sel-orifice').value = '0.62';
   ['inp-d','inp-m','inp-dp','inp-surf','inp-r','inp-v'].forEach(id => document.getElementById(id).value = '');
