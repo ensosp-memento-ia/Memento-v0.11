@@ -34,11 +34,9 @@
 
 body { font-family: “Inter”, sans-serif; background: var(–bg); color: var(–text); min-height: 100vh; }
 
-/* ── NAV TABS ── */
-.tabs{display:flex;background:#e9ecf5;padding:10px;gap:10px}
-.tab{flex:1;text-align:center;padding:10px 12px;border-radius:25px;color:#001F8F;font-weight:600;font-size:13px;cursor:pointer;border:none;background:transparent;font-family:“Inter”,sans-serif;text-decoration:none;display:inline-block;transition:.2s}
-.tab.active{background:#001F8F;color:white}
-.tab:hover:not(.active){background:#d9dff5}
+/* ── NAV TABS — base dans style.css, complément interactif ici ── */
+.tab{transition:.2s;cursor:pointer;}
+.tab:hover:not(.active){background:#d9dff5;}
 
 /* ── CONTAINER ── */
 .container { max-width: 1200px; margin: 0 auto; padding: 24px 20px; }
@@ -505,15 +503,6 @@ const experts = [
     specialty: "Recherche NRBC, contre-mesures médicales radiologiques et biologiques, détection avancée, coordinateur projets européens NRBC (ex. COUNTERACT)",
     contact: null, via: "cea.fr", h24: false,
     tags: ["id","tox","retex"], section: "multi"
-  },
-  {
-    acronym: "ANDRA",
-    name: "Agence Nationale pour la gestion des Déchets RAdioactifs ",
-    domain: ["R"],
-    specialty: "Gestion et transport de déchets radioactifs — appui en cas d'incident impliquant des déchets radioactifs (sources orphelines, colis endommagés, sites contaminés) — expertise stockage et conditionnement",
-    contact: "01.46.11.80.00", via: null, h24: false,
-    formulaire: "https://www.andra.fr",
-    tags: ["id","retex","env"], section: "radio"
   },
   {
     acronym: "BIOTOX/PIRATOX",
