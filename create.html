@@ -5,15 +5,12 @@
   <title>Mémento IA – ENSOSP | Création de fiche</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- Police Inter -->
   <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
-
-  <!-- Styles ENSOSP -->
   <link rel="stylesheet" href="style.css" />
 
-  <!-- Lib compression / QR code -->
   <script src="https://unpkg.com/pako@2.1.0/dist/pako.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
   <style>
     header {
       background: #001F8F;
@@ -31,6 +28,31 @@
       opacity: 0.8;
       margin-top: 3px;
     }
+
+    /* ===== BOUTON BETA TEST — identique à scan.html ===== */
+    .btn-beta-test {
+      background: #001F8F;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      font-size: 16px;
+      font-weight: 600;
+      border-radius: 10px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(0, 31, 143, 0.3);
+    }
+    .btn-beta-test:hover {
+      background: #002bbf;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 31, 143, 0.4);
+    }
+    .btn-beta-test:active {
+      transform: translateY(0);
+    }
   </style>
 </head>
 
@@ -41,9 +63,6 @@
     <div class="header-sub">Création de fiche opérationnelle IA</div>
   </header>
 
-  <!-- ========================================================= -->
-  <!-- BARRE D'ONGLETS + Retour Accueil -->
-  <!-- ========================================================= -->
   <nav class="tabs">
     <a href="index.html" class="tab">🏠 Accueil</a>
     <a href="scan.html" class="tab">📷 Lecture QR</a>
@@ -53,61 +72,45 @@
 
   <main>
 
-    <!-- ========================================================= -->
-    <!-- BOUTONS D'ACTION (Charger + Réinitialiser) -->
-    <!-- ========================================================= -->
-<div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
-  <button id="btnLoadFiche" class="btn-reset">
-    📥 Charger une fiche depuis URL
-  </button>
-  
-  <button id="btnReset" class="btn-reset">
-    🔄 Réinitialiser tout
-  </button>
-        <button id="btnBetaTest" class="btn-beta-test">
+    <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
+      <button id="btnLoadFiche" class="btn-reset">
+        📥 Charger une fiche depuis URL
+      </button>
+      <button id="btnReset" class="btn-reset">
+        🔄 Réinitialiser tout
+      </button>
+      <button id="btnBetaTest" class="btn-beta-test">
         📝 Partager un prompt
       </button>
-</div>
+    </div>
 
-    <!-- ========================================================= -->
-    <!-- SECTION METADONNÉES -->
-    <!-- ========================================================= -->
     <section class="card">
       <h2>1. Métadonnées de la fiche</h2>
 
       <label>Catégorie
         <input id="meta_categorie" type="text" placeholder="Ex : Risque chimique / opérationnel">
       </label>
-
       <label>Titre de la fiche
         <input id="meta_titre" type="text" placeholder="Ex : Analyse initiale d'un site RCH">
       </label>
-
       <label>Objectif
         <input id="meta_objectif" type="text" placeholder="Ex : Aider le RCH3/RCH4 dans l'analyse rapide">
       </label>
-
       <label>Concepteur
         <input id="meta_concepteur" type="text" placeholder="Ex : Cdt Tirelle">
       </label>
-
       <label>Version
         <input id="meta_version" type="text" placeholder="Ex : 1.0" value="1.0">
       </label>
-
       <label>Date de mise à jour
         <input id="meta_date" type="date">
       </label>
     </section>
 
-    <!-- ========================================================= -->
-    <!-- INDICES DE CONFIANCE IA (avec option NC ajoutée) -->
-    <!-- ========================================================= -->
     <section class="card">
       <h2>2. Indices de confiance IA</h2>
 
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-
         <div>
           <label>ChatGPT
             <select id="aiChatGPT" class="indice-confiance">
@@ -117,7 +120,6 @@
               <option value="1">1 - Non recommandée</option>
             </select>
           </label>
-
           <label>Perplexity
             <select id="aiPerplexity" class="indice-confiance">
               <option value="NC" selected>NC - Non classé</option>
@@ -127,7 +129,6 @@
             </select>
           </label>
         </div>
-
         <div>
           <label>Mistral
             <select id="aiMistral" class="indice-confiance">
@@ -137,7 +138,6 @@
               <option value="1">1 - Non recommandée</option>
             </select>
           </label>
-
           <label>Claude
             <select id="aiClaude" class="indice-confiance">
               <option value="NC" selected>NC - Non classé</option>
@@ -147,13 +147,9 @@
             </select>
           </label>
         </div>
-
       </div>
     </section>
 
-    <!-- ========================================================= -->
-    <!-- VARIABLES -->
-    <!-- ========================================================= -->
     <section class="card">
       <h2>3. Variables utilisables dans le prompt (maximum 10)</h2>
 
@@ -166,43 +162,33 @@
       <button id="btnAddVariable" class="btn-add-var">➕ Ajouter une variable</button>
     </section>
 
-
-    <!-- ========================================================= -->
-    <!-- PROMPT -->
-    <!-- ========================================================= -->
     <section class="card">
       <h2>4. Rédaction du prompt</h2>
       <p class="helper">
         Utilisez les variables avec <code>{{identifiant}}</code>.
       </p>
-
       <textarea id="prompt_input" rows="10" placeholder="Rédigez le prompt ici…"></textarea>
       <div id="prompt_count" class="counter">0 caractère</div>
     </section>
 
-    <!-- ========================================================= -->
-    <!-- GENERATION DU QR CODE + URL -->
-    <!-- ========================================================= -->
     <section class="card">
       <h2>5. Génération du QR Code et de l'URL</h2>
 
       <button id="btnGenerate" class="btn-generate">🚀 Générer</button>
 
-      <!-- Zone QR Code -->
       <div id="qrContainer" class="qr-box"></div>
 
-      <!-- Zone URL (masquée par défaut) -->
       <div id="urlContainer" style="display:none;margin-top:20px;">
         <h3 style="color:#001F8F;margin-bottom:10px;">🔗 URL cliquable générée</h3>
-        
+
         <div style="background:#eef2ff;padding:15px;border-radius:10px;margin-bottom:15px;">
           <label style="display:block;margin-bottom:8px;font-weight:600;color:#001F8F;">
             Lien à utiliser dans votre PDF :
           </label>
-          <input 
-            id="generatedUrlCreate" 
-            type="text" 
-            readonly 
+          <input
+            id="generatedUrlCreate"
+            type="text"
+            readonly
             style="width:100%;padding:12px;border:2px solid #001F8F;border-radius:8px;font-size:14px;background:white;font-family:monospace;word-break:break-all;"
           >
           <button id="btnCopyUrlCreate" class="btn-add-var" style="margin-top:10px;">
@@ -226,10 +212,6 @@
 
   </main>
 
-
-  <!-- ========================================================= -->
-  <!-- SCRIPTS UI -->
-  <!-- ========================================================= -->
   <script type="module" src="./src/ui/createFiche.js"></script>
 
 </body>
