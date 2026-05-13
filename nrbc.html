@@ -5,90 +5,33 @@
   <title>Espace NRBC – Mémento IA ENSOSP</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+  <link rel="stylesheet" href="style.css">
   <style>
-    body {
-      font-family: "Inter", sans-serif;
-      background: #f5f7fb;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-      color: #111;
-    }
-    header {
-      background: #001F8F;
-      padding: 12px 20px;
-      text-align: center;
-      color: white;
-      font-size: 16px;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-    }
-    .header-sub {
-      font-size: 12px;
-      font-weight: 400;
-      opacity: 0.8;
-      margin-top: 3px;
-    }
-    .tabs {
-      display: flex;
-      background: #e9ecf5;
-      padding: 10px;
-      gap: 10px;
-    }
-    .tab {
-      flex: 1;
-      text-align: center;
-      padding: 10px 12px;
-      border-radius: 25px;
-      color: #001F8F;
-      font-weight: 600;
-      font-size: 13px;
-      cursor: pointer;
-      border: none;
-      background: transparent;
-      font-family: "Inter", sans-serif;
-      text-decoration: none;
-      display: inline-block;
-      transition: background 0.2s;
-    }
-    .tab.active {
-      background: #001F8F;
-      color: white;
-    }
-    .tab:hover:not(.active) {
-      background: #d9dff5;
-    }
+    /* Styles spécifiques à nrbc.html — composants non présents dans style.css */
+    body { display: flex; flex-direction: column; min-height: 100vh; }
+
     main {
       max-width: 960px;
-      margin: 0 auto;
       padding: 30px 16px 40px;
       width: 100%;
       box-sizing: border-box;
       flex: 1;
     }
-    .page-title {
-      color: #001F8F;
-      font-size: 22px;
-      font-weight: 700;
-      text-align: center;
-      margin: 0 0 6px;
-    }
+
     .page-subtitle {
       color: #666;
       font-size: 14px;
       text-align: center;
       margin: 0 0 30px;
     }
+
     .grid {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 18px;
     }
-    @media (max-width: 680px) {
-      .grid { grid-template-columns: 1fr; }
-    }
+    @media (max-width: 680px) { .grid { grid-template-columns: 1fr; } }
+
     .col {
       background: white;
       border-radius: 15px;
@@ -99,6 +42,7 @@
       gap: 10px;
       box-shadow: 0 3px 8px rgba(0,0,0,.04);
     }
+
     .col-header {
       display: flex;
       align-items: center;
@@ -107,6 +51,7 @@
       border-bottom: 1px solid #eef0f8;
       margin-bottom: 2px;
     }
+
     .col-icon {
       width: 42px;
       height: 42px;
@@ -120,18 +65,20 @@
     .icon-nrbc { background: #eef2ff; }
     .icon-chim { background: #fff7e6; }
     .icon-rad  { background: #edf7f0; }
+
     .col-title {
       font-size: 16px;
       font-weight: 700;
       color: #001F8F;
     }
+
     .col-desc {
       font-size: 13px;
       color: #666;
       line-height: 1.65;
       margin: 0 0 4px;
     }
-    /* Bouton actif */
+
     .btn-tool {
       display: block;
       width: 100%;
@@ -149,13 +96,9 @@
       text-decoration: none;
       transition: background 0.2s, transform 0.15s;
     }
-    .btn-tool:hover {
-      background: #002bbf;
-      transform: translateY(-1px);
-    }
-    .btn-tool:active {
-      transform: translateY(0);
-    }
+    .btn-tool:hover { background: #002bbf; transform: translateY(-1px); }
+    .btn-tool:active { transform: translateY(0); }
+
     .btn-tool-sub {
       display: block;
       font-size: 11px;
@@ -163,7 +106,7 @@
       color: rgba(255,255,255,0.75);
       margin-top: 3px;
     }
-    /* Bouton inactif / à venir */
+
     .btn-soon {
       display: block;
       width: 100%;
@@ -186,6 +129,7 @@
       color: #b0b6cc;
       margin-top: 3px;
     }
+
     .badge {
       display: inline-block;
       font-size: 10px;
@@ -226,12 +170,10 @@
           <div class="col-title">NRBC</div>
         </div>
         <p class="col-desc">Ressources transversales et cartographie des experts du réseau national NRBC.</p>
-
         <a href="Calculateur/expert.html" class="btn-tool">
           Cartographie experts NRBC
           <span class="btn-tool-sub">Réseau national — 41 experts référencés</span>
         </a>
-
         <div class="btn-soon">
           Prochainement disponible
           <span class="btn-soon-sub">Nouvel outil en préparation</span>
@@ -239,33 +181,29 @@
         <span class="badge badge-nrbc">À venir</span>
       </div>
 
-      <!-- COLONNE RISQUES CHIMIQUES (RCH) -->
+      <!-- COLONNE RISQUES CHIMIQUES -->
       <div class="col">
         <div class="col-header">
           <div class="col-icon icon-chim">🧪</div>
           <div class="col-title">Risques chimiques</div>
         </div>
         <p class="col-desc">Outils de calcul et d'aide à la décision pour les interventions sur risques chimiques.</p>
-
         <a href="Calculateur/fluxthermique.html" class="btn-tool">
           Dimensionnement flux thermique
           <span class="btn-tool-sub">Pool fire — Méthode Mudan &amp; Croce · Données INERIS</span>
         </a>
-
         <a href="Calculateur/uvce.html" class="btn-tool">
           Surpression UVCE — Multi-énergie
           <span class="btn-tool-sub">Méthode Multi-énergie · Données INERIS</span>
         </a>
-
         <a href="Calculateur/tnt.html" class="btn-tool">
           Surpression UVCE — Équivalent TNT
           <span class="btn-tool-sub">Méthode Équivalent TNT · Données INERIS</span>
         </a>
-<a href="Calculateur/debitdefuite.html" class="btn-tool">
-  Calcul de débit de fuite
-  <span class="btn-tool-sub">Fuite de gaz / liquide — Méthode INERIS - en construction</span>
-</a>
-
+        <a href="Calculateur/debitdefuite.html" class="btn-tool">
+          Calcul de débit de fuite
+          <span class="btn-tool-sub">Fuite de gaz / liquide — Méthode INERIS - en construction</span>
+        </a>
         <div class="btn-soon">
           Prochainement disponible
           <span class="btn-soon-sub">Nouvel outil en préparation</span>
@@ -273,19 +211,17 @@
         <span class="badge badge-chim">À venir</span>
       </div>
 
-      <!-- COLONNE RISQUES RADIOLOGIQUES (RAD) -->
+      <!-- COLONNE RISQUES RADIOLOGIQUES -->
       <div class="col">
         <div class="col-header">
           <div class="col-icon icon-rad">☢️</div>
           <div class="col-title">Risques radiologiques</div>
         </div>
         <p class="col-desc">Outils de calcul et d'aide à la décision pour les interventions sur sources radioactives.</p>
-
         <a href="Calculateur/debitdedose.html" class="btn-tool">
           Calcul de débit de dose
           <span class="btn-tool-sub">ICRP Publication 107</span>
         </a>
-
         <div class="btn-soon">
           Prochainement disponible
           <span class="btn-soon-sub">Nouvel outil en préparation</span>
@@ -295,6 +231,8 @@
 
     </div>
   </main>
+
+  <footer>© ENSOSP — Cne Eddy Fischer – Cdt Anne Tirelle — V0.11.24</footer>
 
 </body>
 </html>
