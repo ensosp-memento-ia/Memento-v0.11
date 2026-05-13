@@ -1,5 +1,7 @@
 /* ============================================================
    STYLE GLOBAL — Identité ENSOSP
+   Fichier unique — ne pas dupliquer dans les pages HTML
+   Décision technique v0.11.21
 ============================================================ */
 
 body {
@@ -16,6 +18,28 @@ body {
   color: #001F8F;
   font-size: 26px;
   font-weight: 700;
+}
+
+/* ============================================================
+   HEADER
+============================================================ */
+
+header {
+  background: #001F8F;
+  padding: 12px 20px;
+  text-align: center;
+  color: white;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  display: block;
+}
+
+.header-sub {
+  font-size: 12px;
+  font-weight: 400;
+  opacity: 0.8;
+  margin-top: 3px;
 }
 
 /* ============================================================
@@ -37,11 +61,22 @@ body {
   text-decoration: none;
   color: #001F8F;
   font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  font-family: "Inter", sans-serif;
+  display: inline-block;
+  transition: background 0.2s;
 }
 
 .tab.active {
   background: #001F8F;
   color: white;
+}
+
+.tab:hover:not(.active) {
+  background: #d9dff5;
 }
 
 /* ============================================================
@@ -219,8 +254,7 @@ a.btn-primary:hover {
 /* ----------------------------------------------------------
    BOUTONS D'ACTION — socle commun (pages internes)
    Utilisé par : btn-reset, btn-beta-test
-   Padding, font-size et border-radius identiques sur toutes
-   les pages. Ne pas surcharger ces valeurs en inline.
+   Ne pas surcharger padding/font-size/border-radius en inline.
 ---------------------------------------------------------- */
 .btn-action {
   display: inline-flex;
@@ -265,6 +299,33 @@ a.btn-primary:hover {
 }
 
 .btn-beta-test:active {
+  transform: translateY(0);
+}
+
+/* Bouton reset orange — scan uniquement */
+.btn-reset-scan {
+  background: #ff9f1c;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 10px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(255, 159, 28, 0.3);
+}
+
+.btn-reset-scan:hover {
+  background: #e68a00;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 159, 28, 0.4);
+}
+
+.btn-reset-scan:active {
   transform: translateY(0);
 }
 
@@ -370,6 +431,17 @@ a.btn-primary:hover {
 .checkbox input[type="checkbox"] {
   width: auto;
   margin: 0;
+}
+
+/* ============================================================
+   FOOTER
+============================================================ */
+
+footer {
+  padding: 12px;
+  text-align: center;
+  font-size: 13px;
+  color: #444;
 }
 
 /* ============================================================
