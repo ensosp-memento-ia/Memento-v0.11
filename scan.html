@@ -2,34 +2,14 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <title>Lecture QR – Mémento IA </title>
+  <title>Lecture QR – Mémento IA</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
   <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
   <link rel="stylesheet" href="style.css">
-
   <script src="https://unpkg.com/pako@2.1.0/dist/pako.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
-
   <style>
-    header {
-      background: #001F8F;
-      padding: 12px 20px;
-      text-align: center;
-      color: white;
-      font-size: 16px;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-      display: block;
-    }
-    .header-sub {
-      font-size: 12px;
-      font-weight: 400;
-      opacity: 0.8;
-      margin-top: 3px;
-    }
-
-    /* Modal overlay */
+    /* Modal — spécifique à scan.html */
     .modal-overlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
@@ -40,11 +20,7 @@
       z-index: 9999;
       animation: fadeIn 0.2s ease;
     }
-
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to   { opacity: 1; }
-    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
     .modal-content {
       background: white;
@@ -55,7 +31,6 @@
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
       animation: slideUp 0.3s ease;
     }
-
     @keyframes slideUp {
       from { opacity: 0; transform: translateY(20px); }
       to   { opacity: 1; transform: translateY(0); }
@@ -67,29 +42,24 @@
       gap: 12px;
       margin-bottom: 16px;
     }
-
     .modal-icon { font-size: 32px; }
-
     .modal-header h3 {
       margin: 0;
       font-size: 18px;
       color: #001F8F;
       font-weight: 600;
     }
-
     .modal-message {
       color: #555;
       font-size: 15px;
       margin: 0 0 24px 0;
       line-height: 1.5;
     }
-
     .modal-actions {
       display: flex;
       gap: 12px;
       justify-content: flex-end;
     }
-
     .btn-modal-confirm {
       background: #001F8F;
       color: white;
@@ -101,9 +71,7 @@
       cursor: pointer;
       transition: background 0.2s ease;
     }
-
     .btn-modal-confirm:hover { background: #002bbf; }
-
     .btn-modal-cancel {
       background: #e0e0e0;
       color: #333;
@@ -115,36 +83,9 @@
       cursor: pointer;
       transition: background 0.2s ease;
     }
-
     .btn-modal-cancel:hover { background: #d0d0d0; }
-
-    /* Bouton reset orange scan */
-    .btn-reset-scan {
-      background: #ff9f1c;
-      color: white;
-      border: none;
-      padding: 12px 20px;
-      font-size: 15px;
-      font-weight: 600;
-      border-radius: 10px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      transition: all 0.3s ease;
-      box-shadow: 0 2px 8px rgba(255, 159, 28, 0.3);
-    }
-
-    .btn-reset-scan:hover {
-      background: #e68a00;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(255, 159, 28, 0.4);
-    }
-
-    .btn-reset-scan:active { transform: translateY(0); }
   </style>
 </head>
-
 <body>
 
   <header>
@@ -183,22 +124,18 @@
 
     <section class="card" id="sectionScan">
       <h2>Scanner un QR Code</h2>
-
       <button id="btnStartCam" class="btn-add-var">🎥 Scanner via caméra</button>
-      <button id="btnStopCam" class="btn-reset" disabled>Arrêter</button>
+      <button id="btnStopCam" class="btn-action btn-reset" disabled>Arrêter</button>
 
       <div id="videoContainer" style="display:none;margin-top:15px;position:relative;">
         <video id="qrVideo" playsinline muted autoplay style="width:100%;background:#000;border-radius:12px;display:block;"></video>
         <div id="qrViewfinder" style="
-          position:absolute;
-          top:50%; left:50%;
+          position:absolute;top:50%;left:50%;
           transform:translate(-50%,-50%);
-          width:65%; aspect-ratio:1/1;
-          border:3px solid #fff;
-          border-radius:12px;
+          width:65%;aspect-ratio:1/1;
+          border:3px solid #fff;border-radius:12px;
           box-shadow:0 0 0 9999px rgba(0,0,0,0.45);
-          pointer-events:none;
-        ">
+          pointer-events:none;">
           <span style="position:absolute;top:-3px;left:-3px;width:22px;height:22px;border-top:4px solid #1dbf65;border-left:4px solid #1dbf65;border-radius:4px 0 0 0;"></span>
           <span style="position:absolute;top:-3px;right:-3px;width:22px;height:22px;border-top:4px solid #1dbf65;border-right:4px solid #1dbf65;border-radius:0 4px 0 0;"></span>
           <span style="position:absolute;bottom:-3px;left:-3px;width:22px;height:22px;border-bottom:4px solid #1dbf65;border-left:4px solid #1dbf65;border-radius:0 0 0 4px;"></span>
