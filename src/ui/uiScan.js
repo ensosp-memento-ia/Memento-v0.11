@@ -3,14 +3,14 @@
 // Version finale : URL uniquement + Codes couleur + Transmission prompt
 // ========================================================================
 
-// 🔍 LOG DE DÉBOGAGE IMMÉDIAT
 console.log("🚀 DÉBUT DU CHARGEMENT DE uiScan.js - Version finale");
 
 import { decodeFiche } from "../core/compression.js";
 import { getFicheFromUrl } from "../core/urlEncoder.js";
 import { startCameraScan, stopCameraScan } from "../core/qrReaderCamera.js";
+import { BETA_FORM_URL } from "./config.js";
 
-console.log("✅ Imports réussis (decodeFiche, getFicheFromUrl, caméra)");
+console.log("✅ Imports réussis (decodeFiche, getFicheFromUrl, caméra, config)");
 
 // ---------- Sections ----------
 const sectionScan   = document.getElementById("sectionScan");
@@ -39,42 +39,38 @@ function extractFicheFromQR(qrText) {
   console.log("  - Contenu:", qrText.substring(0, 150) + "...");
   console.log("  - Longueur:", qrText.length, "caractères");
 
-  // Vérifier que c'est bien une URL
   if (!qrText.startsWith('http://') && !qrText.startsWith('https://')) {
     throw new Error("Le QR Code ne contient pas une URL valide. Format attendu : https://...");
   }
 
   console.log("🔗 URL détectée, extraction du paramètre 'fiche'...");
-  
+
   try {
     const url = new URL(qrText);
     const ficheParam = url.searchParams.get('fiche');
-    
+
     if (!ficheParam) {
       throw new Error("Paramètre 'fiche' introuvable dans l'URL");
     }
-    
+
     console.log("✅ Paramètre 'fiche' extrait");
     console.log("  - Longueur:", ficheParam.length, "caractères");
-    
-    // Décoder Base64 URL-safe et restaurer padding
+
     let normalizedData = ficheParam
       .replace(/-/g, '+')
       .replace(/_/g, '/');
-    
-    // Restaurer le padding Base64 manquant
+
     const paddingNeeded = (4 - (normalizedData.length % 4)) % 4;
     normalizedData += '='.repeat(paddingNeeded);
-    
+
     console.log("🔄 Décodage Base64...");
-    
-    // Décoder la fiche
+
     const fiche = decodeFiche(normalizedData);
-    
+
     console.log("✅ Fiche décodée avec succès");
-    
+
     return fiche;
-    
+
   } catch (error) {
     console.error("❌ Erreur extraction fiche:", error);
     throw new Error("Impossible d'extraire la fiche de l'URL : " + error.message);
@@ -89,18 +85,15 @@ function onFicheDecoded(fiche) {
 
   window.currentFiche = fiche;
 
-  // 1) Masquer la zone scan, afficher les autres
   if (sectionScan)   sectionScan.style.display   = "none";
   if (sectionMeta)   sectionMeta.style.display   = "block";
   if (sectionVars)   sectionVars.style.display   = "block";
   if (sectionExtra)  sectionExtra.style.display  = "block";
   if (sectionPrompt) sectionPrompt.style.display = "block";
 
-  // 1.1) Afficher les boutons d'action (reset + beta test)
   const actionButtons = document.getElementById("actionButtons");
   if (actionButtons) actionButtons.style.display = "flex";
 
-  // 2) Remplir les métadonnées
   if (metaHeader) {
     metaHeader.style.display = "block";
     metaHeader.innerHTML = `
@@ -113,26 +106,24 @@ function onFicheDecoded(fiche) {
     `;
   }
 
-  // 3) Générer les champs de variables
   const scanVariables = document.getElementById("scanVariables");
   if (scanVariables) {
     scanVariables.innerHTML = "";
-    
+
     (fiche.prompt?.variables || []).forEach(v => {
       const block = document.createElement("div");
       block.className = "var-field";
 
       const lab = document.createElement("label");
       lab.textContent = v.label || v.id;
-      
-      // Indicateur requis
+
       if (v.required) {
         const req = document.createElement("span");
         req.textContent = " *";
         req.style.color = "#ff4d4d";
         lab.appendChild(req);
       }
-      
+
       block.appendChild(lab);
 
       let field;
@@ -141,16 +132,16 @@ function onFicheDecoded(fiche) {
         field = document.createElement("input");
         field.type = "text";
         if (v.required) field.required = true;
-      } 
+      }
       else if (v.type === "number") {
         field = document.createElement("input");
         field.type = "number";
         if (v.required) field.required = true;
-      } 
+      }
       else if (v.type === "choice") {
         field = document.createElement("select");
         if (v.required) field.required = true;
-        
+
         if (!v.required) {
           const emptyOpt = document.createElement("option");
           emptyOpt.value = "";
@@ -164,7 +155,7 @@ function onFicheDecoded(fiche) {
           o.textContent = opt;
           field.appendChild(o);
         });
-      } 
+      }
       else if (v.type === "geoloc") {
         field = document.createElement("div");
         field.innerHTML = `
@@ -172,16 +163,15 @@ function onFicheDecoded(fiche) {
           <input id="${v.id}_lat" placeholder="Latitude" type="number" step="0.000001" ${v.required ? 'required' : ''}>
           <input id="${v.id}_lon" placeholder="Longitude" type="number" step="0.000001" ${v.required ? 'required' : ''}>
         `;
-        
-        // Branchement GPS après insertion dans le DOM
+
         setTimeout(() => {
           const btn = document.getElementById(`${v.id}_gps`);
           if (!btn) return;
-          
+
           btn.onclick = () => {
             btn.disabled = true;
             btn.textContent = "⏳ Localisation...";
-            
+
             navigator.geolocation.getCurrentPosition(
               pos => {
                 const lat = document.getElementById(`${v.id}_lat`);
@@ -203,7 +193,7 @@ function onFicheDecoded(fiche) {
             );
           };
         }, 0);
-      } 
+      }
       else {
         field = document.createElement("input");
         field.type = "text";
@@ -215,61 +205,49 @@ function onFicheDecoded(fiche) {
     });
   }
 
-  // Nettoyage de l'affichage prompt / boutons
   const promptResult = document.getElementById("promptResult");
   const aiButtons = document.getElementById("aiButtons");
-  
+
   if (promptResult) promptResult.textContent = "";
   if (aiButtons) aiButtons.innerHTML = "";
 
-  // ========================================================================
-  // ✅ CORRECTION : Attacher le bouton compiler APRÈS création des éléments
-  // ========================================================================
   initializeCompileButton(fiche);
 }
 
 // ------------------------------------------------------------------------
-// ✅ NOUVELLE FONCTION : Initialisation bouton compiler
+// ✅ Initialisation bouton compiler
 // ------------------------------------------------------------------------
 function initializeCompileButton(fiche) {
   console.log("🔧 Initialisation bouton compiler...");
-  
-  const btnCompile = document.getElementById("btnBuildPrompt");
+
+  const btnCompile    = document.getElementById("btnBuildPrompt");
   const scanVariables = document.getElementById("scanVariables");
-  const promptResult = document.getElementById("promptResult");
-  const extraInput = document.getElementById("extra_input");
-  const aiButtons = document.getElementById("aiButtons");
-  
-  console.log("  - Bouton:", btnCompile);
-  console.log("  - scanVariables:", scanVariables);
-  console.log("  - promptResult:", promptResult);
-  
+  const promptResult  = document.getElementById("promptResult");
+  const extraInput    = document.getElementById("extra_input");
+  const aiButtons     = document.getElementById("aiButtons");
+
   if (!btnCompile) {
     console.error("❌ Bouton btnBuildPrompt introuvable");
     return;
   }
-  
+
   if (!scanVariables || !promptResult) {
     console.error("❌ Éléments manquants pour compilation");
     return;
   }
-  
-  // Attacher l'événement
+
   btnCompile.onclick = () => {
     console.log("🎯 COMPILATION DÉCLENCHÉE !");
-    
+
     if (!window.currentFiche) {
       alert("⚠️ Aucune fiche chargée");
       return;
     }
 
-    console.log("🔄 Compilation du prompt...");
-
     const ficheData = window.currentFiche;
     let prompt = ficheData.prompt.base;
     const extra = extraInput?.value.trim() || "";
 
-    // Remplacer les variables
     (ficheData.prompt?.variables || []).forEach(v => {
       const field = scanVariables.querySelector(`[data-id="${v.id}"]`);
       let value = "";
@@ -282,7 +260,6 @@ function initializeCompileButton(fiche) {
         value = field?.value || "";
       }
 
-      // Vérification requis
       if (v.required && !value) {
         alert(`⚠️ Le champ "${v.label || v.id}" est requis`);
         throw new Error("Champ requis manquant");
@@ -292,111 +269,82 @@ function initializeCompileButton(fiche) {
       prompt = prompt.replace(new RegExp(placeholder, "g"), value);
     });
 
-    // Ajouter infos supplémentaires
     if (extra) {
       prompt += `\n\nInformations complémentaires :\n${extra}`;
     }
 
-    // Afficher
     promptResult.textContent = prompt;
-
-    // ✅ Générer boutons IA avec le prompt
     buildAIButtons(ficheData, prompt, aiButtons);
 
     console.log("✅ Prompt compilé avec succès");
   };
-  
+
   console.log("✅ Bouton compiler initialisé avec succès");
 }
 
 // ------------------------------------------------------------------------
-// ✅ FONCTION FINALE : Boutons IA avec codes couleur + transmission prompt
+// ✅ Boutons IA avec codes couleur + transmission prompt
 // ------------------------------------------------------------------------
 function buildAIButtons(fiche, prompt, aiButtonsContainer) {
   if (!aiButtonsContainer) return;
-  
+
   aiButtonsContainer.innerHTML = "";
   aiButtonsContainer.style.display = "flex";
   aiButtonsContainer.style.flexWrap = "nowrap";
   aiButtonsContainer.style.gap = "8px";
-  
+
   if (!prompt.trim()) return;
 
-  // Récupération des indices IA (avec support NC)
-  // Compatibilité ascendante : claude absent dans les anciennes fiches → NC
   const levels = {
-    chatgpt:   (fiche.ai?.chatgpt   !== undefined) ? fiche.ai.chatgpt   : 3,
-    perplexity:(fiche.ai?.perplexity!== undefined) ? fiche.ai.perplexity: 3,
-    mistral:   (fiche.ai?.mistral   !== undefined) ? fiche.ai.mistral   : 3,
-    claude:    (fiche.ai?.claude    !== undefined) ? fiche.ai.claude    : "NC",
+    chatgpt:    (fiche.ai?.chatgpt    !== undefined) ? fiche.ai.chatgpt    : 3,
+    perplexity: (fiche.ai?.perplexity !== undefined) ? fiche.ai.perplexity : 3,
+    mistral:    (fiche.ai?.mistral    !== undefined) ? fiche.ai.mistral    : 3,
+    claude:     (fiche.ai?.claude     !== undefined) ? fiche.ai.claude     : "NC",
   };
 
-  // Fonction pour déterminer le style selon l'indice
   const styleForLevel = (lvl) => {
-    const lvlStr = String(lvl);
-    
-    switch (lvlStr) {
-      case "3":
-        return "background:#1dbf65;color:white;"; // Vert - Recommandée
-      case "2":
-        return "background:#ff9f1c;color:white;"; // Orange - Acceptable
-      case "1":
-        return "background:#999;color:#ccc;"; // Gris - Non recommandée
-      case "NC":
-        return "background:#001F8F;color:white;"; // Bleu ENSOSP - Non classé
-      default:
-        return "background:#cccccc;color:#777;"; // Fallback
+    switch (String(lvl)) {
+      case "3":  return "background:#1dbf65;color:white;";
+      case "2":  return "background:#ff9f1c;color:white;";
+      case "1":  return "background:#999;color:#ccc;";
+      case "NC": return "background:#001F8F;color:white;";
+      default:   return "background:#cccccc;color:#777;";
     }
   };
 
-  // Fonction pour obtenir le label de l'indice
   const getLabelForLevel = (lvl) => {
-    const lvlStr = String(lvl);
-    switch (lvlStr) {
-      case "3": return "3 - Recommandée";
-      case "2": return "2 - Acceptable";
-      case "1": return "1 - Non recommandée";
+    switch (String(lvl)) {
+      case "3":  return "3 - Recommandée";
+      case "2":  return "2 - Acceptable";
+      case "1":  return "1 - Non recommandée";
       case "NC": return "NC - Non classé";
-      default: return `Indice: ${lvl}`;
+      default:   return `Indice: ${lvl}`;
     }
   };
 
-  // Fonction de création de bouton
   const mkBtn = (label, lvl, baseUrl) => {
     const btn = document.createElement("button");
-    
-    // Texte du bouton avec badge indice
     const lvlLabel = getLabelForLevel(lvl);
+
     btn.innerHTML = `
       <span style="display:flex;flex-direction:column;align-items:center;gap:4px;">
         <span>🤖 ${label}</span>
         <span style="background:rgba(255,255,255,0.3);padding:2px 8px;border-radius:12px;font-size:11px;white-space:nowrap;">${lvlLabel}</span>
       </span>
     `;
-    
-    // Style de base
+
     btn.style = styleForLevel(lvl)
       + "padding:10px 8px;border:none;border-radius:8px;font-weight:600;cursor:pointer;flex:1;min-width:0;";
 
-    // Gestion selon l'indice
-    const lvlStr = String(lvl);
-    
-    if (lvlStr === "1") {
-      // Indice 1 : Non cliquable
+    if (String(lvl) === "1") {
       btn.disabled = true;
       btn.style.cursor = "not-allowed";
       btn.style.opacity = "0.6";
       btn.title = "Cette IA n'est pas recommandée pour cette fiche (indice: 1)";
     } else {
-      // Indices 2, 3, NC : Cliquable avec transmission du prompt
       btn.onclick = () => {
-        const encoded = encodeURIComponent(prompt);
-        const fullUrl = baseUrl + encoded;
-        
+        const fullUrl = baseUrl + encodeURIComponent(prompt);
         console.log(`🚀 Ouverture de ${label} avec prompt`);
-        console.log("  - Longueur prompt:", prompt.length, "caractères");
-        console.log("  - URL:", fullUrl.substring(0, 100) + "...");
-        
         window.open(fullUrl, "_blank");
       };
     }
@@ -404,54 +352,48 @@ function buildAIButtons(fiche, prompt, aiButtonsContainer) {
     aiButtonsContainer.appendChild(btn);
   };
 
-  // Création des 4 boutons avec URLs correctes
-  mkBtn("ChatGPT",   levels.chatgpt,   "https://chat.openai.com/?q=");
-  mkBtn("Perplexity",levels.perplexity,"https://www.perplexity.ai/search?q=");
-  mkBtn("Mistral",   levels.mistral,   "https://chat.mistral.ai/chat?q=");
-  mkBtn("Claude",    levels.claude,    "https://claude.ai/new?q=");
-  
-  console.log("✅ Boutons IA générés avec codes couleur et transmission prompt");
+  mkBtn("ChatGPT",    levels.chatgpt,    "https://chat.openai.com/?q=");
+  mkBtn("Perplexity", levels.perplexity, "https://www.perplexity.ai/search?q=");
+  mkBtn("Mistral",    levels.mistral,    "https://chat.mistral.ai/chat?q=");
+  mkBtn("Claude",     levels.claude,     "https://claude.ai/new?q=");
+
+  console.log("✅ Boutons IA générés");
 }
 
 // ------------------------------------------------------------------------
-// Lecture via CAMÉRA - Utilise le module qrReaderCamera.js
+// Lecture via CAMÉRA
 // ------------------------------------------------------------------------
 if (btnStartCam && btnStopCam && videoEl) {
-  
+
   btnStartCam.onclick = async () => {
-    console.log("🎥 Démarrage caméra via qrReaderCamera.js...");
+    console.log("🎥 Démarrage caméra...");
 
     videoContainer.style.display = "block";
     btnStartCam.disabled = true;
     btnStopCam.disabled = false;
 
     try {
-      // ✅ Utiliser le module robuste qrReaderCamera
       await startCameraScan(videoEl, (qrText) => {
         console.log("📷 QR détecté par caméra");
-        console.log("  - Texte extrait:", qrText.substring(0, 100) + "...");
-        
+
         try {
-          // ✅ Extraire la fiche depuis l'URL
           const fiche = extractFicheFromQR(qrText);
-          
-          // Arrêter la caméra après scan réussi
+
           stopCameraScan().then(() => {
             videoContainer.style.display = "none";
             btnStartCam.disabled = false;
             btnStopCam.disabled = true;
             onFicheDecoded(fiche);
           });
-          
+
         } catch (e) {
           console.error("❌ Erreur décodage QR:", e);
           alert("⚠️ " + e.message + "\n\nContinuez à scanner...");
-          // Ne pas arrêter la caméra, continuer le scan
         }
       });
 
       console.log("✅ Caméra démarrée avec succès");
-      
+
     } catch (err) {
       console.error("❌ Erreur caméra :", err);
       alert("❌ Impossible d'accéder à la caméra : " + err.message);
@@ -479,7 +421,7 @@ if (btnCopyPrompt) {
   btnCopyPrompt.onclick = async () => {
     const promptResult = document.getElementById("promptResult");
     const text = promptResult?.textContent;
-    
+
     if (!text) {
       alert("⚠️ Aucun prompt à copier");
       return;
@@ -501,23 +443,23 @@ if (btnCopyPrompt) {
 
 function checkAndLoadFromUrl() {
   console.log("🔍 Vérification paramètre URL...");
-  
+
   const ficheData = getFicheFromUrl();
-  
+
   if (!ficheData) {
     console.log("ℹ️ Aucun paramètre 'fiche' dans l'URL - mode scan normal");
     return;
   }
-  
+
   console.log("🌐 Paramètre 'fiche' détecté - chargement automatique...");
-  
+
   try {
     const fiche = decodeFiche(ficheData);
     console.log("✅ Fiche chargée depuis l'URL");
-    
+
     showUrlLoadMessage(fiche.meta?.titre || "Fiche chargée");
     onFicheDecoded(fiche);
-    
+
   } catch (err) {
     console.error("❌ Erreur chargement URL :", err);
     alert("❌ Impossible de charger la fiche depuis l'URL\n\n" + err.message);
@@ -539,14 +481,13 @@ function showUrlLoadMessage(titre) {
       "${titre}" a été chargée automatiquement.
     </p>
   `;
-  
+
   const main = document.querySelector("main");
   if (main && main.firstChild) {
     main.insertBefore(messageBox, main.firstChild);
   }
 }
 
-// Initialisation
 window.addEventListener('load', () => {
   console.log("📄 Page chargée - vérification URL...");
   checkAndLoadFromUrl();
@@ -564,35 +505,34 @@ function resetScanPage() {
 function executeReset() {
   const modal = document.getElementById("confirmResetModal");
   if (modal) modal.style.display = "none";
-  
-  // Arrêter la caméra si active
+
   stopCameraScan();
-  
-  if (sectionScan) sectionScan.style.display = "block";
-  if (sectionMeta) sectionMeta.style.display = "none";
-  if (sectionVars) sectionVars.style.display = "none";
-  if (sectionExtra) sectionExtra.style.display = "none";
+
+  if (sectionScan)   sectionScan.style.display   = "block";
+  if (sectionMeta)   sectionMeta.style.display   = "none";
+  if (sectionVars)   sectionVars.style.display   = "none";
+  if (sectionExtra)  sectionExtra.style.display  = "none";
   if (sectionPrompt) sectionPrompt.style.display = "none";
-  
+
   const actionButtons = document.getElementById("actionButtons");
   if (actionButtons) actionButtons.style.display = "none";
-  
+
   const scanVariables = document.getElementById("scanVariables");
-  const extraInput = document.getElementById("extra_input");
-  const promptResult = document.getElementById("promptResult");
-  const aiButtons = document.getElementById("aiButtons");
-  
-  if (scanVariables) scanVariables.innerHTML = "";
-  if (extraInput) extraInput.value = "";
-  if (promptResult) promptResult.textContent = "";
-  if (aiButtons) aiButtons.innerHTML = "";
-  if (metaHeader) metaHeader.innerHTML = "";
-  
+  const extraInput    = document.getElementById("extra_input");
+  const promptResult  = document.getElementById("promptResult");
+  const aiButtons     = document.getElementById("aiButtons");
+
+  if (scanVariables) scanVariables.innerHTML  = "";
+  if (extraInput)    extraInput.value         = "";
+  if (promptResult)  promptResult.textContent = "";
+  if (aiButtons)     aiButtons.innerHTML      = "";
+  if (metaHeader)    metaHeader.innerHTML     = "";
+
   if (window.location.search.includes('fiche=')) {
     const newUrl = window.location.origin + window.location.pathname;
     window.history.replaceState({}, document.title, newUrl);
   }
-  
+
   window.currentFiche = null;
   console.log("✅ Réinitialisation terminée");
 }
@@ -618,12 +558,13 @@ if (confirmResetModal) {
   });
 }
 
-// Bouton Beta Test
+// ========================================================================
+// BOUTON BETA TEST — source unique : config.js
+// ========================================================================
 const btnBetaTest = document.getElementById("btnBetaTest");
 if (btnBetaTest) {
   btnBetaTest.addEventListener("click", () => {
-    const url = "https://forms.office.com/Pages/ResponsePage.aspx?id=8fedXl6ZuESKAGhF_Bb8M5J2aSnQSghAnRmJ9DwIhUxUOFA1Q0lOT0FCSUU4TDU3WklSTTVGRzlMMy4u";
-    window.open(url, "_blank");
+    window.open(BETA_FORM_URL, "_blank");
   });
 }
 
