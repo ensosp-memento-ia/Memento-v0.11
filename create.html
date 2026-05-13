@@ -4,33 +4,11 @@
   <meta charset="UTF-8" />
   <title>Mémento IA – ENSOSP | Création de fiche</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
   <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
   <link rel="stylesheet" href="style.css" />
-
   <script src="https://unpkg.com/pako@2.1.0/dist/pako.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-
-  <style>
-    header {
-      background: #001F8F;
-      padding: 12px 20px;
-      text-align: center;
-      color: white;
-      font-size: 16px;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-      display: block;
-    }
-    .header-sub {
-      font-size: 12px;
-      font-weight: 400;
-      opacity: 0.8;
-      margin-top: 3px;
-    }
-  </style>
 </head>
-
 <body>
 
   <header>
@@ -61,7 +39,6 @@
 
     <section class="card">
       <h2>1. Métadonnées de la fiche</h2>
-
       <label>Catégorie
         <input id="meta_categorie" type="text" placeholder="Ex : Risque chimique / opérationnel">
       </label>
@@ -84,7 +61,6 @@
 
     <section class="card">
       <h2>2. Indices de confiance IA</h2>
-
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
         <div>
           <label>ChatGPT
@@ -127,50 +103,38 @@
 
     <section class="card">
       <h2>3. Variables utilisables dans le prompt (maximum 10)</h2>
-
       <p class="helper">
         Exemple : Identifiant variable <b>code_onu</b> → utilisable dans le prompt avec <code>{{code_onu}}</code>
       </p>
-
       <div id="variablesContainer"></div>
-
       <button id="btnAddVariable" class="btn-add-var">➕ Ajouter une variable</button>
     </section>
 
     <section class="card">
       <h2>4. Rédaction du prompt</h2>
-      <p class="helper">
-        Utilisez les variables avec <code>{{identifiant}}</code>.
-      </p>
+      <p class="helper">Utilisez les variables avec <code>{{identifiant}}</code>.</p>
       <textarea id="prompt_input" rows="10" placeholder="Rédigez le prompt ici…"></textarea>
       <div id="prompt_count" class="counter">0 caractère</div>
     </section>
 
     <section class="card">
       <h2>5. Génération du QR Code et de l'URL</h2>
-
       <button id="btnGenerate" class="btn-generate">🚀 Générer</button>
 
       <div id="qrContainer" class="qr-box"></div>
 
       <div id="urlContainer" style="display:none;margin-top:20px;">
         <h3 style="color:#001F8F;margin-bottom:10px;">🔗 URL cliquable générée</h3>
-
         <div style="background:#eef2ff;padding:15px;border-radius:10px;margin-bottom:15px;">
           <label style="display:block;margin-bottom:8px;font-weight:600;color:#001F8F;">
             Lien à utiliser dans votre PDF :
           </label>
-          <input
-            id="generatedUrlCreate"
-            type="text"
-            readonly
-            style="width:100%;padding:12px;border:2px solid #001F8F;border-radius:8px;font-size:14px;background:white;font-family:monospace;word-break:break-all;"
-          >
+          <input id="generatedUrlCreate" type="text" readonly
+            style="width:100%;padding:12px;border:2px solid #001F8F;border-radius:8px;font-size:14px;background:white;font-family:monospace;word-break:break-all;">
           <button id="btnCopyUrlCreate" class="btn-add-var" style="margin-top:10px;">
             📋 Copier l'URL
           </button>
         </div>
-
         <div style="background:#f9f9f9;padding:15px;border-radius:10px;font-size:14px;">
           <strong style="color:#001F8F;">💡 Utilisation de l'URL :</strong>
           <ul style="margin:10px 0;padding-left:20px;line-height:1.8;">
