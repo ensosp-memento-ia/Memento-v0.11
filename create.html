@@ -28,31 +28,6 @@
       opacity: 0.8;
       margin-top: 3px;
     }
-
-    /* ===== BOUTON BETA TEST — identique à scan.html ===== */
-    .btn-beta-test {
-      background: #001F8F;
-      color: white;
-      border: none;
-      padding: 12px 24px;
-      font-size: 16px;
-      font-weight: 600;
-      border-radius: 10px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      transition: all 0.3s ease;
-      box-shadow: 0 2px 8px rgba(0, 31, 143, 0.3);
-    }
-    .btn-beta-test:hover {
-      background: #002bbf;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0, 31, 143, 0.4);
-    }
-    .btn-beta-test:active {
-      transform: translateY(0);
-    }
   </style>
 </head>
 
@@ -73,13 +48,13 @@
   <main>
 
     <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
-      <button id="btnLoadFiche" class="btn-reset">
+      <button id="btnLoadFiche" class="btn-action btn-reset">
         📥 Charger une fiche depuis URL
       </button>
-      <button id="btnReset" class="btn-reset">
+      <button id="btnReset" class="btn-action btn-reset">
         🔄 Réinitialiser tout
       </button>
-      <button id="btnBetaTest" class="btn-beta-test">
+      <button id="btnBetaTest" class="btn-action btn-beta-test">
         📝 Partager un prompt
       </button>
     </div>
