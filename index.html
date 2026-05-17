@@ -184,6 +184,234 @@
 
     // ── Ticker nouveautés ──
     (function() {
+      var MAX_ENTRIES = 3;
+      var PX_PER_SEC  = 55;
+
+      // Fallback si changelog.json inaccessible (file://, CORS, 404)
+      var FALLBACK = [
+        { date:'2025-05-17', titre:"Page conversions d'unités", lien:'Calculateur/conversions.html', type:'nouveau' },
+        { date:'2025-05-17', titre:'Conversions GPS — DD, DMS, DDM, Lambert 93', lien:'Calculateur/conversions.html', type:'nouveau' },
+        { date:'2025-05-17', titre:'Manche à air — tableau SP et calculateur', lien:'Calculateur/conversions.html', type:'nouveau' }
+      ];
+
+      function badgeClass(type) {
+        if (type === 'nouveau')      return 'ticker-type-nouveau';
+        if (type === 'correctif')    return 'ticker-type-correctif';
+        if (type === 'amelioration') return 'ticker-type-amelioration';
+        return 'ticker-type-nouveau';
+      }
+      function badgeLabel(type) {
+        if (type === 'nouveau')      return 'Nouveau';
+        if (type === 'correctif')    return 'Correctif';
+        if (type === 'amelioration') return 'Amél.';
+        return type;
+      }
+      function fmtDate(iso) {
+        try { var p=iso.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
+        catch(e) { return iso; }
+      }
+
+      function buildItem(entry) {
+        var a = document.createElement('a');
+        a.className = 'ticker-item';
+        a.href = entry.lien || '#';
+        a.innerHTML =
+          '<span class="ticker-date">' + fmtDate(entry.date) + '</span>' +
+          '<span class="ticker-type ' + badgeClass(entry.type) + '">' + badgeLabel(entry.type) + '</span>' +
+          entry.titre;
+        return a;
+      }
+
+      function renderTicker(entries) {
+        var track = document.getElementById('ticker-track');
+        var badge = document.getElementById('ticker-badge');
+        if (!track || !badge) return;
+
+        var shown = entries.slice(0, MAX_ENTRIES);
+        badge.textContent = shown.length;
+
+        // Double pour boucle continue sans saut
+        [shown, shown].forEach(function(set) {
+          var frag = document.createDocumentFragment();
+          set.forEach(function(e) { frag.appendChild(buildItem(e)); });
+          track.appendChild(frag);
+        });
+
+        requestAnimationFrame(function() {
+          var halfW = track.scrollWidth / 2;
+          var dur = Math.max(8, Math.round(halfW / PX_PER_SEC));
+          track.style.animationDuration = dur + 's';
+        });
+      }
+
+      function sortAndRender(data) {
+        data.sort(function(a, b) { return new Date(b.date) - new Date(a.date); });
+        renderTicker(data);
+      }
+
+      fetch('changelog.json')
+        .then(function(r) {
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          return r.json();
+        })
+        .then(sortAndRender)
+        .catch(function() {
+          // Fallback silencieux — données codées en dur
+          sortAndRender(FALLBACK);
+        });
+    })();
+  </script>
+</body>
+</html>    /* ── TICKER NOUVEAUTÉS ── */
+    .ticker-wrap {
+      background: #001F8F;
+      overflow: hidden;
+      position: relative;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      user-select: none;
+      flex-shrink: 0;
+    }
+    .ticker-label {
+      flex-shrink: 0;
+      background: #001F8F;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 0 14px 0 16px;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      z-index: 2;
+      border-right: 1px solid rgba(255,255,255,0.18);
+      white-space: nowrap;
+    }
+    .ticker-badge {
+      background: #ff4444;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 20px;
+      line-height: 1;
+    }
+    .ticker-track-wrap {
+      flex: 1;
+      overflow: hidden;
+      height: 100%;
+      position: relative;
+    }
+    .ticker-track-wrap::before,
+    .ticker-track-wrap::after {
+      content: '';
+      position: absolute;
+      top: 0; bottom: 0;
+      width: 32px;
+      z-index: 2;
+      pointer-events: none;
+    }
+    .ticker-track-wrap::before { left: 0;  background: linear-gradient(to right, #001F8F, transparent); }
+    .ticker-track-wrap::after  { right: 0; background: linear-gradient(to left,  #001F8F, transparent); }
+    .ticker-track {
+      display: flex;
+      align-items: center;
+      height: 100%;
+      white-space: nowrap;
+      animation: ticker-scroll linear infinite;
+    }
+    .ticker-track:hover,
+    .ticker-track:focus-within {
+      animation-play-state: paused;
+    }
+    @keyframes ticker-scroll {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+    .ticker-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 28px;
+      color: rgba(255,255,255,0.90);
+      font-size: 13px;
+      font-weight: 500;
+      text-decoration: none;
+      transition: color 0.2s;
+      cursor: pointer;
+    }
+    .ticker-item:hover { color: #fff; }
+    .ticker-item::before {
+      content: '•';
+      color: rgba(255,255,255,0.35);
+      font-size: 10px;
+      flex-shrink: 0;
+    }
+    .ticker-date {
+      font-size: 11px;
+      color: rgba(255,255,255,0.50);
+      flex-shrink: 0;
+    }
+    .ticker-type {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 6px;
+      flex-shrink: 0;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    .ticker-type-nouveau      { background: rgba(0,200,100,0.25);  color: #7fffb8; }
+    .ticker-type-correctif    { background: rgba(255,180,0,0.25);   color: #ffd97a; }
+    .ticker-type-amelioration { background: rgba(100,160,255,0.25); color: #b0d0ff; }
+  </style>
+</head>
+<body>
+
+  <header>Mémento Opérationnel IA – ENSOSP</header>
+
+  <!-- TICKER NOUVEAUTÉS -->
+  <div class="ticker-wrap" id="ticker-wrap">
+    <div class="ticker-label">
+      🔔 Nouveautés
+      <span class="ticker-badge" id="ticker-badge">—</span>
+    </div>
+    <div class="ticker-track-wrap">
+      <div class="ticker-track" id="ticker-track"></div>
+    </div>
+  </div>
+
+  <main>
+    <h1>Bienvenue</h1>
+    <p style="max-width:560px;margin:0;font-size:14px;">
+      Créez ou lisez une fiche opérationnelle IA via le scan.
+    </p>
+    <div style="background:#fff3cd;border-left:4px solid #ff9f1c;padding:10px 14px;border-radius:8px;max-width:560px;">
+      <span style="font-size:14px;color:#856404;">⚠️ <strong>Avertissement</strong> — L'IA peut faire des erreurs. Exercez votre jugement professionnel avant toute action opérationnelle.</span>
+    </div>
+    <a href="scan.html"   class="btn btn-primary">📷 Lire une fiche (Scan QR Code)</a>
+    <a href="create.html" class="btn btn-primary">📝 Créer une fiche IA</a>
+    <a href="https://sdis76-my.sharepoint.com/:f:/g/personal/anne_tirelle_sdis76_fr/IgBMN_Ng429YRqwq0tPmPs2XAXwV8MXJFYjQnvp7jmM_M8g?e=mZgrwl"
+       target="_blank" rel="noopener noreferrer" class="btn btn-primary">📁 Accéder aux Mémentos IA</a>
+    <a href="nrbc.html"   class="btn btn-primary">⚗️ Espace NRBC</a>
+  </main>
+
+  <footer>© ENSOSP — Cne Eddy Fischer – Cdt Anne Tirelle — V0.11.25</footer>
+
+  <script>
+    // ── Boutons hover ──
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.btn-primary').forEach(function(btn) {
+        btn.addEventListener('mouseenter', function() { this.style.filter = 'brightness(1.2)'; });
+        btn.addEventListener('mouseleave', function() { this.style.filter = 'brightness(1)'; });
+      });
+    });
+
+    // ── Ticker nouveautés ──
+    (function() {
       var CHANGELOG_URL = 'changelog.json';
       var MAX_ENTRIES   = 3;
       var PX_PER_SEC    = 55;
