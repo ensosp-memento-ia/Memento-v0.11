@@ -257,6 +257,1735 @@
         </div>
       </div>
 
+      <!-- DOSE -->
+      <div class="sub-panel" id="sub-rad-dose">
+        <div id="widget-rad-dose"></div>
+      </div>
+
+      <!-- DÉBIT DE DOSE -->
+      <div class="sub-panel" id="sub-rad-debitdose">
+        <div class="section-title">Débit de dose absorbée — Gy/h ↔ rad/h (avec préfixe)</div>
+        <div id="widget-rad-debitdose"></div>
+        <div style="background:#f1f3fa;border-radius:12px;padding:12px 14px;margin-top:12px;font-size:13px;color:#444;line-height:1.8;">
+          <strong style="color:#001F8F;">Équivalence</strong> — 1 Gy/h = 100 rad/h
+        </div>
+      </div>
+
+      <!-- DÉBIT ÉQUIVALENT DE DOSE -->
+      <div class="sub-panel" id="sub-rad-debiteqdose">
+        <div class="section-title">Débit d'équivalent de dose — Sv/h ↔ rem/h (avec préfixe)</div>
+        <div id="widget-rad-debiteqdose"></div>
+        <div style="background:#f1f3fa;border-radius:12px;padding:12px 14px;margin-top:12px;font-size:13px;color:#444;line-height:1.8;">
+          <strong style="color:#001F8F;">Équivalence</strong> — 1 Sv/h = 100 rem/h
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <!-- GPS -->
+  <div class="family-panel" id="panel-gps">
+    <div class="card">
+      <div class="card-title">Coordonnées GPS</div>
+      <div id="widget-gps"></div>
+      <div id="gps-maps-block" style="margin-top:16px;display:none;">
+        <hr class="section-sep" style="margin-bottom:14px;">
+        <div id="gps-maps-link"></div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  Mémento Opérationnel IA — ENSOSP
+</footer>
+
+<script>
+// ═══════════════════════════════════════════
+// UTILITAIRES
+// ═══════════════════════════════════════════
+
+function fmt(val) {
+  if (val === null || val === undefined || isNaN(val)) return '';
+  if (val === 0) return '0';
+  var abs = Math.abs(val);
+  if (abs >= 0.0001 && abs < 1e8) return parseFloat(val.toPrecision(7)).toString();
+  return val.toExponential(4);
+}
+
+// ═══════════════════════════════════════════
+// CONSTRUCTEUR WIDGET STYLE GOOGLE
+// prefixConfig (optionnel) : { unitKeys: ['pa'], prefixes: [{p:'k',label:'Kilo',f:1e3}, ...] }
+// Affiche boutons préfixe sous le sélecteur pour les unités listées dans unitKeys
+// ═══════════════════════════════════════════
+
+var SI_PREFIXES_ALL = [
+  { p:'T', label:'Téra',  f:1e12 },
+  { p:'G', label:'Giga',  f:1e9  },
+  { p:'M', label:'Méga',  f:1e6  },
+  { p:'k', label:'Kilo',  f:1e3  },
+  { p:'',  label:'—',     f:1    },
+  { p:'m', label:'Milli', f:1e-3 },
+  { p:'µ', label:'Micro', f:1e-6 },
+];
+
+function buildWidget(containerId, units, convertFn, defaultSrc, defaultDst, prefixConfig) {
+  var container = document.getElementById(containerId);
+  if (!container) return;
+
+  var pfx       = containerId;
+  var selSrcId  = pfx + '_sel_src';
+  var selDstId  = pfx + '_sel_dst';
+  var inputId   = pfx + '_input';
+  var resultId  = pfx + '_result';
+  var copyId    = pfx + '_copy';
+  var formulaId = pfx + '_formula';
+
+  // État des préfixes actifs (src/dst) par unité
+  var pfxState = { src: '', dst: '' };
+
+  // --- Helpers préfixe ---
+  var hasPfx = !!(prefixConfig && prefixConfig.unitKeys && prefixConfig.prefixes);
+
+  function unitBaseKey(key) {
+    // Retrouver la clé de base (ex 'pa' → 'pa', déjà la base)
+    return key;
+  }
+
+  function unitIsPrefixable(key, side) {
+    if (!hasPfx) return false;
+    return prefixConfig.unitKeys.indexOf(key) !== -1;
+  }
+
+  function pfxBtnsHtml(side, activeP) {
+    if (!hasPfx) return '';
+    return '<div id="' + pfx + '_pfxbtns_' + side + '" style="display:none;flex-wrap:wrap;gap:4px;margin-top:6px;">' +
+      prefixConfig.prefixes.map(function(p) {
+        var isActive = (p.p === activeP);
+        return '<button id="' + pfx+'_pb_'+side+'_'+p.p + '" ' +
+          'onclick="wPfxSet(\'' + pfx + '\',\'' + side + '\',\'' + p.p + '\')" ' +
+          'style="padding:4px 8px;border:1.5px solid ' + (isActive ? '#001F8F' : '#ccd2e3') + ';' +
+          'border-radius:7px;background:' + (isActive ? '#001F8F' : '#fff') + ';' +
+          'color:' + (isActive ? '#fff' : '#444') + ';' +
+          'font-size:12px;font-weight:700;font-family:Inter,sans-serif;cursor:pointer;min-width:28px;">' +
+          (p.p || '—') + '</button>';
+      }).join('') +
+    '</div>';
+  }
+
+  function optLabelWithPfx(u, activeP) {
+    if (!hasPfx || !unitIsPrefixable(u.key)) return u.label;
+    var pfxObj = prefixConfig.prefixes.find(function(p){return p.p===activeP;});
+    if (!pfxObj || pfxObj.p === '') return u.label;
+    // Construire label complet : ex Kilopascal (kPa)
+    var baseName = u.name || u.label.replace(/\s*\(.*\)/, '');
+    var baseSym  = u.sym  || u.key;
+    var lo = baseName.charAt(0).toLowerCase() + baseName.slice(1);
+    return pfxObj.label + lo + ' (' + pfxObj.p + baseSym + ')';
+  }
+
+  function optionsHtml(selected, activePfx) {
+    return units.map(function(u) {
+      var lbl = optLabelWithPfx(u, activePfx || '');
+      return '<option value="' + u.key + '"' + (u.key === selected ? ' selected' : '') + '>' + lbl + '</option>';
+    }).join('');
+  }
+
+  // Facteur du préfixe actif pour un côté
+  function pfxFactor(side) {
+    if (!hasPfx) return 1;
+    var selId = side === 'src' ? selSrcId : selDstId;
+    var selEl = document.getElementById(selId);
+    if (!selEl) return 1;
+    var unitKey = selEl.value;
+    if (!unitIsPrefixable(unitKey)) return 1;
+    var activeP = (side === 'src') ? pfxState.src : pfxState.dst;
+    var pfxObj = prefixConfig.prefixes.find(function(p){return p.p===activeP;});
+    return pfxObj ? pfxObj.f : 1;
+  }
+
+  container.innerHTML =
+    '<div class="conv-widget">' +
+      '<div class="conv-row">' +
+        '<div class="conv-side">' +
+          '<label>De</label>' +
+          '<select class="conv-select" id="' + selSrcId + '">' + optionsHtml(defaultSrc || units[0].key, pfxState.src) + '</select>' +
+          pfxBtnsHtml('src', pfxState.src) +
+          '<input class="conv-input" type="number" id="' + inputId + '" placeholder="Saisir une valeur" autocomplete="off">' +
+        '</div>' +
+        '<div class="swap-btn-wrap">' +
+          '<button class="swap-btn" id="' + pfx + '_swap" title="Inverser">⇄</button>' +
+        '</div>' +
+        '<div class="conv-side">' +
+          '<label>Vers</label>' +
+          '<select class="conv-select" id="' + selDstId + '">' + optionsHtml(defaultDst || units[1].key, pfxState.dst) + '</select>' +
+          pfxBtnsHtml('dst', pfxState.dst) +
+          '<div class="conv-result-box">' +
+            '<span class="conv-result-val" id="' + resultId + '">—</span>' +
+            '<button class="copy-btn" id="' + copyId + '" title="Copier">⎘</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="formula-box" id="' + formulaId + '"></div>' +
+    '</div>';
+
+  // Afficher/masquer boutons préfixe selon unité sélectionnée
+  function refreshPfxBtns(side) {
+    if (!hasPfx) return;
+    var selId  = side === 'src' ? selSrcId : selDstId;
+    var btnDiv = document.getElementById(pfx + '_pfxbtns_' + side);
+    if (!btnDiv) return;
+    var unitKey = document.getElementById(selId).value;
+    btnDiv.style.display = unitIsPrefixable(unitKey) ? 'flex' : 'none';
+  }
+
+  function doCalc() {
+    var rawVal = document.getElementById(inputId).value;
+    var val = rawVal === '' ? null : parseFloat(rawVal);
+    var src = document.getElementById(selSrcId).value;
+    var dst = document.getElementById(selDstId).value;
+    var resultEl  = document.getElementById(resultId);
+    var formulaEl = document.getElementById(formulaId);
+
+    if (val === null || isNaN(val)) {
+      resultEl.textContent = '—';
+      formulaEl.innerHTML = '';
+      return;
+    }
+
+    // Appliquer facteur préfixe : val × pfxSrc → unité de base → ÷ pfxDst
+    var fSrc = pfxFactor('src');
+    var fDst = pfxFactor('dst');
+    var valAdjusted = val * fSrc;
+
+    var out = convertFn(valAdjusted, src, dst);
+    if (out === null || out === undefined || isNaN(out)) {
+      resultEl.textContent = '⚠ N/A';
+      formulaEl.innerHTML = '<span style="color:#c0392b;">Conversion non disponible.</span>';
+      return;
+    }
+    out = out / fDst;
+
+    resultEl.textContent = fmt(out);
+
+    var srcU = units.find(function(u){return u.key===src;});
+    var dstU = units.find(function(u){return u.key===dst;});
+    var srcLabel = optLabelWithPfx(srcU, pfxState.src);
+    var dstLabel = optLabelWithPfx(dstU, pfxState.dst);
+    var formulaStr = convertFn(valAdjusted, src, dst, true);
+    formulaEl.innerHTML =
+      '<span class="formula-label">Formule</span> ' +
+      (formulaStr || fmt(val) + ' ' + srcLabel + ' = ' + fmt(out) + ' ' + dstLabel);
+  }
+
+  document.getElementById(inputId).addEventListener('input', doCalc);
+
+  document.getElementById(selSrcId).addEventListener('change', function() {
+    pfxState.src = '';
+    refreshPfxBtns('src');
+    // Reset boutons préfixe src
+    if (hasPfx) prefixConfig.prefixes.forEach(function(p) {
+      var b = document.getElementById(pfx+'_pb_src_'+p.p);
+      if (b) { b.style.background=(p.p===''?'#001F8F':'#fff'); b.style.color=(p.p===''?'#fff':'#444'); b.style.borderColor=(p.p===''?'#001F8F':'#ccd2e3'); }
+    });
+    // Mettre à jour label option
+    var selEl = document.getElementById(selSrcId);
+    var u = units.find(function(uu){return uu.key===selEl.value;});
+    if (u) selEl.options[selEl.selectedIndex].text = optLabelWithPfx(u, '');
+    doCalc();
+  });
+
+  document.getElementById(selDstId).addEventListener('change', function() {
+    pfxState.dst = '';
+    refreshPfxBtns('dst');
+    if (hasPfx) prefixConfig.prefixes.forEach(function(p) {
+      var b = document.getElementById(pfx+'_pb_dst_'+p.p);
+      if (b) { b.style.background=(p.p===''?'#001F8F':'#fff'); b.style.color=(p.p===''?'#fff':'#444'); b.style.borderColor=(p.p===''?'#001F8F':'#ccd2e3'); }
+    });
+    var selEl = document.getElementById(selDstId);
+    var u = units.find(function(uu){return uu.key===selEl.value;});
+    if (u) selEl.options[selEl.selectedIndex].text = optLabelWithPfx(u, '');
+    doCalc();
+  });
+
+  // Swap
+  document.getElementById(pfx + '_swap').addEventListener('click', function() {
+    var selSrc = document.getElementById(selSrcId);
+    var selDst = document.getElementById(selDstId);
+    var tmp = selSrc.value; selSrc.value = selDst.value; selDst.value = tmp;
+    var tmpP = pfxState.src; pfxState.src = pfxState.dst; pfxState.dst = tmpP;
+    var resText = document.getElementById(resultId).textContent;
+    var num = parseFloat(resText);
+    if (!isNaN(num)) document.getElementById(inputId).value = resText;
+    refreshPfxBtns('src'); refreshPfxBtns('dst');
+    // Sync boutons visuels après swap
+    if (hasPfx) ['src','dst'].forEach(function(side) {
+      var activeP = side==='src' ? pfxState.src : pfxState.dst;
+      prefixConfig.prefixes.forEach(function(p) {
+        var b = document.getElementById(pfx+'_pb_'+side+'_'+p.p);
+        if (!b) return;
+        var on = p.p===activeP;
+        b.style.background=on?'#001F8F':'#fff'; b.style.color=on?'#fff':'#444'; b.style.borderColor=on?'#001F8F':'#ccd2e3';
+      });
+    });
+    doCalc();
+  });
+
+  // Copie
+  document.getElementById(copyId).addEventListener('click', function() {
+    var txt = document.getElementById(resultId).textContent;
+    if (txt === '—' || txt === '') return;
+    navigator.clipboard.writeText(txt).then(function() {
+      var btn = document.getElementById(copyId);
+      btn.classList.add('copied'); btn.textContent = '✓';
+      setTimeout(function() { btn.classList.remove('copied'); btn.textContent = '⎘'; }, 1200);
+    });
+  });
+
+  // Init affichage boutons préfixe
+  refreshPfxBtns('src');
+  refreshPfxBtns('dst');
+
+  // Exposer wPfxSet sur window pour les onclick inline
+  if (hasPfx) {
+    if (!window._wPfxRegistry) window._wPfxRegistry = {};
+    window._wPfxRegistry[pfx] = {
+      pfxState: pfxState,
+      units: units,
+      prefixConfig: prefixConfig,
+      selSrcId: selSrcId,
+      selDstId: selDstId,
+      doCalc: doCalc,
+      optLabelWithPfx: optLabelWithPfx,
+      unitIsPrefixable: unitIsPrefixable,
+      refreshPfxBtns: refreshPfxBtns,
+      pfx: pfx
+    };
+  }
+
+  return doCalc;
+}
+
+// Fonction globale appelée par les boutons préfixe onclick
+function wPfxSet(widgetId, side, p) {
+  var reg = window._wPfxRegistry && window._wPfxRegistry[widgetId];
+  if (!reg) return;
+
+  if (side === 'src') reg.pfxState.src = p;
+  else                reg.pfxState.dst = p;
+
+  // Mettre à jour visuellement les boutons
+  reg.prefixConfig.prefixes.forEach(function(pr) {
+    var btn = document.getElementById(reg.pfx + '_pb_' + side + '_' + pr.p);
+    if (!btn) return;
+    var on = pr.p === p;
+    btn.style.background   = on ? '#001F8F' : '#fff';
+    btn.style.color        = on ? '#fff' : '#444';
+    btn.style.borderColor  = on ? '#001F8F' : '#ccd2e3';
+  });
+
+  // Mettre à jour le label de l'option dans le sélecteur
+  var selId = side === 'src' ? reg.selSrcId : reg.selDstId;
+  var sel   = document.getElementById(selId);
+  if (sel) {
+    var u = reg.units.find(function(uu){return uu.key===sel.value;});
+    if (u && reg.unitIsPrefixable(u.key)) {
+      sel.options[sel.selectedIndex].text = reg.optLabelWithPfx(u, p);
+    }
+  }
+
+  reg.doCalc();
+}
+
+// ═══════════════════════════════════════════
+// CONVERTISSEUR LINÉAIRE GÉNÉRIQUE
+// toBase : facteur de conversion vers l'unité de base
+// ═══════════════════════════════════════════
+
+function makeLinearConverter(units) {
+  var map = {};
+  units.forEach(function(u) { map[u.key] = u.toBase; });
+  return function(val, src, dst, formulaMode) {
+    var base = val * map[src];
+    var result = base / map[dst];
+    if (formulaMode) {
+      var factor = map[src] / map[dst];
+      return fmt(val) + ' × ' + fmt(factor) + ' = ' + fmt(result) + ' ' + units.find(function(u){return u.key===dst;}).label;
+    }
+    return result;
+  };
+}
+
+// ═══════════════════════════════════════════
+// 1. PRESSIONS
+// ═══════════════════════════════════════════
+
+var pressUnits = [
+  { key:'pa',   label:'Pascal (Pa)',       name:'Pascal',      sym:'Pa',  toBase:1 },
+  { key:'bar',  label:'Bar',               name:'Bar',         sym:'bar', toBase:1e5 },
+  { key:'mbar', label:'Millibar (mbar)',   name:'Millibar',    sym:'mbar',toBase:100 },
+  { key:'kpa',  label:'Kilopascal (kPa)', name:'Kilopascal',  sym:'kPa', toBase:1000 },
+  { key:'mpa',  label:'Mégapascal (MPa)', name:'Mégapascal',  sym:'MPa', toBase:1e6 },
+  { key:'atm',  label:'Atmosphère (atm)', name:'Atmosphère',  sym:'atm', toBase:101325 },
+  { key:'psi',  label:'PSI',              name:'PSI',          sym:'psi', toBase:6894.757 },
+  { key:'mmhg', label:'mmHg (Torr)',      name:'Millimètre Hg',sym:'mmHg',toBase:133.3224 },
+];
+var pressPfxConfig = {
+  unitKeys: ['pa'],
+  prefixes: [
+    { p:'M', label:'Méga',  f:1e6  },
+    { p:'k', label:'Kilo',  f:1e3  },
+    { p:'',  label:'—',     f:1    },
+    { p:'m', label:'Milli', f:1e-3 },
+    { p:'µ', label:'Micro', f:1e-6 },
+  ]
+};
+buildWidget('widget-pressions', pressUnits, makeLinearConverter(pressUnits), 'bar', 'pa', pressPfxConfig);
+
+// ═══════════════════════════════════════════
+// 2. TEMPÉRATURES
+// ═══════════════════════════════════════════
+
+var tempUnits = [
+  { key:'c', label:'°Celsius (°C)' },
+  { key:'k', label:'Kelvin (K)' },
+  { key:'f', label:'°Fahrenheit (°F)' },
+];
+
+function tempConverter(val, src, dst, formulaMode) {
+  // Convert src → Celsius
+  var c;
+  if (src === 'c') c = val;
+  else if (src === 'k') c = val - 273.15;
+  else c = (val - 32) * 5/9;
+  // Celsius → dst
+  var result;
+  if (dst === 'c') result = c;
+  else if (dst === 'k') result = c + 273.15;
+  else result = c * 9/5 + 32;
+
+  if (formulaMode) {
+    if (src === 'c' && dst === 'k') return fmt(val) + ' + 273,15 = ' + fmt(result) + ' K';
+    if (src === 'k' && dst === 'c') return fmt(val) + ' − 273,15 = ' + fmt(result) + ' °C';
+    if (src === 'c' && dst === 'f') return '(' + fmt(val) + ' × 9/5) + 32 = ' + fmt(result) + ' °F';
+    if (src === 'f' && dst === 'c') return '(' + fmt(val) + ' − 32) × 5/9 = ' + fmt(result) + ' °C';
+    if (src === 'k' && dst === 'f') return '((' + fmt(val) + ' − 273,15) × 9/5) + 32 = ' + fmt(result) + ' °F';
+    if (src === 'f' && dst === 'k') return '((' + fmt(val) + ' − 32) × 5/9) + 273,15 = ' + fmt(result) + ' K';
+    return fmt(val) + ' = ' + fmt(result);
+  }
+  return result;
+}
+buildWidget('widget-temperatures', tempUnits, tempConverter, 'c', 'k');
+
+// ═══════════════════════════════════════════
+// 3. DÉBITS
+// ═══════════════════════════════════════════
+
+var debitVolUnits = [
+  { key:'lmin', label:'L/min',  toBase:1/60000 },
+  { key:'lh',   label:'L/h',   toBase:1/3600000 },
+  { key:'ls',   label:'L/s',   toBase:0.001 },
+  { key:'m3h',  label:'m³/h',  toBase:1/3600 },
+  { key:'m3s',  label:'m³/s',  toBase:1 },
+];
+var recalcDebitVol = buildWidget('widget-debits-vol', debitVolUnits, makeLinearConverter(debitVolUnits), 'lmin', 'm3h');
+
+// Sous-onglets débits
+document.querySelectorAll('#panel-debits .sub-tab-btn').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('#panel-debits .sub-tab-btn').forEach(function(b) { b.classList.remove('active'); });
+    document.querySelectorAll('#panel-debits .sub-panel').forEach(function(p) { p.classList.remove('active'); });
+    btn.classList.add('active');
+    document.getElementById('sub-' + btn.dataset.sub).classList.add('active');
+  });
+});
+
+// Débit massique pur — pivot kg/s
+var debitMassUnits = [
+  { key:'kgs',  label:'kg/s',          toBase:1 },
+  { key:'kgmin',label:'kg/min',        toBase:1/60 },
+  { key:'kgh',  label:'kg/h',          toBase:1/3600 },
+  { key:'gs',   label:'g/s',           toBase:1e-3 },
+  { key:'gmin', label:'g/min',         toBase:1e-3/60 },
+  { key:'th',   label:'t/h (tonne/h)', toBase:1000/3600 },
+  { key:'lbs',  label:'lb/s',          toBase:0.453592 },
+  { key:'lbmin',label:'lb/min',        toBase:0.453592/60 },
+  { key:'lbh',  label:'lb/h',          toBase:0.453592/3600 },
+];
+
+function massConverter(val, src, dst, formulaMode) {
+  var srcU = debitMassUnits.find(function(u){return u.key===src;});
+  var dstU = debitMassUnits.find(function(u){return u.key===dst;});
+  var kgs = val * srcU.toBase;
+  var result = kgs / dstU.toBase;
+  if (formulaMode) {
+    return fmt(val) + ' × ' + fmt(srcU.toBase / dstU.toBase) + ' = ' + fmt(result) + ' ' + dstU.label;
+  }
+  return result;
+}
+var recalcMassiqueWidget = buildWidget('widget-debits-mass', debitMassUnits, massConverter, 'kgh', 'lbh');
+
+// Débit vol → masse (avec densité) — unités volumiques source, massiques cible
+var debitVolUnitsVM = [
+  { key:'lmin_v', label:'L/min',  toBaseM3s: 1/60000 },
+  { key:'lh_v',   label:'L/h',   toBaseM3s: 1/3600000 },
+  { key:'ls_v',   label:'L/s',   toBaseM3s: 0.001 },
+  { key:'m3h_v',  label:'m³/h',  toBaseM3s: 1/3600 },
+  { key:'m3s_v',  label:'m³/s',  toBaseM3s: 1 },
+];
+var debitMassUnitsVM = [
+  { key:'kgs_m',  label:'kg/s',          toBaseKgs:1 },
+  { key:'kgmin_m',label:'kg/min',        toBaseKgs:1/60 },
+  { key:'kgh_m',  label:'kg/h',          toBaseKgs:1/3600 },
+  { key:'gs_m',   label:'g/s',           toBaseKgs:1e-3 },
+  { key:'th_m',   label:'t/h (tonne/h)', toBaseKgs:1000/3600 },
+  { key:'lbh_m',  label:'lb/h',          toBaseKgs:0.453592/3600 },
+];
+
+// Widget vol→mass : sélecteur source parmi vol, sélecteur cible parmi mass
+function buildVolMassWidget(containerId) {
+  var c = document.getElementById(containerId);
+  if (!c) return;
+  var pfx = containerId;
+
+  function optVol(sel) {
+    return debitVolUnitsVM.map(function(u){
+      return '<option value="'+u.key+'"'+(u.key===sel?' selected':'')+'>'+u.label+'</option>';
+    }).join('');
+  }
+  function optMass(sel) {
+    return debitMassUnitsVM.map(function(u){
+      return '<option value="'+u.key+'"'+(u.key===sel?' selected':'')+'>'+u.label+'</option>';
+    }).join('');
+  }
+
+  c.innerHTML =
+    '<div class="conv-widget">'+
+      '<div class="conv-row">'+
+        '<div class="conv-side">'+
+          '<label>De (volumique)</label>'+
+          '<select class="conv-select" id="'+pfx+'_src">'+optVol('lmin_v')+'</select>'+
+          '<input class="conv-input" type="number" id="'+pfx+'_inp" placeholder="Saisir une valeur" autocomplete="off">'+
+        '</div>'+
+        '<div class="swap-btn-wrap"><div style="width:40px;"></div></div>'+
+        '<div class="conv-side">'+
+          '<label>Vers (massique)</label>'+
+          '<select class="conv-select" id="'+pfx+'_dst">'+optMass('kgh_m')+'</select>'+
+          '<div class="conv-result-box">'+
+            '<span class="conv-result-val" id="'+pfx+'_res">—</span>'+
+            '<button class="copy-btn" id="'+pfx+'_copy" title="Copier">⎘</button>'+
+          '</div>'+
+        '</div>'+
+      '</div>'+
+      '<div class="formula-box" id="'+pfx+'_form"></div>'+
+    '</div>';
+
+  function doCalc() {
+    var raw = document.getElementById(pfx+'_inp').value;
+    var val = raw===''?null:parseFloat(raw);
+    var srcKey = document.getElementById(pfx+'_src').value;
+    var dstKey = document.getElementById(pfx+'_dst').value;
+    var resEl  = document.getElementById(pfx+'_res');
+    var frmEl  = document.getElementById(pfx+'_form');
+    var dens   = parseFloat(document.getElementById('densite').value)||1;
+
+    if (val===null||isNaN(val)) { resEl.textContent='—'; frmEl.innerHTML=''; return; }
+
+    var srcU = debitVolUnitsVM.find(function(u){return u.key===srcKey;});
+    var dstU = debitMassUnitsVM.find(function(u){return u.key===dstKey;});
+    // vol en m³/s → kg/s via densité (dens kg/L = 1000 kg/m³)
+    var m3s  = val * srcU.toBaseM3s;
+    var kgs  = m3s * dens * 1000;
+    var result = kgs / dstU.toBaseKgs;
+
+    resEl.textContent = fmt(result);
+    frmEl.innerHTML = '<span class="formula-label">Formule</span> '+
+      fmt(val)+' '+srcU.label+' × '+fmt(dens)+' kg/L × facteurs = '+fmt(result)+' '+dstU.label;
+  }
+
+  document.getElementById(pfx+'_inp').addEventListener('input', doCalc);
+  document.getElementById(pfx+'_src').addEventListener('change', doCalc);
+  document.getElementById(pfx+'_dst').addEventListener('change', doCalc);
+  document.getElementById(pfx+'_copy').addEventListener('click', function(){
+    var txt = document.getElementById(pfx+'_res').textContent;
+    if (txt==='—') return;
+    navigator.clipboard.writeText(txt).then(function(){
+      var btn=document.getElementById(pfx+'_copy');
+      btn.classList.add('copied'); btn.textContent='✓';
+      setTimeout(function(){btn.classList.remove('copied');btn.textContent='⎘';},1200);
+    });
+  });
+
+  return doCalc;
+}
+
+var recalcVolMassWidget = null;
+
+function setMassMode(mode) {
+  var btnMass = document.getElementById('btn-mass-only');
+  var btnVol  = document.getElementById('btn-mass-vol');
+  var wMass   = document.getElementById('widget-debits-mass');
+  var wVol    = document.getElementById('widget-debits-vol-mass');
+  var densBlk = document.getElementById('dens-block');
+
+  if (mode === 'mass') {
+    btnMass.classList.add('active'); btnVol.classList.remove('active');
+    wMass.style.display = ''; wVol.style.display = 'none';
+    densBlk.style.display = 'none';
+  } else {
+    btnVol.classList.add('active'); btnMass.classList.remove('active');
+    wMass.style.display = 'none'; wVol.style.display = '';
+    densBlk.style.display = '';
+    if (!recalcVolMassWidget) {
+      recalcVolMassWidget = buildVolMassWidget('widget-debits-vol-mass');
+    }
+  }
+}
+
+function recalcMassique() {
+  if (recalcMassiqueWidget) recalcMassiqueWidget();
+  if (recalcVolMassWidget)  recalcVolMassWidget();
+}
+
+// ═══════════════════════════════════════════
+// 4. CONCENTRATIONS
+// ═══════════════════════════════════════════
+
+var R_GAS = 8.314;
+function getM()  { var v = parseFloat(document.getElementById('masseMolaire').value); return isNaN(v)||v<=0 ? null : v; }
+function getT()  { var v = parseFloat(document.getElementById('concTemp').value); return ((isNaN(v)?20:v) + 273.15); }
+function getP()  { var v = parseFloat(document.getElementById('concPres').value); return isNaN(v)?101325:v; }
+
+function ppmToMgm3(ppm) { var M=getM(); if(!M) return null; return ppm * M * getP() / (R_GAS * getT() * 1000); }
+function mgm3ToPpm(mg)  { var M=getM(); if(!M) return null; return mg  * R_GAS * getT() * 1000 / (M * getP()); }
+
+var concUnits = [
+  { key:'ppm',   label:'ppm (vol/vol)' },
+  { key:'mgm3',  label:'mg/m³' },
+  { key:'pcvol', label:'% vol' },
+  { key:'ugm3',  label:'µg/m³' },
+];
+
+function concConverter(val, src, dst, formulaMode) {
+  var M = getM();
+  // Convert to ppm first
+  var ppm;
+  if (src === 'ppm')   ppm = val;
+  else if (src === 'pcvol') ppm = val * 1e4;
+  else if (src === 'mgm3')  { ppm = mgm3ToPpm(val); if (ppm === null) return null; }
+  else if (src === 'ugm3')  { ppm = mgm3ToPpm(val / 1000); if (ppm === null) return null; }
+
+  var result;
+  if (dst === 'ppm')   result = ppm;
+  else if (dst === 'pcvol') result = ppm / 1e4;
+  else if (dst === 'mgm3')  { result = ppmToMgm3(ppm); if (result === null) return null; }
+  else if (dst === 'ugm3')  { var mg = ppmToMgm3(ppm); if (mg === null) return null; result = mg * 1000; }
+
+  if (formulaMode) {
+    var noM = !M;
+    if ((src==='mgm3'||src==='ugm3'||dst==='mgm3'||dst==='ugm3') && noM)
+      return '⚠ Saisir M (g/mol) ou formule chimique pour cette conversion';
+    if (src==='ppm' && dst==='mgm3')
+      return fmt(val) + ' ppm × ' + fmt(M) + ' g/mol × ' + fmt(getP()) + ' Pa / (8,314 × ' + fmt(getT()) + ' K × 1000) = ' + fmt(result) + ' mg/m³';
+    if (src==='mgm3' && dst==='ppm')
+      return fmt(val) + ' mg/m³ × 8,314 × ' + fmt(getT()) + ' K × 1000 / (' + fmt(M) + ' × ' + fmt(getP()) + ') = ' + fmt(result) + ' ppm';
+    if (src==='pcvol' && dst==='ppm')  return fmt(val) + ' % × 10 000 = ' + fmt(result) + ' ppm';
+    if (src==='ppm' && dst==='pcvol')  return fmt(val) + ' ppm ÷ 10 000 = ' + fmt(result) + ' %';
+    if (src==='mgm3' && dst==='ugm3')  return fmt(val) + ' × 1 000 = ' + fmt(result) + ' µg/m³';
+    if (src==='ugm3' && dst==='mgm3')  return fmt(val) + ' ÷ 1 000 = ' + fmt(result) + ' mg/m³';
+  }
+  return result;
+}
+
+var recalcConcWidget = buildWidget('widget-conc', concUnits, concConverter, 'ppm', 'mgm3');
+
+function recalcConc() {
+  if (recalcConcWidget) recalcConcWidget();
+}
+
+function onFormulaInput() {
+  var formula = document.getElementById('formuleChem').value.trim();
+  if (!formula) return;
+  var res = parseFormula(formula);
+  if (res.error || !res.elements) return;
+  var M = 0;
+  for (var sym in res.elements) M += MASSES[sym] * res.elements[sym];
+  document.getElementById('masseMolaire').value = fmt(M);
+  recalcConc();
+}
+
+// ═══════════════════════════════════════════
+// 5. DIMENSIONS / VOLUMES
+// ═══════════════════════════════════════════
+
+var longUnits = [
+  { key:'mm',   label:'Millimètre (mm)',  toBase:0.001 },
+  { key:'cm',   label:'Centimètre (cm)',  toBase:0.01 },
+  { key:'m',    label:'Mètre (m)',        toBase:1 },
+  { key:'km',   label:'Kilomètre (km)',   toBase:1000 },
+  { key:'in',   label:'Pouce (in)',       toBase:0.0254 },
+  { key:'ft',   label:'Pied (ft)',        toBase:0.3048 },
+  { key:'yd',   label:'Yard (yd)',        toBase:0.9144 },
+  { key:'mi',   label:'Mile (mi)',        toBase:1609.344 },
+  { key:'nmi',  label:'Mille marin (nmi)',toBase:1852 },
+];
+buildWidget('widget-longueurs', longUnits, makeLinearConverter(longUnits), 'm', 'ft');
+
+var surfUnits = [
+  { key:'mm2',  label:'mm²',             toBase:1e-6 },
+  { key:'cm2',  label:'cm²',             toBase:1e-4 },
+  { key:'m2',   label:'m²',              toBase:1 },
+  { key:'ha',   label:'Hectare (ha)',     toBase:1e4 },
+  { key:'km2',  label:'km²',             toBase:1e6 },
+  { key:'in2',  label:'Pouce² (in²)',    toBase:6.4516e-4 },
+  { key:'ft2',  label:'Pied² (ft²)',     toBase:0.092903 },
+  { key:'yd2',  label:'Yard² (yd²)',     toBase:0.836127 },
+  { key:'acre', label:'Acre',            toBase:4046.856 },
+  { key:'mi2',  label:'Mile² (mi²)',     toBase:2.58999e6 },
+];
+buildWidget('widget-surfaces', surfUnits, makeLinearConverter(surfUnits), 'm2', 'ft2');
+
+var volUnits = [
+  { key:'ml',   label:'mL / cm³',        toBase:1e-6 },
+  { key:'l',    label:'Litre (L)',        toBase:1e-3 },
+  { key:'m3',   label:'m³',              toBase:1 },
+  { key:'in3',  label:'Pouce³ (in³)',    toBase:1.6387e-5 },
+  { key:'ft3',  label:'Pied³ (ft³)',     toBase:0.028317 },
+  { key:'usgal',label:'Gallon US (gal)', toBase:3.78541e-3 },
+  { key:'ukgal',label:'Gallon UK (gal)', toBase:4.54609e-3 },
+  { key:'floz', label:'Fl. oz US',       toBase:2.9574e-5 },
+  { key:'bbl',  label:'Baril (bbl)',     toBase:0.158987 },
+];
+buildWidget('widget-volumes', volUnits, makeLinearConverter(volUnits), 'l', 'ft3');
+
+// Sous-onglets dimensions (scope global car initialisés après buildWidget)
+document.querySelectorAll('#panel-dimensions .sub-tab-btn').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('#panel-dimensions .sub-tab-btn').forEach(function(b) { b.classList.remove('active'); });
+    document.querySelectorAll('#panel-dimensions .sub-panel').forEach(function(p) { p.classList.remove('active'); });
+    btn.classList.add('active');
+    document.getElementById('sub-' + btn.dataset.sub).classList.add('active');
+  });
+});
+
+// ═══════════════════════════════════════════
+// 6. TEMPS
+// ═══════════════════════════════════════════
+
+var tempsUnits = [
+  { key:'s',  label:'Secondes (s)',  toBase:1 },
+  { key:'mn', label:'Minutes (min)', toBase:60 },
+  { key:'h',  label:'Heures (h)',    toBase:3600 },
+  { key:'j',  label:'Jours (j)',     toBase:86400 },
+];
+buildWidget('widget-temps', tempsUnits, makeLinearConverter(tempsUnits), 'mn', 'h');
+
+// ═══════════════════════════════════════════
+// 7. VITESSE
+// ═══════════════════════════════════════════
+
+var ventUnits = [
+  { key:'ms',   label:'m/s',             toBase:1 },
+  { key:'kmh',  label:'km/h',            toBase:1/3.6 },
+  { key:'mph',  label:'Mile/h (mph)',    toBase:0.44704 },
+  { key:'kn',   label:'Nœud (kn)',       toBase:0.514444 },
+  { key:'fts',  label:'Pied/s (ft/s)',   toBase:0.3048 },
+  { key:'bft',  label:'Beaufort (Bf) ≈', toBase:null }, // special
+];
+
+function vitesseConverter(val, src, dst, formulaMode) {
+  // Beaufort ≈ (v/0.836)^(2/3) — approximation WMO
+  function msToBft(ms)  { return Math.pow(ms / 0.836, 2/3); }
+  function bftToMs(bft) { return 0.836 * Math.pow(bft, 3/2); }
+
+  var toMs = { ms:1, kmh:1/3.6, mph:0.44704, kn:0.514444, fts:0.3048 };
+
+  var ms;
+  if (src === 'bft') ms = bftToMs(val);
+  else ms = val * toMs[src];
+
+  var result;
+  if (dst === 'bft') result = msToBft(ms);
+  else result = ms / toMs[dst];
+
+  if (formulaMode) {
+    var srcL = ventUnits.find(function(u){return u.key===src;}).label;
+    var dstL = ventUnits.find(function(u){return u.key===dst;}).label;
+    if (src==='bft' || dst==='bft') return fmt(val) + ' ' + srcL + ' ≈ ' + fmt(result) + ' ' + dstL + ' (approx. WMO)';
+    var factor = toMs[src] / toMs[dst];
+    return fmt(val) + ' × ' + fmt(factor) + ' = ' + fmt(result) + ' ' + dstL;
+  }
+  return result;
+}
+buildWidget('widget-vent', ventUnits, vitesseConverter, 'kmh', 'ms');
+
+// Sous-onglets vitesse
+document.querySelectorAll('#panel-metier .sub-tab-btn').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('#panel-metier .sub-tab-btn').forEach(function(b) { b.classList.remove('active'); });
+    document.querySelectorAll('#panel-metier .sub-panel').forEach(function(p) { p.classList.remove('active'); });
+    btn.classList.add('active');
+    document.getElementById('sub-' + btn.dataset.sub).classList.add('active');
+  });
+});
+
+// MANCHE À AIR
+// Source : tableau SP — 1 bande ≈ 5 nœuds ≈ 9 km/h ≈ 2,5 m/s
+// Horizontale à partir de 25 nœuds (5 bandes)
+var MANCHE_DATA = [
+  { bandes:1, couleur:'R', noeuds:5,  kmh:9,  ms:2.5,  etat:'Légèrement gonflée' },
+  { bandes:2, couleur:'B', noeuds:10, kmh:18, ms:5,    etat:'Gonflée à 45°' },
+  { bandes:3, couleur:'R', noeuds:15, kmh:27, ms:7.5,  etat:'Gonflée à ~30°' },
+  { bandes:4, couleur:'B', noeuds:20, kmh:36, ms:10,   etat:'Quasi-horizontale' },
+  { bandes:5, couleur:'R', noeuds:25, kmh:45, ms:12.5, etat:'Horizontale' },
+];
+
+function buildMancheWidget() {
+  var c = document.getElementById('manche-widget');
+  if (!c) return;
+
+  var html =
+    '<div style="margin-bottom:14px;background:#f1f3fa;border-radius:12px;padding:14px 16px;">' +
+      '<p style="font-size:13px;color:#444;line-height:1.6;">' +
+        '<strong>Principe :</strong> chaque bande gonflée ≈ 5 nœuds. ' +
+        '1 nœud = 1 mille marin/h = 1,852 km/h.<br>' +
+        'Horizontale à partir de 25 nœuds (5 bandes). ' +
+        '<span style="font-size:12px;color:#555;">(Source : doctrine SP)</span>' +
+      '</p>' +
+    '</div>' +
+    '<div style="overflow-x:auto;">' +
+    '<table style="width:100%;border-collapse:collapse;font-size:14px;">' +
+      '<thead>' +
+        '<tr style="background:#001F8F;color:#fff;">' +
+          '<th style="padding:10px 12px;text-align:left;border-radius:8px 0 0 0;">Bandes</th>' +
+          '<th style="padding:10px 12px;text-align:center;">Nœuds</th>' +
+          '<th style="padding:10px 12px;text-align:center;">km/h</th>' +
+          '<th style="padding:10px 12px;text-align:center;">m/s</th>' +
+          '<th style="padding:10px 12px;text-align:left;border-radius:0 8px 0 0;">Position manche</th>' +
+        '</tr>' +
+      '</thead>' +
+      '<tbody>';
+
+  MANCHE_DATA.forEach(function(row, i) {
+    var bg = i % 2 === 0 ? '#fff' : '#f5f7fb';
+    var couleurDot = row.couleur === 'R'
+      ? 'background:#e74c3c;'
+      : 'background:#2980b9;';
+    html +=
+      '<tr style="background:' + bg + ';">' +
+        '<td style="padding:10px 12px;">' +
+          '<span style="display:inline-flex;align-items:center;gap:6px;">' +
+            '<span style="width:12px;height:12px;border-radius:50%;' + couleurDot + 'display:inline-block;flex-shrink:0;"></span>' +
+            '<strong>' + row.bandes + ' bande' + (row.bandes>1?'s':'') + '</strong>' +
+            ' <span style="font-size:12px;color:#555;">(' + row.couleur + ')</span>' +
+          '</span>' +
+        '</td>' +
+        '<td style="padding:10px 12px;text-align:center;font-weight:600;">' + row.noeuds + '</td>' +
+        '<td style="padding:10px 12px;text-align:center;">' + row.kmh + '</td>' +
+        '<td style="padding:10px 12px;text-align:center;">' + row.ms + '</td>' +
+        '<td style="padding:10px 12px;color:#444;">' + row.etat + '</td>' +
+      '</tr>';
+  });
+
+  html += '</tbody></table></div>';
+
+  // Convertisseur interactif bandes → valeurs
+  html +=
+    '<div style="margin-top:16px;background:#eef2ff;border-radius:12px;padding:14px 16px;">' +
+      '<div style="font-size:13px;font-weight:700;color:#001F8F;margin-bottom:10px;">Lecture rapide — saisir le nombre de bandes</div>' +
+      '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">' +
+        '<input type="number" id="manche-inp" min="0" max="10" step="0.5" placeholder="ex: 3" ' +
+          'style="width:90px;padding:10px 12px;border-radius:10px;border:2px solid #001F8F;font-size:18px;font-weight:700;font-family:Inter,sans-serif;color:#001F8F;background:#f5f7fb;" ' +
+          'oninput="calcManche()">' +
+        '<span style="font-size:14px;color:#444;">bande(s)</span>' +
+      '</div>' +
+      '<div id="manche-result" style="margin-top:10px;font-size:14px;color:#111;line-height:1.8;"></div>' +
+    '</div>';
+
+  c.innerHTML = html;
+}
+
+function calcManche() {
+  var val = parseFloat(document.getElementById('manche-inp').value);
+  var res = document.getElementById('manche-result');
+  if (isNaN(val) || val < 0) { res.innerHTML = ''; return; }
+  // 1 bande = 5 nœuds = 2,5 m/s = 9 km/h
+  var noeuds = val * 5;
+  var ms     = val * 2.5;
+  var kmh    = val * 9;
+  var mph    = noeuds * 1.15078;
+
+  var posNote = '';
+  if (val >= 5) posNote = ' — <strong style="color:#c0392b;">Manche horizontale</strong>';
+  else if (val >= 4) posNote = ' — Quasi-horizontale';
+  else if (val >= 3) posNote = ' — ~30° du vertical';
+  else if (val >= 2) posNote = ' — ~45° du vertical';
+  else if (val >= 1) posNote = ' — Légèrement gonflée';
+
+  res.innerHTML =
+    '≈ <strong>' + fmt(noeuds) + ' nœuds</strong> · ' +
+    '<strong>' + fmt(kmh) + ' km/h</strong> · ' +
+    '<strong>' + fmt(ms) + ' m/s</strong> · ' +
+    fmt(mph) + ' mph' +
+    posNote;
+}
+
+buildMancheWidget();
+
+// ═══════════════════════════════════════════
+// 8. MASSE MOLAIRE
+// ═══════════════════════════════════════════
+
+var MASSES = {
+  H:1.008,He:4.0026,Li:6.941,Be:9.0122,B:10.811,C:12.011,N:14.007,O:15.999,
+  F:18.998,Ne:20.180,Na:22.990,Mg:24.305,Al:26.982,Si:28.086,P:30.974,S:32.065,
+  Cl:35.453,Ar:39.948,K:39.098,Ca:40.078,Sc:44.956,Ti:47.867,V:50.942,Cr:51.996,
+  Mn:54.938,Fe:55.845,Co:58.933,Ni:58.693,Cu:63.546,Zn:65.38,Ga:69.723,Ge:72.63,
+  As:74.922,Se:78.96,Br:79.904,Kr:83.798,Rb:85.468,Sr:87.62,Y:88.906,Zr:91.224,
+  Nb:92.906,Mo:95.96,Tc:98,Ru:101.07,Rh:102.91,Pd:106.42,Ag:107.87,Cd:112.41,
+  In:114.82,Sn:118.71,Sb:121.76,Te:127.60,I:126.90,Xe:131.29,Cs:132.91,Ba:137.33,
+  La:138.91,Ce:140.12,Pr:140.91,Nd:144.24,Pm:145,Sm:150.36,Eu:151.96,Gd:157.25,
+  Tb:158.93,Dy:162.50,Ho:164.93,Er:167.26,Tm:168.93,Yb:173.05,Lu:174.97,Hf:178.49,
+  Ta:180.95,W:183.84,Re:186.21,Os:190.23,Ir:192.22,Pt:195.08,Au:196.97,Hg:200.59,
+  Tl:204.38,Pb:207.2,Bi:208.98,Po:209,At:210,Rn:222,Fr:223,Ra:226,Ac:227,
+  Th:232.04,Pa:231.04,U:238.03,Np:237,Pu:244,Am:243,Cm:247
+};
+
+function parseFormula(formula) {
+  var stack = [{}], i = 0, n = formula.length;
+  while (i < n) {
+    if (formula[i] === '(') { stack.push({}); i++; }
+    else if (formula[i] === ')') {
+      i++;
+      var ns2 = '';
+      while (i < n && /\d/.test(formula[i])) { ns2 += formula[i]; i++; }
+      var mult = ns2 ? parseInt(ns2) : 1;
+      var top = stack.pop();
+      if (!stack.length) return { error: 'Parenthèse fermante non appariée' };
+      for (var el in top) stack[stack.length-1][el] = (stack[stack.length-1][el]||0) + top[el]*mult;
+    } else if (/[A-Z]/.test(formula[i])) {
+      var sym = formula[i]; i++;
+      while (i < n && /[a-z]/.test(formula[i])) { sym += formula[i]; i++; }
+      var ns3 = '';
+      while (i < n && /\d/.test(formula[i])) { ns3 += formula[i]; i++; }
+      var cnt = ns3 ? parseInt(ns3) : 1;
+      if (!(sym in MASSES)) return { error: 'Élément inconnu : "' + sym + '"' };
+      stack[stack.length-1][sym] = (stack[stack.length-1][sym]||0) + cnt;
+    } else if (/[a-z]/.test(formula[i])) {
+      return { error: 'Minuscule inattendue : "' + formula[i] + '" — éléments commencent par majuscule' };
+    } else { i++; }
+  }
+  if (stack.length !== 1) return { error: 'Parenthèse ouvrante non fermée' };
+  return { elements: stack[0], error: null };
+}
+
+function calcMolarMass() {
+  var formula = document.getElementById('molarFormula').value.trim();
+  var res = document.getElementById('molarResult');
+  if (!formula) { res.innerHTML = ''; return; }
+  var parsed = parseFormula(formula);
+  if (parsed.error) { res.innerHTML = '<div class="molar-error">⚠ ' + parsed.error + '</div>'; return; }
+  var M = 0, lines = [];
+  for (var sym in parsed.elements) {
+    var cnt = parsed.elements[sym];
+    var m = MASSES[sym] * cnt;
+    M += m;
+    lines.push(sym + ' × ' + cnt + ' = ' + fmt(MASSES[sym]) + ' × ' + cnt + ' = <strong>' + fmt(m) + ' g/mol</strong>');
+  }
+  res.innerHTML = '<div class="molar-result"><div class="mol-value">M = ' + fmt(M) + ' g/mol</div><div class="mol-detail">' + lines.join('<br>') + '</div></div>';
+  document.getElementById('masseMolaire').value = fmt(M);
+  recalcConc();
+}
+
+// ═══════════════════════════════════════════
+// 9. RADIOLOGIE — avec préfixes SI
+// ═══════════════════════════════════════════
+
+// Générateur d'unités avec préfixes : T, G, M, k, (base), m, µ
+// baseKey : clé de base, baseLabel : nom unité, baseToSI : facteur vers unité SI
+function makePrefixUnits(baseKey, baseLabel, baseToSI) {
+  var prefixes = [
+    { p:'T',  label:'Téra',  f:1e12 },
+    { p:'G',  label:'Giga',  f:1e9  },
+    { p:'M',  label:'Méga',  f:1e6  },
+    { p:'k',  label:'Kilo',  f:1e3  },
+    { p:'',   label:'',      f:1    },
+    { p:'m',  label:'Milli', f:1e-3 },
+    { p:'µ',  label:'Micro', f:1e-6 },
+  ];
+  return prefixes.map(function(pr) {
+    return {
+      key:   pr.p + baseKey,
+      label: pr.label + (pr.label ? baseLabel.charAt(0).toLowerCase() + baseLabel.slice(1) : baseLabel) +
+             ' (' + pr.p + (baseKey === 'Bq' ? 'Bq' : baseKey === 'Ci' ? 'Ci' :
+                            baseKey === 'Gy' ? 'Gy' : baseKey === 'rad' ? 'rad' :
+                            baseKey === 'Sv' ? 'Sv' : baseKey === 'rem' ? 'rem' :
+                            baseKey === 'Gyh' ? 'Gy/h' : baseKey === 'radh' ? 'rad/h' :
+                            baseKey === 'Svh' ? 'Sv/h' : 'rem/h') + ')',
+      toBase: pr.f * baseToSI
+    };
+  });
+}
+
+// ACTIVITÉ — Bq (SI = Bq) et Ci (1 Ci = 3.7e10 Bq)
+var actBqUnits  = makePrefixUnits('Bq',  'Becquerel',  1);
+var actCiUnits  = makePrefixUnits('Ci',  'Curie',      3.7e10);
+var actAllRadUnits = actBqUnits.concat(actCiUnits);
+buildWidget('widget-rad-activite', actAllRadUnits, makeLinearConverter(actAllRadUnits), 'MBq', 'Ci');
+
+// DOSE — widget avec sélecteurs unité + boutons préfixe + Q contextuel
+var DOSE_UNITS = [
+  { key:'Gy',  name:'Gray',    sym:'Gy',  toSI:1,    group:'abs' },
+  { key:'rad', name:'Rad',     sym:'rad', toSI:0.01, group:'abs' },
+  { key:'Sv',  name:'Sievert', sym:'Sv',  toSI:1,    group:'eq'  },
+  { key:'rem', name:'Rem',     sym:'rem', toSI:0.01, group:'eq'  },
+];
+var PREFIXES = [
+  { p:'T', label:'Téra',  f:1e12 },
+  { p:'G', label:'Giga',  f:1e9  },
+  { p:'M', label:'Méga',  f:1e6  },
+  { p:'k', label:'Kilo',  f:1e3  },
+  { p:'',  label:'',      f:1    },
+  { p:'m', label:'Milli', f:1e-3 },
+  { p:'µ', label:'Micro', f:1e-6 },
+];
+
+// État du widget dose
+var doseState = {
+  srcUnit: 'Gy', srcPfx: '', dstUnit: 'Gy', dstPfx: 'm', val: null, Q: 1
+};
+
+function unitLabel(u, pfxP) {
+  var pfx = PREFIXES.find(function(pr){return pr.p===pfxP;}) || PREFIXES[4];
+  if (pfx.p === '') return u.name + ' (' + u.sym + ')';
+  var baseLower = u.name.charAt(0).toLowerCase() + u.name.slice(1);
+  return pfx.label + baseLower + ' (' + pfx.p + u.sym + ')';
+}
+
+function buildDoseWidget() {
+  var c = document.getElementById('widget-rad-dose');
+  if (!c) return;
+
+  function unitOpts(sel, activePfx) {
+    return DOSE_UNITS.map(function(u) {
+      return '<option value="'+u.key+'"'+(u.key===sel?' selected':'')+'>'+unitLabel(u, activePfx||'')+'</option>';
+    }).join('');
+  }
+  function pfxBtns(id, active) {
+    return PREFIXES.map(function(p) {
+      return '<button onclick="doseSetPfx(\''+id+'\',\''+p.p+'\')" id="dpfx-'+id+'-'+p.p+'" '+
+        'style="padding:5px 8px;border:1.5px solid '+(p.p===active?'#001F8F':'#ccd2e3')+
+        ';border-radius:7px;background:'+(p.p===active?'#001F8F':'#fff')+
+        ';color:'+(p.p===active?'#fff':'#444')+
+        ';font-size:12px;font-weight:700;font-family:Inter,sans-serif;cursor:pointer;min-width:30px;">'+
+        (p.label)+'</button>';
+    }).join('');
+  }
+
+  c.innerHTML =
+    '<div style="display:grid;grid-template-columns:1fr auto 1fr;gap:12px;align-items:start;">'+
+      '<div>'+
+        '<div style="font-size:12px;font-weight:600;color:#444;margin-bottom:6px;">De</div>'+
+        '<select id="dose-sel-src" onchange="doseOnChange()" class="conv-select">'+unitOpts(doseState.srcUnit, doseState.srcPfx)+'</select>'+
+        '<div id="dose-pfx-src" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:8px;">'+pfxBtns('src', doseState.srcPfx)+'</div>'+
+        '<input type="number" id="dose-inp" placeholder="Saisir une valeur" autocomplete="off" oninput="doseCalc()" class="conv-input" style="margin-top:10px;">'+
+      '</div>'+
+      '<div style="display:flex;align-items:center;padding-top:28px;">'+
+        '<button class="swap-btn" onclick="doseSwap()" title="Inverser">⇄</button>'+
+      '</div>'+
+      '<div>'+
+        '<div style="font-size:12px;font-weight:600;color:#444;margin-bottom:6px;">Vers</div>'+
+        '<select id="dose-sel-dst" onchange="doseOnChange()" class="conv-select">'+unitOpts(doseState.dstUnit, doseState.dstPfx)+'</select>'+
+        '<div id="dose-pfx-dst" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:8px;">'+pfxBtns('dst', doseState.dstPfx)+'</div>'+
+        '<div class="conv-result-box" style="margin-top:10px;">'+
+          '<span id="dose-result" class="conv-result-val">—</span>'+
+          '<button class="copy-btn" onclick="doseCopy()" title="Copier">⎘</button>'+
+        '</div>'+
+      '</div>'+
+    '</div>'+
+    '<div id="dose-q-block" style="display:none;margin-top:14px;background:#eef2ff;border-radius:12px;padding:14px 16px;">'+
+      '<div style="font-size:13px;font-weight:700;color:#001F8F;margin-bottom:10px;">⚡ Facteur qualité Q requis — D<sub>eq</sub> = D × Q</div>'+
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;">'+
+        '<button class="mass-mode-btn active" id="qbtn-1"   onclick="doseSetQ(1,   this)">Q=1 · Ray. X, γ, β</button>'+
+        '<button class="mass-mode-btn"        id="qbtn-20"  onclick="doseSetQ(20,  this)">Q=20 · Ray. α</button>'+
+        '<button class="mass-mode-btn"        id="qbtn-5"   onclick="doseSetQ(5,   this)">Q=5 · Ray. N min</button>'+
+        '<button class="mass-mode-btn"        id="qbtn-10"  onclick="doseSetQ(10,  this)">Q=10 · Ray. N moy</button>'+
+        '<button class="mass-mode-btn"        id="qbtn-c"   onclick="doseSetQ(\'c\',this)">Q perso</button>'+
+      '</div>'+
+      '<div id="dose-q-custom-wrap" style="display:none;margin-bottom:10px;">'+
+        '<input type="number" id="dose-q-custom" placeholder="ex: 15" min="1" oninput="doseCalc()" '+
+          'style="width:120px;padding:8px 12px;border-radius:10px;border:1.5px solid #ccd2e3;font-size:15px;font-family:Inter,sans-serif;background:#fff;">'+
+      '</div>'+
+      '<div id="dose-q-formula" style="font-size:13px;color:#001F8F;font-style:italic;"></div>'+
+    '</div>'+
+    '<div class="formula-box" id="dose-formula" style="margin-top:10px;"></div>';
+}
+
+function doseSetPfx(side, p) {
+  if (side==='src') doseState.srcPfx = p;
+  else doseState.dstPfx = p;
+
+  // Mettre à jour l'option affichée dans le sélecteur
+  var selId = side==='src' ? 'dose-sel-src' : 'dose-sel-dst';
+  var sel = document.getElementById(selId);
+  if (sel) {
+    var unitKey = side==='src' ? doseState.srcUnit : doseState.dstUnit;
+    var u = DOSE_UNITS.find(function(u){return u.key===unitKey;});
+    var pfxObj = PREFIXES.find(function(pr){return pr.p===p;});
+    // Mettre à jour le texte de l'option sélectionnée
+    for (var i=0; i<sel.options.length; i++) {
+      if (sel.options[i].value === unitKey) {
+        sel.options[i].text = unitLabel(u, pfxObj.p);
+        break;
+      }
+    }
+  }
+
+  // Rafraîchir visuellement les boutons
+  PREFIXES.forEach(function(pr) {
+    var btn = document.getElementById('dpfx-'+side+'-'+pr.p);
+    if (!btn) return;
+    var active = (pr.p === (side==='src' ? doseState.srcPfx : doseState.dstPfx));
+    btn.style.background = active ? '#001F8F' : '#fff';
+    btn.style.color = active ? '#fff' : '#444';
+    btn.style.borderColor = active ? '#001F8F' : '#ccd2e3';
+  });
+  doseCalc();
+}
+
+function doseOnChange() {
+  doseState.srcUnit = document.getElementById('dose-sel-src').value;
+  doseState.dstUnit = document.getElementById('dose-sel-dst').value;
+  doseToggleQ();
+  doseCalc();
+}
+
+function doseToggleQ() {
+  var srcGrp = DOSE_UNITS.find(function(u){return u.key===doseState.srcUnit;}).group;
+  var dstGrp = DOSE_UNITS.find(function(u){return u.key===doseState.dstUnit;}).group;
+  var needQ = (srcGrp !== dstGrp); // abs↔eq nécessite Q
+  var qBlock = document.getElementById('dose-q-block');
+  if (qBlock) qBlock.style.display = needQ ? '' : 'none';
+}
+
+function doseSetQ(val, btn) {
+  doseState.Q = val;
+  ['1','20','5','10','c'].forEach(function(k) {
+    var b = document.getElementById('qbtn-'+k);
+    if (b) { b.classList.remove('active'); }
+  });
+  if (btn) btn.classList.add('active');
+  var cw = document.getElementById('dose-q-custom-wrap');
+  if (cw) cw.style.display = (val==='c') ? '' : 'none';
+  doseCalc();
+}
+
+function doseSwap() {
+  var tmp = doseState.srcUnit; doseState.srcUnit = doseState.dstUnit; doseState.dstUnit = tmp;
+  var tp  = doseState.srcPfx;  doseState.srcPfx  = doseState.dstPfx;  doseState.dstPfx  = tp;
+  // Remettre les sélecteurs à jour
+  document.getElementById('dose-sel-src').value = doseState.srcUnit;
+  document.getElementById('dose-sel-dst').value = doseState.dstUnit;
+  doseSetPfx('src', doseState.srcPfx);
+  doseSetPfx('dst', doseState.dstPfx);
+  // Swap valeur
+  var res = document.getElementById('dose-result').textContent;
+  var num = parseFloat(res);
+  if (!isNaN(num)) document.getElementById('dose-inp').value = res;
+  doseToggleQ();
+  doseCalc();
+}
+
+function doseCopy() {
+  var txt = document.getElementById('dose-result').textContent;
+  if (txt==='—') return;
+  navigator.clipboard.writeText(txt).then(function() {
+    var btn = document.querySelector('#widget-rad-dose .copy-btn');
+    if (btn) { btn.classList.add('copied'); btn.textContent='✓'; setTimeout(function(){btn.classList.remove('copied');btn.textContent='⎘';},1200); }
+  });
+}
+
+function doseCalc() {
+  var valStr = document.getElementById('dose-inp').value;
+  var val = valStr==='' ? null : parseFloat(valStr);
+  var resEl  = document.getElementById('dose-result');
+  var frmEl  = document.getElementById('dose-formula');
+  var qFrmEl = document.getElementById('dose-q-formula');
+  if (!resEl) return;
+
+  var srcU = DOSE_UNITS.find(function(u){return u.key===doseState.srcUnit;});
+  var dstU = DOSE_UNITS.find(function(u){return u.key===doseState.dstUnit;});
+  var srcPf = PREFIXES.find(function(p){return p.p===doseState.srcPfx;});
+  var dstPf = PREFIXES.find(function(p){return p.p===doseState.dstPfx;});
+
+  if (val===null||isNaN(val)) { resEl.textContent='—'; if(frmEl)frmEl.innerHTML=''; if(qFrmEl)qFrmEl.innerHTML=''; return; }
+
+  // Valeur en SI (Gy ou Sv selon groupe)
+  var valSI = val * srcPf.f * srcU.toSI;
+
+  var needQ = (srcU.group !== dstU.group);
+  var Q = doseState.Q;
+  if (Q==='c') { Q = parseFloat(document.getElementById('dose-q-custom').value); if(isNaN(Q)){resEl.textContent='⚠ Q ?'; return;} }
+
+  var dstSI;
+  if (!needQ) {
+    // Même groupe — conversion directe
+    dstSI = valSI / dstU.toSI;
+  } else {
+    // Groupes différents — abs→eq : ×Q | eq→abs : ÷Q
+    if (srcU.group==='abs') dstSI = valSI * Q / dstU.toSI;  // Gy→Sv
+    else                    dstSI = valSI / Q / dstU.toSI;  // Sv→Gy
+  }
+
+  var result = dstSI / dstPf.f;
+  resEl.textContent = fmt(result);
+
+  var srcLabel = srcPf.p + srcU.key;
+  var dstLabel = dstPf.p + dstU.key;
+  if (frmEl) {
+    if (needQ) {
+      frmEl.innerHTML = '<span class="formula-label">Formule</span> ' +
+        fmt(val)+' '+srcLabel+(srcU.group==='abs'?' × Q('+fmt(Q)+')':' ÷ Q('+fmt(Q)+')')+' = '+fmt(result)+' '+dstLabel;
+    } else {
+      var factor = (srcPf.f * srcU.toSI) / (dstPf.f * dstU.toSI);
+      frmEl.innerHTML = '<span class="formula-label">Formule</span> '+fmt(val)+' × '+fmt(factor)+' = '+fmt(result)+' '+dstLabel;
+    }
+  }
+  if (qFrmEl && needQ) {
+    qFrmEl.innerHTML = srcLabel+' → '+dstLabel+' : D<sub>eq</sub> = D × Q('+fmt(Q)+')';
+  }
+}
+
+buildDoseWidget();
+
+function calcDeq() {} // stub — remplacé par doseCalc// DÉBIT DE DOSE ABSORBÉE — Gy/h et rad/h
+var ddGyUnitsR   = makePrefixUnits('Gyh',  'Gray/h',  1);
+var ddRadUnits   = makePrefixUnits('radh', 'Rad/h',   0.01);
+var ddAllUnits   = ddGyUnitsR.concat(ddRadUnits);
+buildWidget('widget-rad-debitdose', ddAllUnits, makeLinearConverter(ddAllUnits), 'µGyh', 'mGyh');
+
+// DÉBIT D'ÉQUIVALENT DE DOSE — Sv/h et rem/h
+var ddSvUnitsR   = makePrefixUnits('Svh',  'Sievert/h', 1);
+var ddRemUnits   = makePrefixUnits('remh', 'Rem/h',     0.01);
+var ddEqAllUnits = ddSvUnitsR.concat(ddRemUnits);
+buildWidget('widget-rad-debiteqdose', ddEqAllUnits, makeLinearConverter(ddEqAllUnits), 'µSvh', 'mSvh');
+
+// ═══════════════════════════════════════════
+// GPS — WIDGET STYLE GOOGLE
+// ═══════════════════════════════════════════
+
+var GPS_FORMATS = [
+  { key:'dd',      label:'DD — Degrés Décimaux' },
+  { key:'dms',     label:'DMS — Degrés Min Sec' },
+  { key:'ddm',     label:'DDM — Degrés Min Déc' },
+  { key:'lambert', label:'Lambert 93 (RGF93)' },
+];
+
+// ── Utilitaires de conversion (pivot = DD) ──
+function ddToDMS(dd) {
+  var abs = Math.abs(dd);
+  var d = Math.floor(abs);
+  var mf = (abs - d) * 60;
+  var m = Math.floor(mf);
+  var s = (mf - m) * 60;
+  return { d:d, m:m, s:s };
+}
+function dmsToDd(d, m, s, hem) {
+  var v = Math.abs(+d) + (+m)/60 + (+s)/3600;
+  return (hem==='S'||hem==='W') ? -v : v;
+}
+function ddToDDM(dd) {
+  var abs = Math.abs(dd);
+  var d = Math.floor(abs);
+  return { d:d, m:(abs-d)*60 };
+}
+function ddmToDd(d, m, hem) {
+  var v = Math.abs(+d) + (+m)/60;
+  return (hem==='S'||hem==='W') ? -v : v;
+}
+
+// Lambert 93 IGN RGF93
+function ddToLambert(latDD, lonDD) {
+  var a=6378137, e=0.0818191908426215;
+  var lc=3*Math.PI/180, phi0=46.5*Math.PI/180;
+  var phi1=44*Math.PI/180, phi2=49*Math.PI/180;
+  var X0=700000, Y0=6600000;
+  var phi=latDD*Math.PI/180, lam=lonDD*Math.PI/180;
+  function N(p){var s=Math.sin(p);return a/Math.sqrt(1-e*e*s*s);}
+  function L(p){var s=Math.sin(p);return Math.log(Math.tan(Math.PI/4+p/2)*Math.pow((1-e*s)/(1+e*s),e/2));}
+  var n=(Math.log(N(phi1)*Math.cos(phi1))-Math.log(N(phi2)*Math.cos(phi2)))/(L(phi2)-L(phi1));
+  var c=N(phi1)*Math.cos(phi1)/n*Math.exp(n*L(phi1));
+  var r0=c*Math.exp(-n*L(phi0));
+  var rs=c*Math.exp(-n*L(phi));
+  return {
+    X: Math.round(X0 + rs*Math.sin(n*(lam-lc))),
+    Y: Math.round(Y0 + r0 - rs*Math.cos(n*(lam-lc)))
+  };
+}
+
+// ── Formateurs d'affichage ──
+function fmtDD(lat, lon) {
+  return lat.toFixed(6) + ' , ' + lon.toFixed(6);
+}
+function fmtDMS(lat, lon) {
+  function f(v, p, n) {
+    var r=ddToDMS(v), h=v>=0?p:n;
+    return r.d+'° '+r.m+"' "+r.s.toFixed(2)+'" '+h;
+  }
+  return f(lat,'N','S') + '<br>' + f(lon,'E','W');
+}
+function fmtDDM(lat, lon) {
+  function f(v, p, n) {
+    var r=ddToDDM(v), h=v>=0?p:n;
+    return r.d+"° "+r.m.toFixed(4)+"' "+h;
+  }
+  return f(lat,'N','S') + '<br>' + f(lon,'E','W');
+}
+
+// ── Saisie selon format ──
+function buildGpsSrcInput(fmt) {
+  var INP = 'style="width:100%;padding:11px 12px;border-radius:10px;border:2px solid #001F8F;font-size:15px;font-family:Inter,sans-serif;background:#f5f7fb;color:#001F8F;margin-bottom:6px;"';
+  var INP2= 'style="width:100%;padding:9px 10px;border-radius:10px;border:1.5px solid #ccd2e3;font-size:14px;font-family:Inter,sans-serif;background:#fff;"';
+  var SEL = 'style="padding:9px 8px;border-radius:10px;border:1.5px solid #ccd2e3;font-size:14px;font-family:Inter,sans-serif;background:#fff;"';
+
+  if (fmt==='dd') return (
+    '<div style="font-size:12px;font-weight:600;color:#444;margin-bottom:4px;">Latitude (°)</div>'+
+    '<input type="number" id="gw-lat" placeholder="ex: 48.856600" step="0.000001" oninput="gpsCalc()" '+INP+'>'+
+    '<div style="font-size:12px;font-weight:600;color:#444;margin:6px 0 4px;">Longitude (°)</div>'+
+    '<input type="number" id="gw-lon" placeholder="ex: 2.352200" step="0.000001" oninput="gpsCalc()" '+INP+'>'
+  );
+  if (fmt==='dms') return (
+    '<div style="font-size:12px;font-weight:600;color:#444;margin-bottom:4px;">Latitude</div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:5px;margin-bottom:6px;">'+
+      '<input type="number" id="gw-latd" placeholder="°" oninput="gpsCalc()" '+INP2+'>'+
+      '<input type="number" id="gw-latm" placeholder="\'" min="0" max="59" oninput="gpsCalc()" '+INP2+'>'+
+      '<input type="number" id="gw-lats" placeholder="\'\'" step="0.01" min="0" oninput="gpsCalc()" '+INP2+'>'+
+      '<select id="gw-lath" onchange="gpsCalc()" '+SEL+'><option>N</option><option>S</option></select>'+
+    '</div>'+
+    '<div style="font-size:12px;font-weight:600;color:#444;margin-bottom:4px;">Longitude</div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:5px;">'+
+      '<input type="number" id="gw-lond" placeholder="°" oninput="gpsCalc()" '+INP2+'>'+
+      '<input type="number" id="gw-lonm" placeholder="\'" min="0" max="59" oninput="gpsCalc()" '+INP2+'>'+
+      '<input type="number" id="gw-lons" placeholder="\'\'" step="0.01" min="0" oninput="gpsCalc()" '+INP2+'>'+
+      '<select id="gw-lonh" onchange="gpsCalc()" '+SEL+'><option>E</option><option>W</option></select>'+
+    '</div>'
+  );
+  if (fmt==='ddm') return (
+    '<div style="font-size:12px;font-weight:600;color:#444;margin-bottom:4px;">Latitude</div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr auto;gap:5px;margin-bottom:6px;">'+
+      '<input type="number" id="gw-latd" placeholder="°" oninput="gpsCalc()" '+INP2+'>'+
+      '<input type="number" id="gw-latm" placeholder="\'.mmmm" step="0.0001" min="0" oninput="gpsCalc()" '+INP2+'>'+
+      '<select id="gw-lath" onchange="gpsCalc()" '+SEL+'><option>N</option><option>S</option></select>'+
+    '</div>'+
+    '<div style="font-size:12px;font-weight:600;color:#444;margin-bottom:4px;">Longitude</div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr auto;gap:5px;">'+
+      '<input type="number" id="gw-lond" placeholder="°" oninput="gpsCalc()" '+INP2+'>'+
+      '<input type="number" id="gw-lonm" placeholder="\'.mmmm" step="0.0001" min="0" oninput="gpsCalc()" '+INP2+'>'+
+      '<select id="gw-lonh" onchange="gpsCalc()" '+SEL+'><option>E</option><option>W</option></select>'+
+    '</div>'
+  );
+  if (fmt==='lambert') return (
+    '<div style="font-size:12px;font-weight:600;color:#444;margin-bottom:4px;">X Lambert 93 (m)</div>'+
+    '<input type="number" id="gw-lx" placeholder="ex: 652540" oninput="gpsCalc()" '+INP+'>'+
+    '<div style="font-size:12px;font-weight:600;color:#444;margin:6px 0 4px;">Y Lambert 93 (m)</div>'+
+    '<input type="number" id="gw-ly" placeholder="ex: 6862740" oninput="gpsCalc()" '+INP+'>'+
+    '<div style="font-size:12px;color:#888;margin-top:4px;">⚠ Lambert → DD non supporté dans ce sens (projection inverse complexe) — utilisez DD → Lambert</div>'
+  );
+  return '';
+}
+
+// ── Lire les DD depuis le formulaire source ──
+function readSrcDD(fmt) {
+  if (fmt==='dd') {
+    var lat=parseFloat(document.getElementById('gw-lat').value);
+    var lon=parseFloat(document.getElementById('gw-lon').value);
+    if (isNaN(lat)||isNaN(lon)) return null;
+    return {lat:lat, lon:lon};
+  }
+  if (fmt==='dms') {
+    var ld=document.getElementById('gw-latd').value, lm=document.getElementById('gw-latm').value||0, ls=document.getElementById('gw-lats').value||0, lh=document.getElementById('gw-lath').value;
+    var od=document.getElementById('gw-lond').value, om=document.getElementById('gw-lonm').value||0, os=document.getElementById('gw-lons').value||0, oh=document.getElementById('gw-lonh').value;
+    if (ld===''||od==='') return null;
+    return {lat:dmsToDd(ld,lm,ls,lh), lon:dmsToDd(od,om,os,oh)};
+  }
+  if (fmt==='ddm') {
+    var ld=document.getElementById('gw-latd').value, lm=document.getElementById('gw-latm').value||0, lh=document.getElementById('gw-lath').value;
+    var od=document.getElementById('gw-lond').value, om=document.getElementById('gw-lonm').value||0, oh=document.getElementById('gw-lonh').value;
+    if (ld===''||od==='') return null;
+    return {lat:ddmToDd(ld,lm,lh), lon:ddmToDd(od,om,oh)};
+  }
+  return null; // lambert src non supporté
+}
+
+// ── Afficher le résultat selon format destination ──
+function renderDst(fmt, lat, lon) {
+  if (fmt==='dd')      return '<strong>'+fmtDD(lat,lon)+'</strong>';
+  if (fmt==='dms')     return '<strong>'+fmtDMS(lat,lon)+'</strong>';
+  if (fmt==='ddm')     return '<strong>'+fmtDDM(lat,lon)+'</strong>';
+  if (fmt==='lambert') {
+    var l=ddToLambert(lat,lon);
+    return '<strong>X = '+l.X+' m — Y = '+l.Y+' m</strong><br><span style="font-size:12px;color:#555;">EPSG:2154 — France métropolitaine</span>';
+  }
+  return '';
+}
+
+// ── Lien Google Maps (DD) ──
+function updateMapsLink(lat, lon) {
+  var bl = document.getElementById('gps-maps-block');
+  var lk = document.getElementById('gps-maps-link');
+  if (!bl||!lk) return;
+  if (lat===null||lon===null||isNaN(lat)||isNaN(lon)) { bl.style.display='none'; return; }
+  var url='https://www.google.com/maps?q='+lat.toFixed(6)+','+lon.toFixed(6);
+  bl.style.display='block';
+  lk.innerHTML=
+    '<a href="'+url+'" target="_blank" style="display:inline-flex;align-items:center;gap:8px;'+
+    'background:#001F8F;color:#fff;padding:11px 18px;border-radius:12px;text-decoration:none;'+
+    'font-weight:600;font-size:14px;font-family:Inter,sans-serif;">📍 Ouvrir dans Google Maps</a>'+
+    '<div class="formula-box" style="margin-top:8px;"><span class="formula-label">URL</span> '+url+'</div>';
+}
+
+// ── Construction du widget ──
+function buildGpsWidget() {
+  var c = document.getElementById('widget-gps');
+  if (!c) return;
+
+  function optionsHtml(sel) {
+    return GPS_FORMATS.map(function(f){
+      return '<option value="'+f.key+'"'+(f.key===sel?' selected':'')+'>'+f.label+'</option>';
+    }).join('');
+  }
+
+  c.innerHTML =
+    '<div class="conv-widget">'+
+      '<div class="conv-row">'+
+        '<div class="conv-side">'+
+          '<label>De</label>'+
+          '<select class="conv-select" id="gw-sel-src" onchange="gpsRebuildSrc()">'+optionsHtml('dd')+'</select>'+
+          '<div id="gw-src-inputs" style="margin-top:10px;"></div>'+
+        '</div>'+
+        '<div class="swap-btn-wrap">'+
+          '<button class="swap-btn" id="gw-swap" title="Inverser">⇄</button>'+
+        '</div>'+
+        '<div class="conv-side">'+
+          '<label>Vers</label>'+
+          '<select class="conv-select" id="gw-sel-dst" onchange="gpsCalc()">'+optionsHtml('dms')+'</select>'+
+          '<div class="conv-result-box" style="margin-top:10px;min-height:70px;align-items:flex-start;padding:12px 14px;">'+
+            '<span id="gw-result" style="flex:1;font-size:16px;line-height:1.6;">—</span>'+
+            '<button class="copy-btn" id="gw-copy" title="Copier">⎘</button>'+
+          '</div>'+
+        '</div>'+
+      '</div>'+
+      '<div class="formula-box" id="gw-formula" style="margin-top:12px;"></div>'+
+    '</div>';
+
+  gpsRebuildSrc();
+
+  document.getElementById('gw-swap').addEventListener('click', function() {
+    var s=document.getElementById('gw-sel-src'), d=document.getElementById('gw-sel-dst');
+    var tmp=s.value; s.value=d.value; d.value=tmp;
+    gpsRebuildSrc();
+  });
+
+  document.getElementById('gw-copy').addEventListener('click', function() {
+    var txt=document.getElementById('gw-result').innerText;
+    if (txt==='—') return;
+    navigator.clipboard.writeText(txt).then(function(){
+      var btn=document.getElementById('gw-copy');
+      btn.classList.add('copied'); btn.textContent='✓';
+      setTimeout(function(){btn.classList.remove('copied');btn.textContent='⎘';},1200);
+    });
+  });
+}
+
+function gpsRebuildSrc() {
+  var fmt = document.getElementById('gw-sel-src').value;
+  document.getElementById('gw-src-inputs').innerHTML = buildGpsSrcInput(fmt);
+  document.getElementById('gw-result').innerHTML = '—';
+  document.getElementById('gw-formula').innerHTML = '';
+  updateMapsLink(null, null);
+}
+
+function gpsCalc() {
+  var src = document.getElementById('gw-sel-src').value;
+  var dst = document.getElementById('gw-sel-dst').value;
+  var res = document.getElementById('gw-result');
+  var frm = document.getElementById('gw-formula');
+
+  var dd = readSrcDD(src);
+  if (!dd) { res.innerHTML='—'; frm.innerHTML=''; updateMapsLink(null,null); return; }
+
+  var lat=dd.lat, lon=dd.lon;
+
+  if (src===dst) {
+    res.innerHTML=renderDst(dst,lat,lon);
+    frm.innerHTML='<span class="formula-label">Info</span> Même format source et destination';
+    updateMapsLink(lat,lon);
+    return;
+  }
+
+  var html=renderDst(dst,lat,lon);
+  res.innerHTML=html;
+
+  var srcL=GPS_FORMATS.find(function(f){return f.key===src;}).label;
+  var dstL=GPS_FORMATS.find(function(f){return f.key===dst;}).label;
+  frm.innerHTML='<span class="formula-label">Formule</span> '+srcL+' → DD → '+dstL;
+
+  updateMapsLink(lat,lon);
+}
+
+buildGpsWidget();
+
+// ═══════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════
+
+document.getElementById('familyNav').addEventListener('click', function(e) {
+  var btn = e.target.closest('.family-btn');
+  if (!btn) return;
+  document.querySelectorAll('.family-btn').forEach(function(b) { b.classList.remove('active'); });
+  document.querySelectorAll('.family-panel').forEach(function(p) { p.classList.remove('active'); });
+  btn.classList.add('active');
+  var panel = document.getElementById('panel-' + btn.dataset.family);
+  if (panel) panel.classList.add('active');
+});
+
+// Navigation sub-tabs — scopée par panel parent pour éviter les conflits
+document.querySelectorAll('.family-panel').forEach(function(panel) {
+  panel.querySelectorAll('.sub-tab-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      panel.querySelectorAll('.sub-tab-btn').forEach(function(b) { b.classList.remove('active'); });
+      panel.querySelectorAll('.sub-panel').forEach(function(p) { p.classList.remove('active'); });
+      btn.classList.add('active');
+      var sp = document.getElementById('sub-' + btn.dataset.sub);
+      if (sp) sp.classList.add('active');
+    });
+  });
+});
+</script>
+</body>
+</html>.conv-result-val { flex: 1; word-break: break-all; }
+.copy-btn { background: #e5e8ff; border: none; border-radius: 8px; padding: 7px 10px; cursor: pointer; color: #001F8F; font-size: 13px; transition: background 0.2s, transform 0.15s; flex-shrink: 0; }
+.copy-btn:hover { background: #d9dff5; transform: translateY(-1px); }
+.copy-btn.copied { background: #001F8F; color: #fff; }
+.swap-btn-wrap { display: flex; align-items: flex-end; padding-bottom: 0; }
+.swap-btn { background: #e5e8ff; border: none; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 18px; color: #001F8F; transition: background 0.2s, transform 0.2s; flex-shrink: 0; }
+.swap-btn:hover { background: #001F8F; color: #fff; transform: rotate(180deg); }
+.formula-box { margin-top: 12px; background: #f1f3fa; border-radius: 10px; padding: 10px 14px; font-size: 13px; color: #555; min-height: 36px; font-style: italic; }
+.formula-label { font-weight: 700; font-style: normal; color: #001F8F; margin-right: 6px; background: #dde3ff; border-radius: 5px; padding: 1px 7px; font-size: 12px; }
+
+/* Paramètres contextuels */
+.param-block { background: #f1f3fa; border-radius: 12px; padding: 14px 16px; margin-bottom: 16px; }
+.param-block label { font-size: 13px; font-weight: 600; color: #444; display: block; margin-bottom: 6px; }
+.param-block input { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1.5px solid #ccd2e3; font-size: 14px; font-family: 'Inter', sans-serif; background: #fff; }
+.param-row { display: flex; gap: 10px; flex-wrap: wrap; }
+.param-row .param-item { flex: 1; min-width: 140px; }
+.param-row .param-item label { font-size: 13px; font-weight: 600; color: #444; display: block; margin-bottom: 6px; }
+.param-row .param-item input { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1.5px solid #ccd2e3; font-size: 14px; font-family: 'Inter', sans-serif; background: #fff; }
+
+/* Séparateurs et titres de section */
+.section-sep { border: none; border-top: 1.5px solid #e9ecf5; margin: 20px 0; }
+.section-title { font-size: 13px; font-weight: 700; color: #001F8F; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 14px; }
+
+/* Sous-onglets */
+.sub-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
+.sub-tab-btn { background: #f1f3fa; border: none; border-radius: 8px; padding: 6px 13px; font-size: 13px; font-weight: 600; color: #444; cursor: pointer; transition: background 0.2s, color 0.2s; }
+.sub-tab-btn.active { background: #001F8F; color: #fff; }
+.mass-mode-btn { background: #f1f3fa; border: none; border-radius: 8px; padding: 6px 13px; font-size: 13px; font-weight: 600; color: #444; cursor: pointer; transition: background 0.2s, color 0.2s; }
+.mass-mode-btn.active { background: #001F8F; color: #fff; }
+.sub-panel { display: none; }
+.sub-panel.active { display: block; }
+
+/* Masse molaire */
+.molar-result { background: #eef2ff; border-radius: 12px; padding: 14px 16px; margin-top: 14px; }
+.molar-result .mol-value { font-size: 22px; font-weight: 700; color: #001F8F; }
+.molar-result .mol-detail { font-size: 13px; color: #444; margin-top: 6px; line-height: 1.7; }
+.molar-error { color: #c0392b; font-size: 13px; margin-top: 8px; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<header>
+  Mémento Opérationnel IA – ENSOSP
+  <div class="header-sub">Conversions d'unités — usage opérationnel RCH/NRBC</div>
+</header>
+
+<nav class="tabs">
+  <a href="../index.html" class="tab">🏠 Accueil</a>
+  <a href="../scan.html" class="tab">📷 Lecture QR</a>
+  <a href="../create.html" class="tab">📝 Création fiche</a>
+  <a href="../nrbc.html" class="tab">⚗️ Espace NRBC</a>
+</nav>
+
+<nav class="family-nav" id="familyNav">
+  <button class="family-btn active" data-family="pressions">Pressions</button>
+  <button class="family-btn" data-family="temperatures">Températures</button>
+  <button class="family-btn" data-family="debits">Débits</button>
+  <button class="family-btn" data-family="concentrations">Concentrations</button>
+  <button class="family-btn" data-family="dimensions">Dimensions</button>
+  <button class="family-btn" data-family="temps">Temps</button>
+  <button class="family-btn" data-family="metier">Vitesse</button>
+  <button class="family-btn" data-family="massemolaire">Masse molaire</button>
+  <button class="family-btn" data-family="radio">Irradiation</button>
+  <button class="family-btn" data-family="gps">GPS</button>
+</nav>
+
+<main>
+
+  <!-- PRESSIONS -->
+  <div class="family-panel active" id="panel-pressions">
+    <div class="card">
+      <div class="card-title">Pressions</div>
+      <div id="widget-pressions"></div>
+    </div>
+  </div>
+
+  <!-- TEMPÉRATURES -->
+  <div class="family-panel" id="panel-temperatures">
+    <div class="card">
+      <div class="card-title">Températures</div>
+      <div id="widget-temperatures"></div>
+    </div>
+  </div>
+
+  <!-- DÉBITS -->
+  <div class="family-panel" id="panel-debits">
+    <div class="card">
+      <div class="card-title">Débits</div>
+      <div class="sub-tabs">
+        <button class="sub-tab-btn active" data-sub="debvol">Volumiques</button>
+        <button class="sub-tab-btn" data-sub="debmass">Massiques</button>
+      </div>
+      <div class="sub-panel active" id="sub-debvol">
+        <div id="widget-debits-vol"></div>
+      </div>
+      <div class="sub-panel" id="sub-debmass">
+        <div class="param-block" style="margin-bottom:14px;">
+          <div style="display:flex;gap:8px;margin-bottom:12px;">
+            <button class="mass-mode-btn active" id="btn-mass-only" onclick="setMassMode('mass')">Massique pur</button>
+            <button class="mass-mode-btn" id="btn-mass-vol" onclick="setMassMode('vol')">Vol → Masse (densité)</button>
+          </div>
+          <div id="dens-block" style="display:none;">
+            <label style="font-size:13px;font-weight:600;color:#444;display:block;margin-bottom:6px;">Densité du produit (kg/L)</label>
+            <input type="number" id="densite" value="1" min="0.001" step="0.001" oninput="recalcMassique()" style="width:100%;padding:10px 12px;border-radius:10px;border:1.5px solid #ccd2e3;font-size:14px;font-family:'Inter',sans-serif;background:#fff;">
+            <p style="font-size:12px;color:#555;margin-top:5px;">Conversion : débit volumique × densité → débit massique</p>
+          </div>
+        </div>
+        <div id="widget-debits-mass"></div>
+        <div id="widget-debits-vol-mass" style="display:none;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONCENTRATIONS -->
+  <div class="family-panel" id="panel-concentrations">
+    <div class="card">
+      <div class="card-title">Concentrations</div>
+      <div class="param-block">
+        <div class="param-row">
+          <div class="param-item">
+            <label>Formule chimique</label>
+            <input type="text" id="formuleChem" placeholder="ex: NH3, C2H5OH, Cl2" oninput="onFormulaInput()">
+          </div>
+          <div class="param-item">
+            <label>Masse molaire M (g/mol)</label>
+            <input type="number" id="masseMolaire" placeholder="ex: 17.03" min="0.001" step="0.001" oninput="recalcConc()">
+          </div>
+        </div>
+        <p class="helper-text">La formule chimique calcule M automatiquement — ou saisissez M directement.</p>
+        <div class="param-row" style="margin-top:10px;">
+          <div class="param-item">
+            <label>Température (°C)</label>
+            <input type="number" id="concTemp" value="20" step="0.1" oninput="recalcConc()">
+          </div>
+          <div class="param-item">
+            <label>Pression (Pa)</label>
+            <input type="number" id="concPres" value="101325" step="1" oninput="recalcConc()">
+          </div>
+        </div>
+        <p class="helper-text">Conditions de référence NF (20 °C / 101 325 Pa par défaut)</p>
+      </div>
+      <div id="widget-conc"></div>
+    </div>
+  </div>
+
+  <!-- DIMENSIONS -->
+  <div class="family-panel" id="panel-dimensions">
+    <div class="card">
+      <div class="card-title">Dimensions</div>
+      <div class="sub-tabs">
+        <button class="sub-tab-btn active" data-sub="long">Longueurs</button>
+        <button class="sub-tab-btn" data-sub="surf">Surfaces</button>
+        <button class="sub-tab-btn" data-sub="vol">Volumes</button>
+      </div>
+      <div class="sub-panel active" id="sub-long">
+        <div id="widget-longueurs"></div>
+      </div>
+      <div class="sub-panel" id="sub-surf">
+        <div id="widget-surfaces"></div>
+      </div>
+      <div class="sub-panel" id="sub-vol">
+        <div id="widget-volumes"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TEMPS -->
+  <div class="family-panel" id="panel-temps">
+    <div class="card">
+      <div class="card-title">Temps</div>
+      <div id="widget-temps"></div>
+    </div>
+  </div>
+
+  <!-- VITESSE -->
+  <div class="family-panel" id="panel-metier">
+    <div class="card">
+      <div class="card-title">Vitesse</div>
+      <div class="sub-tabs">
+        <button class="sub-tab-btn active" data-sub="vit-conv">Conversion</button>
+        <button class="sub-tab-btn" data-sub="vit-manche">Manche à air</button>
+      </div>
+      <div class="sub-panel active" id="sub-vit-conv">
+        <div id="widget-vent"></div>
+      </div>
+      <div class="sub-panel" id="sub-vit-manche">
+        <div id="manche-widget"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MASSE MOLAIRE -->
+  <div class="family-panel" id="panel-massemolaire">
+    <div class="card">
+      <div class="card-title">Calculateur de masse molaire</div>
+      <div class="param-block">
+        <label>Formule chimique</label>
+        <input type="text" id="molarFormula" placeholder="ex: Ca(OH)2, C2H5OH, Fe2(SO4)3, NH3" oninput="calcMolarMass()" style="font-size:16px;width:100%;padding:11px 12px;border-radius:10px;border:1.5px solid #ccd2e3;font-family:'Inter',sans-serif;background:#fff;">
+      </div>
+      <div id="molarResult"></div>
+    </div>
+  </div>
+
+  <!-- RADIOLOGIE -->
+  <div class="family-panel" id="panel-radio">
+    <div class="card">
+      <div class="card-title">Irradiation</div>
+      <div class="sub-tabs">
+        <button class="sub-tab-btn active" data-sub="rad-activite">Activité</button>
+        <button class="sub-tab-btn" data-sub="rad-dose">Dose</button>
+        <button class="sub-tab-btn" data-sub="rad-debitdose">Débit de dose</button>
+        <button class="sub-tab-btn" data-sub="rad-debiteqdose">Débit équiv. dose</button>
+      </div>
+
+      <!-- ACTIVITÉ -->
+      <div class="sub-panel active" id="sub-rad-activite">
+        <div class="section-title">Activité — Bq ↔ Ci (avec préfixe)</div>
+        <div id="widget-rad-activite"></div>
+        <div style="background:#f1f3fa;border-radius:12px;padding:12px 14px;margin-top:12px;font-size:13px;color:#444;line-height:1.8;">
+          <strong style="color:#001F8F;">Équivalence</strong> — 1 Ci = 3,7 × 10¹⁰ Bq
+        </div>
+      </div>
+
       <!-- DOSE ABSORBÉE + ÉQUIVALENT -->
       <div class="sub-panel" id="sub-rad-dose">
         <div class="section-title">Conversion de dose — Gy / rad / Sv / rem</div>
