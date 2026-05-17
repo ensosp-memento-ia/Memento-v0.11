@@ -237,76 +237,114 @@
     </div>
   </div>
 
-  <!-- Irradiation -->
+  <!-- RADIOLOGIE -->
   <div class="family-panel" id="panel-radio">
     <div class="card">
       <div class="card-title">Irradiation</div>
       <div class="sub-tabs">
-        <button class="sub-tab-btn active" data-sub="dose">Dose</button>
-        <button class="sub-tab-btn" data-sub="activite">Activité</button>
-        <button class="sub-tab-btn" data-sub="debitdose">Débit de dose</button>
-        <button class="sub-tab-btn" data-sub="exposition">Exposition</button>
-        <button class="sub-tab-btn" data-sub="energie">Énergie</button>
+        <button class="sub-tab-btn active" data-sub="rad-activite">Activité</button>
+        <button class="sub-tab-btn" data-sub="rad-dose">Dose</button>
+        <button class="sub-tab-btn" data-sub="rad-debitdose">Débit de dose</button>
+        <button class="sub-tab-btn" data-sub="rad-debiteqdose">Débit équiv. dose</button>
       </div>
 
-      <div class="sub-panel active" id="sub-dose">
-        <div class="section-title">Dose absorbée (Gy)</div>
-        <div id="widget-dose-gy"></div>
-        <hr class="section-sep">
-        <div class="section-title">Dose efficace — Équivalent de dose (Sv)</div>
-        <div id="widget-dose-sv"></div>
-        <hr class="section-sep">
-        <div class="section-title">Anciennes unités</div>
-        <div id="widget-dose-old"></div>
-        <hr class="section-sep">
-        <div class="section-title">Équivalent de dose — Facteur qualité Q</div>
-        <div id="facteur-qualite"></div>
-      </div>
-
-      <div class="sub-panel" id="sub-activite">
-        <div class="section-title">Activité — Bq et Ci</div>
-        <div id="widget-act-all"></div>
-        <hr class="section-sep">
-        <div style="background:#f1f3fa;border-radius:12px;padding:14px 16px;font-size:13px;color:#444;line-height:1.8;">
-          <strong style="color:#001F8F;">Équivalences clés</strong><br>
-          1 Ci = 3,7 × 10¹⁰ Bq = 37 GBq<br>
-          Décroissance : A = A₀ / 2ⁿ &nbsp;|&nbsp; n = t / T &nbsp;|&nbsp; n ≈ A₀/100 après 7 périodes, A₀/1000 après 10 périodes
+      <!-- ACTIVITÉ -->
+      <div class="sub-panel active" id="sub-rad-activite">
+        <div class="section-title">Activité — Bq ↔ Ci (avec préfixe)</div>
+        <div id="widget-rad-activite"></div>
+        <div style="background:#f1f3fa;border-radius:12px;padding:12px 14px;margin-top:12px;font-size:13px;color:#444;line-height:1.8;">
+          <strong style="color:#001F8F;">Équivalence</strong> — 1 Ci = 3,7 × 10¹⁰ Bq
         </div>
       </div>
 
-      <div class="sub-panel" id="sub-debitdose">
-        <div class="section-title">Débit de dose efficace (Sv/h)</div>
-        <div id="widget-dd-sv"></div>
+      <!-- DOSE ABSORBÉE + ÉQUIVALENT -->
+      <div class="sub-panel" id="sub-rad-dose">
+        <div class="section-title">Conversion de dose — Gy / rad / Sv / rem</div>
+        <div id="widget-rad-dose"></div>
+        <div style="background:#f1f3fa;border-radius:12px;padding:12px 14px;margin-top:12px;font-size:13px;color:#444;line-height:1.8;">
+          <strong style="color:#001F8F;">Équivalences</strong> — 1 Gy = 100 rad &nbsp;|&nbsp; 1 Sv = 100 rem
+        </div>
         <hr class="section-sep">
-        <div class="section-title">Débit de dose absorbée (Gy/h)</div>
-        <div id="widget-dd-gy"></div>
-        <hr class="section-sep">
-        <div class="section-title">Anciennes unités</div>
-        <div id="widget-dd-old"></div>
-        <hr class="section-sep">
-        <div style="background:#f1f3fa;border-radius:12px;padding:14px 16px;font-size:13px;color:#444;line-height:1.8;">
-          <strong style="color:#001F8F;">Équivalences</strong><br>
-          1 Gy/h = 100 rad/h &nbsp;|&nbsp; 1 Sv/h = 100 rem/h &nbsp;|&nbsp; D = D̊ × t
+        <div class="section-title">Dose absorbée → Équivalent de dose (D × Q)</div>
+        <div style="overflow-x:auto;margin-bottom:14px;">
+          <table style="width:100%;border-collapse:collapse;font-size:14px;">
+            <thead><tr style="background:#001F8F;color:#fff;">
+              <th style="padding:9px 12px;text-align:center;">Q</th>
+              <th style="padding:9px 12px;text-align:left;">Rayonnements</th>
+            </tr></thead>
+            <tbody>
+              <tr style="background:#fff;"><td style="padding:9px 12px;text-align:center;font-weight:700;font-size:16px;">1</td><td style="padding:9px 12px;">X, γ, β</td></tr>
+              <tr style="background:#f5f7fb;"><td style="padding:9px 12px;text-align:center;font-weight:700;font-size:16px;">20</td><td style="padding:9px 12px;">α</td></tr>
+              <tr style="background:#fff;"><td style="padding:9px 12px;text-align:center;font-weight:700;font-size:16px;">5 à 20</td><td style="padding:9px 12px;">N (neutrons)</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="background:#eef2ff;border-radius:12px;padding:14px 16px;">
+          <div style="font-size:13px;font-weight:700;color:#001F8F;margin-bottom:12px;">D<sub>eq</sub> = D × Q</div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
+            <div style="flex:1;min-width:130px;">
+              <div style="font-size:12px;font-weight:600;color:#444;margin-bottom:4px;">Dose D</div>
+              <input type="number" id="q-dose" placeholder="ex: 0.5" oninput="calcDeq()" style="width:100%;padding:9px 12px;border-radius:10px;border:1.5px solid #ccd2e3;font-size:15px;font-family:Inter,sans-serif;background:#fff;">
+            </div>
+            <div style="flex:1;min-width:130px;">
+              <div style="font-size:12px;font-weight:600;color:#444;margin-bottom:4px;">Unité D</div>
+              <select id="q-dose-unit" onchange="calcDeq()" style="width:100%;padding:9px 12px;border-radius:10px;border:1.5px solid #ccd2e3;font-size:14px;font-family:Inter,sans-serif;background:#fff;">
+                <option value="1">Gy</option>
+                <option value="1e-3">mGy</option>
+                <option value="1e-6">µGy</option>
+                <option value="1e3">kGy</option>
+                <option value="0.01">rad</option>
+                <option value="1e-4">mrad</option>
+              </select>
+            </div>
+            <div style="flex:1;min-width:130px;">
+              <div style="font-size:12px;font-weight:600;color:#444;margin-bottom:4px;">Facteur Q</div>
+              <select id="q-facteur" onchange="calcDeq()" style="width:100%;padding:9px 12px;border-radius:10px;border:1.5px solid #ccd2e3;font-size:14px;font-family:Inter,sans-serif;background:#fff;">
+                <option value="1">Q = 1 — X, γ, β</option>
+                <option value="20">Q = 20 — α</option>
+                <option value="5">Q = 5 — N (min)</option>
+                <option value="10">Q = 10 — N (moyen)</option>
+                <option value="20n">Q = 20 — N (max)</option>
+                <option value="custom">Q personnalisé…</option>
+              </select>
+            </div>
+            <div style="flex:1;min-width:130px;" id="q-custom-wrap" style="display:none;">
+              <div style="font-size:12px;font-weight:600;color:#444;margin-bottom:4px;">Q (valeur)</div>
+              <input type="number" id="q-custom" placeholder="ex: 12" min="1" oninput="calcDeq()" style="width:100%;padding:9px 12px;border-radius:10px;border:1.5px solid #ccd2e3;font-size:15px;font-family:Inter,sans-serif;background:#fff;">
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
+            <div style="flex:1;min-width:130px;">
+              <div style="font-size:12px;font-weight:600;color:#444;margin-bottom:4px;">Unité résultat</div>
+              <select id="q-res-unit" onchange="calcDeq()" style="width:100%;padding:9px 12px;border-radius:10px;border:1.5px solid #ccd2e3;font-size:14px;font-family:Inter,sans-serif;background:#fff;">
+                <option value="1">Sv</option>
+                <option value="1e-3">mSv</option>
+                <option value="1e-6">µSv</option>
+                <option value="1e3">kSv</option>
+                <option value="0.01">rem</option>
+                <option value="1e-4">mrem</option>
+              </select>
+            </div>
+          </div>
+          <div id="q-result" style="margin-top:4px;font-size:16px;font-weight:700;color:#001F8F;"></div>
         </div>
       </div>
 
-      <div class="sub-panel" id="sub-exposition">
-        <div class="section-title">Dose d'exposition</div>
-        <div id="widget-exposition"></div>
-        <hr class="section-sep">
-        <div style="background:#f1f3fa;border-radius:12px;padding:14px 16px;font-size:13px;color:#444;line-height:1.8;">
-          <strong style="color:#001F8F;">Équivalences</strong><br>
-          1 R (röntgen) ≈ 2,58 × 10⁻⁴ C/kg &nbsp;|&nbsp; Unité SI : Coulomb/kg
+      <!-- DÉBIT DE DOSE -->
+      <div class="sub-panel" id="sub-rad-debitdose">
+        <div class="section-title">Débit de dose absorbée — Gy/h ↔ rad/h (avec préfixe)</div>
+        <div id="widget-rad-debitdose"></div>
+        <div style="background:#f1f3fa;border-radius:12px;padding:12px 14px;margin-top:12px;font-size:13px;color:#444;line-height:1.8;">
+          <strong style="color:#001F8F;">Équivalence</strong> — 1 Gy/h = 100 rad/h
         </div>
       </div>
 
-      <div class="sub-panel" id="sub-energie">
-        <div class="section-title">Énergie radiologique</div>
-        <div id="widget-energie"></div>
-        <hr class="section-sep">
-        <div style="background:#f1f3fa;border-radius:12px;padding:14px 16px;font-size:13px;color:#444;line-height:1.8;">
-          <strong style="color:#001F8F;">Équivalences</strong><br>
-          1 MeV = 10³ keV = 10⁶ eV &nbsp;|&nbsp; 1 eV = 1,602 × 10⁻¹⁹ J &nbsp;|&nbsp; 1 erg = 10⁻⁷ J
+      <!-- DÉBIT ÉQUIVALENT DE DOSE -->
+      <div class="sub-panel" id="sub-rad-debiteqdose">
+        <div class="section-title">Débit d'équivalent de dose — Sv/h ↔ rem/h (avec préfixe)</div>
+        <div id="widget-rad-debiteqdose"></div>
+        <div style="background:#f1f3fa;border-radius:12px;padding:12px 14px;margin-top:12px;font-size:13px;color:#444;line-height:1.8;">
+          <strong style="color:#001F8F;">Équivalence</strong> — 1 Sv/h = 100 rem/h
         </div>
       </div>
 
@@ -1049,131 +1087,95 @@ function calcMolarMass() {
 }
 
 // ═══════════════════════════════════════════
-// 9. IRRADIATION
+// 9. RADIOLOGIE — avec préfixes SI
 // ═══════════════════════════════════════════
 
-// Dose Gy
-var doseGyUnits = [
-  { key:'gy',  label:'Gray (Gy)',       toBase:1 },
-  { key:'mgy', label:'Milligray (mGy)', toBase:1e-3 },
-  { key:'ugy', label:'Microgray (µGy)', toBase:1e-6 },
-];
-buildWidget('widget-dose-gy', doseGyUnits, makeLinearConverter(doseGyUnits), 'mgy', 'gy');
-
-// Dose Sv
-var doseSvUnits = [
-  { key:'sv',  label:'Sievert (Sv)',       toBase:1 },
-  { key:'msv', label:'Millisievert (mSv)', toBase:1e-3 },
-  { key:'usv', label:'Microsievert (µSv)', toBase:1e-6 },
-];
-buildWidget('widget-dose-sv', doseSvUnits, makeLinearConverter(doseSvUnits), 'msv', 'sv');
-
-// Dose anciennes
-var doseOldUnits = [
-  { key:'rem',  label:'rem',  toBase:0.01 },
-  { key:'mrem', label:'mrem', toBase:1e-5 },
-  { key:'rad',  label:'rad',  toBase:0.01 },
-];
-buildWidget('widget-dose-old', doseOldUnits, makeLinearConverter(doseOldUnits), 'rem', 'mrem');
-
-// Activité — Bq + Ci dans un seul widget
-var actAllUnits = [
-  { key:'bq',  label:'Becquerel (Bq)',     toBase:1 },
-  { key:'kbq', label:'Kilobecquerel (kBq)',toBase:1e3 },
-  { key:'mbq', label:'Mégabecquerel (MBq)',toBase:1e6 },
-  { key:'gbq', label:'Gigabecquerel (GBq)',toBase:1e9 },
-  { key:'ci',  label:'Curie (Ci)',         toBase:3.7e10 },
-  { key:'mci', label:'Millicurie (mCi)',   toBase:3.7e7 },
-  { key:'uci', label:'Microcurie (µCi)',   toBase:3.7e4 },
-];
-buildWidget('widget-act-all', actAllUnits, makeLinearConverter(actAllUnits), 'mbq', 'ci');
-
-// Débit dose Sv/h
-var ddSvUnits = [
-  { key:'svh',  label:'Sv/h',  toBase:1 },
-  { key:'msvh', label:'mSv/h', toBase:1e-3 },
-  { key:'usvh', label:'µSv/h', toBase:1e-6 },
-];
-buildWidget('widget-dd-sv', ddSvUnits, makeLinearConverter(ddSvUnits), 'usvh', 'msvh');
-
-// Débit dose Gy/h
-var ddGyUnits = [
-  { key:'gyh',  label:'Gy/h',  toBase:1 },
-  { key:'mgyh', label:'mGy/h', toBase:1e-3 },
-  { key:'ugyh', label:'µGy/h', toBase:1e-6 },
-];
-buildWidget('widget-dd-gy', ddGyUnits, makeLinearConverter(ddGyUnits), 'ugyh', 'mgyh');
-
-// Débit dose anciennes
-var ddOldUnits = [
-  { key:'remh',  label:'rem/h',        toBase:0.01 },
-  { key:'mremh', label:'mrem/h',       toBase:1e-5 },
-  { key:'rh',    label:'R/h (röntgen)',toBase:8.77e-3 },
-];
-buildWidget('widget-dd-old', ddOldUnits, makeLinearConverter(ddOldUnits), 'remh', 'mremh');
-
-// Énergie radiologique
-var energieUnits = [
-  { key:'ev',  label:'Électronvolt (eV)',      toBase:1 },
-  { key:'kev', label:'Kiloélectronvolt (keV)', toBase:1e3 },
-  { key:'mev', label:'Mégaélectronvolt (MeV)', toBase:1e6 },
-  { key:'j',   label:'Joule (J)',               toBase:6.242e18 },
-  { key:'erg', label:'Erg',                     toBase:6.242e11 },
-];
-buildWidget('widget-energie', energieUnits, makeLinearConverter(energieUnits), 'mev', 'j');
-
-// Dose d'exposition : C/kg ↔ röntgen
-var expositionUnits = [
-  { key:'ckg',  label:'Coulomb/kg (C/kg)',  toBase:1 },
-  { key:'mckg', label:'mC/kg',              toBase:1e-3 },
-  { key:'r',    label:'Röntgen (R)',         toBase:2.58e-4 },
-  { key:'mr',   label:'Milliroentgen (mR)',  toBase:2.58e-7 },
-];
-buildWidget('widget-exposition', expositionUnits, makeLinearConverter(expositionUnits), 'r', 'ckg');
-
-// Facteur qualité Q — tableau statique
-(function() {
-  var c = document.getElementById('facteur-qualite');
-  if (!c) return;
-  c.innerHTML =
-    '<div style="overflow-x:auto;">' +
-    '<table style="width:100%;border-collapse:collapse;font-size:14px;">' +
-      '<thead><tr style="background:#001F8F;color:#fff;">' +
-        '<th style="padding:9px 12px;text-align:center;">Q</th>' +
-        '<th style="padding:9px 12px;text-align:left;">Rayonnements</th>' +
-        '<th style="padding:9px 12px;text-align:left;">Relation</th>' +
-      '</tr></thead>' +
-      '<tbody>' +
-        '<tr style="background:#fff;"><td style="padding:9px 12px;text-align:center;font-weight:700;">1</td><td style="padding:9px 12px;">X, γ, β</td><td style="padding:9px 12px;color:#555;">D<sub>eq</sub> = D × 1</td></tr>' +
-        '<tr style="background:#f5f7fb;"><td style="padding:9px 12px;text-align:center;font-weight:700;">20</td><td style="padding:9px 12px;">α</td><td style="padding:9px 12px;color:#555;">D<sub>eq</sub> = D × 20</td></tr>' +
-        '<tr style="background:#fff;"><td style="padding:9px 12px;text-align:center;font-weight:700;">5 à 20</td><td style="padding:9px 12px;">N (neutrons)</td><td style="padding:9px 12px;color:#555;">D<sub>eq</sub> = D × Q</td></tr>' +
-      '</tbody>' +
-    '</table></div>' +
-    '<div style="margin-top:10px;background:#f1f3fa;border-radius:10px;padding:10px 14px;font-size:13px;color:#444;line-height:1.7;">' +
-      '<strong style="color:#001F8F;">Calcul interactif D<sub>eq</sub> = D × Q</strong>' +
-      '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;">' +
-        '<div style="flex:1;min-width:120px;">' +
-          '<div style="font-size:12px;font-weight:600;color:#444;margin-bottom:4px;">Dose D (Gy)</div>' +
-          '<input type="number" id="q-dose" placeholder="ex: 0.5" oninput="calcDeq()" style="width:100%;padding:9px 12px;border-radius:10px;border:1.5px solid #ccd2e3;font-size:15px;font-family:Inter,sans-serif;background:#fff;">' +
-        '</div>' +
-        '<div style="flex:1;min-width:120px;">' +
-          '<div style="font-size:12px;font-weight:600;color:#444;margin-bottom:4px;">Facteur Q</div>' +
-          '<input type="number" id="q-facteur" placeholder="ex: 20" oninput="calcDeq()" style="width:100%;padding:9px 12px;border-radius:10px;border:1.5px solid #ccd2e3;font-size:15px;font-family:Inter,sans-serif;background:#fff;">' +
-        '</div>' +
-      '</div>' +
-      '<div id="q-result" style="margin-top:10px;font-size:15px;font-weight:600;color:#001F8F;"></div>' +
-    '</div>';
-})();
-
-function calcDeq() {
-  var d = parseFloat(document.getElementById('q-dose').value);
-  var q = parseFloat(document.getElementById('q-facteur').value);
-  var r = document.getElementById('q-result');
-  if (isNaN(d) || isNaN(q)) { r.innerHTML = ''; return; }
-  var deq = d * q;
-  r.innerHTML = 'D<sub>eq</sub> = ' + fmt(d) + ' Gy × ' + fmt(q) + ' = <strong>' + fmt(deq) + ' Sv</strong>';
+// Générateur d'unités avec préfixes : T, G, M, k, (base), m, µ
+// baseKey : clé de base, baseLabel : nom unité, baseToSI : facteur vers unité SI
+function makePrefixUnits(baseKey, baseLabel, baseToSI) {
+  var prefixes = [
+    { p:'T',  label:'Téra',  f:1e12 },
+    { p:'G',  label:'Giga',  f:1e9  },
+    { p:'M',  label:'Méga',  f:1e6  },
+    { p:'k',  label:'Kilo',  f:1e3  },
+    { p:'',   label:'',      f:1    },
+    { p:'m',  label:'Milli', f:1e-3 },
+    { p:'µ',  label:'Micro', f:1e-6 },
+  ];
+  return prefixes.map(function(pr) {
+    return {
+      key:   pr.p + baseKey,
+      label: pr.label + (pr.label ? baseLabel.charAt(0).toLowerCase() + baseLabel.slice(1) : baseLabel) +
+             ' (' + pr.p + (baseKey === 'Bq' ? 'Bq' : baseKey === 'Ci' ? 'Ci' :
+                            baseKey === 'Gy' ? 'Gy' : baseKey === 'rad' ? 'rad' :
+                            baseKey === 'Sv' ? 'Sv' : baseKey === 'rem' ? 'rem' :
+                            baseKey === 'Gyh' ? 'Gy/h' : baseKey === 'radh' ? 'rad/h' :
+                            baseKey === 'Svh' ? 'Sv/h' : 'rem/h') + ')',
+      toBase: pr.f * baseToSI
+    };
+  });
 }
 
+// ACTIVITÉ — Bq (SI = Bq) et Ci (1 Ci = 3.7e10 Bq)
+var actBqUnits  = makePrefixUnits('Bq',  'Becquerel',  1);
+var actCiUnits  = makePrefixUnits('Ci',  'Curie',      3.7e10);
+var actAllRadUnits = actBqUnits.concat(actCiUnits);
+buildWidget('widget-rad-activite', actAllRadUnits, makeLinearConverter(actAllRadUnits), 'MBq', 'Ci');
+
+// DOSE — Gy, rad, Sv, rem (toutes en un seul widget, pivot = Gy)
+// 1 Gy = 100 rad | 1 Sv = 100 rem | Gy ↔ Sv via Q
+var doseGyUnitsR  = makePrefixUnits('Gy',  'Gray',    1);
+var doseRadUnits  = makePrefixUnits('rad', 'Rad',     0.01);
+var eqSvUnits     = makePrefixUnits('Sv',  'Sievert', 1);
+var eqRemUnits    = makePrefixUnits('rem', 'Rem',     0.01);
+var doseAllUnits  = doseGyUnitsR.concat(doseRadUnits).concat(eqSvUnits).concat(eqRemUnits);
+buildWidget('widget-rad-dose', doseAllUnits, makeLinearConverter(doseAllUnits), 'mGy', 'mSv');
+
+function calcDeq() {
+  var dVal  = parseFloat(document.getElementById('q-dose').value);
+  var dUnit = parseFloat(document.getElementById('q-dose-unit').value);
+  var qSel  = document.getElementById('q-facteur').value;
+  var cwrap = document.getElementById('q-custom-wrap');
+  var rUnit = parseFloat(document.getElementById('q-res-unit').value);
+  var res   = document.getElementById('q-result');
+
+  // Afficher/masquer champ Q personnalisé
+  var isCustom = (qSel === 'custom');
+  cwrap.style.display = isCustom ? '' : 'none';
+
+  if (isNaN(dVal)) { res.innerHTML = ''; return; }
+
+  var Q;
+  if (isCustom) {
+    Q = parseFloat(document.getElementById('q-custom').value);
+    if (isNaN(Q)) { res.innerHTML = ''; return; }
+  } else {
+    Q = parseFloat(qSel === '20n' ? '20' : qSel);
+  }
+
+  // D en Gy → Deq en Sv → convertir en unité choisie
+  var dGy  = dVal * dUnit;          // dose en Gy
+  var deqSv = dGy * Q;              // équivalent dose en Sv
+  var deqOut = deqSv / rUnit;       // dans l'unité de sortie
+
+  var dUnitLabel  = document.getElementById('q-dose-unit').options[document.getElementById('q-dose-unit').selectedIndex].text;
+  var rUnitLabel  = document.getElementById('q-res-unit').options[document.getElementById('q-res-unit').selectedIndex].text;
+
+  res.innerHTML =
+    'D<sub>eq</sub> = ' + fmt(dVal) + ' ' + dUnitLabel +
+    ' × Q(' + fmt(Q) + ')' +
+    ' = <strong>' + fmt(deqOut) + ' ' + rUnitLabel + '</strong>';
+}// DÉBIT DE DOSE ABSORBÉE — Gy/h et rad/h
+var ddGyUnitsR   = makePrefixUnits('Gyh',  'Gray/h',  1);
+var ddRadUnits   = makePrefixUnits('radh', 'Rad/h',   0.01);
+var ddAllUnits   = ddGyUnitsR.concat(ddRadUnits);
+buildWidget('widget-rad-debitdose', ddAllUnits, makeLinearConverter(ddAllUnits), 'µGyh', 'mGyh');
+
+// DÉBIT D'ÉQUIVALENT DE DOSE — Sv/h et rem/h
+var ddSvUnitsR   = makePrefixUnits('Svh',  'Sievert/h', 1);
+var ddRemUnits   = makePrefixUnits('remh', 'Rem/h',     0.01);
+var ddEqAllUnits = ddSvUnitsR.concat(ddRemUnits);
+buildWidget('widget-rad-debiteqdose', ddEqAllUnits, makeLinearConverter(ddEqAllUnits), 'µSvh', 'mSvh');
 
 // ═══════════════════════════════════════════
 // GPS — WIDGET STYLE GOOGLE
