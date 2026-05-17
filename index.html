@@ -187,13 +187,6 @@
       var MAX_ENTRIES = 3;
       var PX_PER_SEC  = 55;
 
-      // Fallback si changelog.json inaccessible (file://, CORS, 404)
-      var FALLBACK = [
-        { date:'2025-05-17', titre:"Page conversions d'unités", lien:'Calculateur/conversions.html', type:'nouveau' },
-        { date:'2025-05-17', titre:'Conversions GPS — DD, DMS, DDM, Lambert 93', lien:'Calculateur/conversions.html', type:'nouveau' },
-        { date:'2025-05-17', titre:'Manche à air — tableau SP et calculateur', lien:'Calculateur/conversions.html', type:'nouveau' }
-      ];
-
       function badgeClass(type) {
         if (type === 'nouveau')      return 'ticker-type-nouveau';
         if (type === 'correctif')    return 'ticker-type-correctif';
@@ -230,7 +223,6 @@
         var shown = entries.slice(0, MAX_ENTRIES);
         badge.textContent = shown.length;
 
-        // Double pour boucle continue sans saut
         [shown, shown].forEach(function(set) {
           var frag = document.createDocumentFragment();
           set.forEach(function(e) { frag.appendChild(buildItem(e)); });
@@ -244,20 +236,18 @@
         });
       }
 
-      function sortAndRender(data) {
-        data.sort(function(a, b) { return new Date(b.date) - new Date(a.date); });
-        renderTicker(data);
-      }
-
       fetch('changelog.json')
         .then(function(r) {
           if (!r.ok) throw new Error('HTTP ' + r.status);
           return r.json();
         })
-        .then(sortAndRender)
+        .then(function(data) {
+          data.sort(function(a, b) { return new Date(b.date) - new Date(a.date); });
+          renderTicker(data);
+        })
         .catch(function() {
-          // Fallback silencieux — données codées en dur
-          sortAndRender(FALLBACK);
+          var w = document.getElementById('ticker-wrap');
+          if (w) w.style.display = 'none';
         });
     })();
   </script>
