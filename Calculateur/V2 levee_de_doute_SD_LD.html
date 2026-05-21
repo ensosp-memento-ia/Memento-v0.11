@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Levée de Doute Radiologique | Mémento IA ENSOSP</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=IBM+Plex+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bleu:#001F8F; --bleu2:#0033cc; --fond:#f5f7fb; --blanc:#fff;
+      --gris:#e9ecf5; --gris2:#ccd2e3; --texte:#111;
+      --vert:#155724; --vert-bg:#d4edda;
+      --orange:#856404; --orange-bg:#fff3cd;
+      --rouge:#721c24; --rouge-bg:#f8d7da;
+      --violet:#4a148c; --violet-bg:#ede7f6;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'IBM Plex Sans',sans-serif;background:var(--fond);color:var(--texte);min-height:100vh;display:flex;flex-direction:column}
+    header{background:var(--bleu);padding:12px 20px;text-align:center;color:white;font-size:16px;font-weight:700;letter-spacing:.5px}
+    .header-sub{font-size:12px;font-weight:400;opacity:.8;margin-top:3px}
+    .tabs{display:flex;background:#e9ecf5;padding:10px;gap:10px}
+    .tab{flex:1;text-align:center;padding:10px 12px;border-radius:25px;color:var(--bleu);font-weight:600;font-size:13px;cursor:pointer;border:none;background:transparent;font-family:'IBM Plex Sans',sans-serif;text-decoration:none;display:inline-block;transition:.2s}
+    .tab.active{background:var(--bleu);color:white}
+    .tab:hover:not(.active){background:#d9dff5}
+    main{max-width:900px;margin:0 auto;padding:20px;flex:1;width:100%}
+    .warn{background:#fff3cd;border-left:4px solid #ff9f1c;padding:14px 16px;border-radius:8px;font-size:13px;color:#856404;margin-bottom:20px;line-height:1.7}
+    .warn strong{display:block;font-size:14px;margin-bottom:6px}
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+    @media(max-width:640px){.grid-2{grid-template-columns:1fr}}
+    .card{background:var(--blanc);padding:22px;border-radius:15px;margin-bottom:20px;box-shadow:0 3px 8px rgba(0,0,0,.05)}
+    .card h2{color:var(--bleu);margin:0 0 16px 0;font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px}
+    label{display:block;font-weight:600;font-size:13px;color:var(--bleu);margin-bottom:5px;margin-top:14px}
+    label:first-child{margin-top:0}
+    input[type=number],input[type=text],select{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--gris2);font-size:15px;font-family:'IBM Plex Sans',sans-serif;color:var(--texte);background:#fff;transition:border-color .2s;appearance:none}
+    input[type=number]{padding-right:72px}
+    input[type=number]:focus,select:focus{border-color:var(--bleu);outline:none}
+    .iw{position:relative}
+    .iu{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:12px;font-weight:600;color:var(--bleu);background:var(--gris);padding:2px 7px;border-radius:6px;pointer-events:none;white-space:nowrap}
+    .hint{font-size:11px;color:#888;margin-top:5px;line-height:1.5}
+
+    /* IC selector pills */
+    .ic-pills{display:flex;gap:8px;margin-top:6px}
+    .ic-pill{flex:1;padding:10px 8px;border-radius:10px;border:2px solid var(--gris2);background:#f8f9ff;color:var(--bleu);font-weight:700;font-size:14px;font-family:'IBM Plex Mono',monospace;cursor:pointer;text-align:center;transition:.2s}
+    .ic-pill.selected{border-color:var(--bleu);background:var(--bleu);color:white}
+    .ic-pill:hover:not(.selected){border-color:var(--bleu2);background:#eef2ff}
+    .ic-pill .ic-sub{font-size:10px;font-weight:600;opacity:.75;display:block;margin-top:2px;font-family:'IBM Plex Sans',sans-serif}
+
+    /* Aide contextuelle */
+    .aide-card{background:#f1f3fa;border-radius:12px;padding:16px;margin-top:4px}
+    .aide-card select{margin-top:0}
+    .aide-result{margin-top:12px;padding:12px 14px;background:white;border-radius:10px;border-left:4px solid var(--bleu);font-size:13px;line-height:1.8;display:none}
+    .aide-result.visible{display:block}
+    .aide-tag{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:5px;vertical-align:middle}
+    .aide-tag.priorite{background:#eef2ff;color:var(--bleu)}
+    .aide-tag.ic-tag{background:#d4edda;color:#155724}
+    .aide-tag.temps{background:#fff3cd;color:#856404}
+
+    .btn-generate{width:100%;padding:16px;background:var(--bleu);color:white;border:none;font-size:16px;font-family:'IBM Plex Sans',sans-serif;border-radius:14px;cursor:pointer;font-weight:700;margin-top:8px;transition:all .2s;box-shadow:0 4px 12px rgba(0,31,143,.3)}
+    .btn-generate:hover{background:var(--bleu2);transform:translateY(-2px)}
+    .btn-generate:active{transform:translateY(0)}
+
+    /* RÉSULTATS */
+    #results{display:none}
+    #results.visible{display:block}
+
+    /* Hero SD/LD */
+    .sdld-hero{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+    @media(max-width:500px){.sdld-hero{grid-template-columns:1fr}}
+    .sdld-box{text-align:center;padding:24px 16px;border-radius:15px;background:white;box-shadow:0 3px 8px rgba(0,0,0,.05);border-top:5px solid var(--bleu)}
+    .sdld-box.sd{border-top-color:#0077b6}
+    .sdld-box.ld{border-top-color:#7209b7}
+    .sdld-lbl{font-size:11px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}
+    .sdld-name{font-size:13px;font-weight:600;color:#444;margin-bottom:10px}
+    .sdld-val{font-size:clamp(2.2rem,8vw,3.2rem);font-weight:800;font-family:'IBM Plex Mono',monospace;line-height:1}
+    .sdld-box.sd .sdld-val{color:#0077b6}
+    .sdld-box.ld .sdld-val{color:#7209b7}
+    .sdld-unit{font-size:13px;color:#888;margin-top:6px}
+
+    /* Verdict */
+    .verdict-hero{text-align:center;padding:22px 20px;border-radius:15px;background:white;box-shadow:0 3px 8px rgba(0,0,0,.05);margin-bottom:20px;border-top:5px solid #888;transition:border-color .4s}
+    .verdict-hero.absent{border-top-color:#28a745}
+    .verdict-hero.present{border-top-color:#dc3545}
+    .verdict-hero.indeter{border-top-color:#fd7e14}
+    .verdict-lbl{font-size:12px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px}
+    .verdict-text{font-size:clamp(1.1rem,4vw,1.5rem);font-weight:800;padding:14px 28px;border-radius:30px;display:inline-block}
+    .verdict-text.absent{background:#d4edda;color:#155724}
+    .verdict-text.present{background:#f8d7da;color:#721c24}
+    .verdict-text.indeter{background:#fff3cd;color:#856404}
+    .verdict-sub{font-size:12px;color:#666;margin-top:10px;line-height:1.6}
+
+    /* Valeurs mesurées vs seuils */
+    .compare-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px}
+    @media(max-width:500px){.compare-grid{grid-template-columns:1fr}}
+    .cg-box{background:white;border-radius:14px;box-shadow:0 3px 8px rgba(0,0,0,.05);padding:16px;text-align:center}
+    .cg-lbl{font-size:10px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+    .cg-val{font-size:1.5rem;font-weight:800;color:var(--bleu);font-family:'IBM Plex Mono',monospace}
+    .cg-unit{font-size:11px;color:#888}
+    .cg-box.highlight-sd .cg-val{color:#0077b6}
+    .cg-box.highlight-ld .cg-val{color:#7209b7}
+    .cg-box.highlight-m .cg-val{color:#333}
+
+    /* Formule box */
+    .formule-box{background:#eef2ff;border-radius:12px;padding:18px 20px;margin-bottom:20px}
+    .formule-box h3{color:var(--bleu);margin:0 0 10px 0;font-size:12px;text-transform:uppercase;letter-spacing:.5px;font-weight:700}
+    .feq{font-size:14px;color:var(--bleu);font-weight:700;margin-bottom:8px;font-family:'IBM Plex Mono',monospace}
+    .fpar{font-size:12px;color:#444;line-height:2;font-family:'IBM Plex Mono',monospace}
+    .fpar b{color:var(--bleu)}
+
+    /* Schéma repère numérique */
+    #schema-wrap{background:white;border-radius:15px;box-shadow:0 3px 8px rgba(0,0,0,.05);padding:20px;margin-bottom:20px}
+    #schema-wrap h3{color:var(--bleu);font-size:14px;font-weight:700;margin-bottom:14px}
+    #schema-svg{width:100%;height:auto;display:block}
+
+    /* Export */
+    .btn-export{width:100%;padding:14px;background:#e9ecf5;color:var(--bleu);border:none;font-size:14px;font-family:'IBM Plex Sans',sans-serif;border-radius:14px;cursor:pointer;font-weight:700;transition:all .2s;margin-bottom:20px}
+    .btn-export:hover{background:#d9dff5}
+    .btn-export.copied{background:var(--vert-bg);color:var(--vert)}
+
+    .sources-box{background:#f1f3fa;border-radius:10px;padding:14px 16px;margin-bottom:20px;font-size:11px;color:#555;line-height:1.8}
+    .sources-box strong{color:var(--bleu)}
+
+    footer{padding:12px;text-align:center;font-size:12px;color:#444;border-top:1px solid #e0e4f0}
+    @media(max-width:640px){.card{padding:16px}main{padding:14px}}
+
+    /* Badge IC */
+    .ic-badge{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;background:#eef2ff;color:var(--bleu);font-family:'IBM Plex Mono',monospace}
+    .ic-badge.k3{background:#ede7f6;color:#4a148c}
+
+    /* Axe numérique SVG */
+    .num-axis text{font-family:'IBM Plex Mono',monospace}
+  </style>
+</head>
+<body>
+
+<header>
+  Mémento Opérationnel IA – ENSOSP
+  <div class="header-sub">Levée de Doute Radiologique · SD / LD · Seuil de Décision &amp; Limite de Détection</div>
+</header>
+
+<nav class="tabs">
+  <a href="index.html" class="tab">🏠 Accueil</a>
+  <a href="scan.html" class="tab">📷 Lecture QR</a>
+  <a href="create.html" class="tab">📝 Création fiche</a>
+  <a href="nrbc.html" class="tab">⚗️ Espace NRBC</a>
+</nav>
+
+<main>
+
+<div class="warn">
+  <strong>⚠️ Principe de la levée de doute radiologique — SD / LD (méthode ISO 11929)</strong>
+  Le <strong>Seuil de Décision (SD)</strong> est la valeur au-dessus de laquelle on considère qu'une activité est détectée au sens statistique. 
+  La <strong>Limite de Détection (LD)</strong> est la plus petite activité vraie qui peut être détectée avec la probabilité souhaitée.
+  Cette méthode permet de différencier une <strong>radioactivité ajoutée très faible</strong> du bruit de fond ambiant avec une rigueur statistique définie par l'intervalle de confiance choisi (95 % ou 99,7 %).
+  <br><br>
+  <strong>Formules (ISO 11929 / Currie 1968) :</strong>
+  SD = B + k × √(B × (1/t<sub>B</sub> + 1/t<sub>M</sub>)) &nbsp;|&nbsp;
+  LD = B + 2k × √(B × (1/t<sub>B</sub> + 1/t<sub>M</sub>))
+  — avec <strong>k = 2</strong> pour IC 95 % et <strong>k = 3</strong> pour IC 99,7 %.
+</div>
+
+<div class="grid-2">
+
+  <!-- COLONNE GAUCHE : PARAMÈTRES -->
+  <div>
+
+    <div class="card">
+      <h2>📡 Bruit de fond ambiant</h2>
+
+      <label>Valeur du bruit de fond (B)</label>
+      <div class="iw">
+        <input type="number" id="bdf-val" min="0" step="0.1" placeholder="Ex : 50" oninput="onInput()">
+        <span class="iu">cps ou µSv/h</span>
+      </div>
+      <div class="hint">Mesure représentative du fond ambiant, loin de toute source suspecte.</div>
+
+      <label>Temps de mesure du bruit de fond (t<sub>B</sub>)</label>
+      <div class="iw">
+        <input type="number" id="bdf-temps" min="1" step="1" placeholder="Ex : 300" oninput="onInput()">
+        <span class="iu">s</span>
+      </div>
+      <div class="hint">Temps de mesure long → meilleure précision statistique. Recommandé : ≥ 300 s pour une levée de doute précise.</div>
+    </div>
+
+    <div class="card">
+      <h2>☢️ Mesure sur l'objet ou la personne</h2>
+
+      <label>Valeur mesurée (M)</label>
+      <div class="iw">
+        <input type="number" id="mes-val" min="0" step="0.1" placeholder="Ex : 100" oninput="onInput()">
+        <span class="iu">cps ou µSv/h</span>
+      </div>
+      <div class="hint">Mesure réalisée sur l'objet ou la zone suspecte, dans les mêmes conditions que le bruit de fond.</div>
+
+      <label>Temps de mesure (t<sub>M</sub>)</label>
+      <div class="iw">
+        <input type="number" id="mes-temps" min="1" step="1" placeholder="Ex : 300" oninput="onInput()">
+        <span class="iu">s</span>
+      </div>
+      <div class="hint">Peut être plus court que t<sub>B</sub> (ex : 1–2 s) pour un contrôle rapide de personnes.</div>
+    </div>
+
+  </div>
+
+  <!-- COLONNE DROITE : IC + AIDE -->
+  <div>
+
+    <div class="card">
+      <h2>📊 Intervalle de confiance</h2>
+      <div class="hint" style="margin-bottom:12px">Choisir le niveau statistique selon l'objectif opérationnel :</div>
+
+      <div class="ic-pills">
+        <div class="ic-pill selected" id="pill-95" onclick="selectIC(0.95)">
+          95%
+          <span class="ic-sub">k = 2</span>
+        </div>
+        <div class="ic-pill" id="pill-997" onclick="selectIC(0.997)">
+          99,7%
+          <span class="ic-sub">k = 3</span>
+        </div>
+      </div>
+      <input type="hidden" id="ic-val" value="0.95">
+
+      <div style="margin-top:14px;padding:12px;background:#f1f3fa;border-radius:10px;font-size:12px;color:#444;line-height:1.8">
+        <strong style="color:var(--bleu)">IC 95 % (k=2)</strong> — 1 fausse alarme sur 20. Idéal pour contrôle rapide de personnes.<br>
+        <strong style="color:#4a148c">IC 99,7 % (k=3)</strong> — 1 fausse alarme sur 370. Idéal pour levée de doute approfondie.
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>🧭 Aide au choix des paramètres</h2>
+      <div class="aide-card">
+        <label style="margin-top:0">Cas opérationnel</label>
+        <select id="cas-select" onchange="updateAide()">
+          <option value="">— Sélectionner un cas —</option>
+          <option value="1">Lever le doute sur radioactivité ambiante / objet</option>
+          <option value="2">Contrôler des personnes</option>
+          <option value="3">Contrôler un grand nombre de personnes</option>
+        </select>
+        <div class="aide-result" id="aide-result"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<button class="btn-generate" onclick="calculer()">⚗️ Calculer SD &amp; LD</button>
+
+<!-- RÉSULTATS -->
+<div id="results">
+
+  <!-- Verdict principal -->
+  <div class="verdict-hero" id="verdict-hero">
+    <div class="verdict-lbl">Conclusion de la levée de doute</div>
+    <div><span class="verdict-text" id="verdict-text">—</span></div>
+    <div class="verdict-sub" id="verdict-sub"></div>
+  </div>
+
+  <!-- SD / LD hero -->
+  <div class="sdld-hero">
+    <div class="sdld-box sd">
+      <div class="sdld-lbl">SD — Seuil de Décision</div>
+      <div class="sdld-name">Valeur critique de détection</div>
+      <div class="sdld-val" id="sd-val">—</div>
+      <div class="sdld-unit">cps ou µSv/h</div>
+    </div>
+    <div class="sdld-box ld">
+      <div class="sdld-lbl">LD — Limite de Détection</div>
+      <div class="sdld-name">Activité minimale détectable</div>
+      <div class="sdld-val" id="ld-val">—</div>
+      <div class="sdld-unit">cps ou µSv/h</div>
+    </div>
+  </div>
+
+  <!-- Comparaison des 3 valeurs -->
+  <div class="compare-grid">
+    <div class="cg-box highlight-m">
+      <div class="cg-lbl">Mesure (M)</div>
+      <div class="cg-val" id="cg-m">—</div>
+      <div class="cg-unit">cps ou µSv/h</div>
+    </div>
+    <div class="cg-box highlight-sd">
+      <div class="cg-lbl">Seuil de Décision</div>
+      <div class="cg-val" id="cg-sd">—</div>
+      <div class="cg-unit">cps ou µSv/h</div>
+    </div>
+    <div class="cg-box highlight-ld">
+      <div class="cg-lbl">Limite de Détection</div>
+      <div class="cg-val" id="cg-ld">—</div>
+      <div class="cg-unit">cps ou µSv/h</div>
+    </div>
+  </div>
+
+  <!-- Schéma axe numérique -->
+  <div id="schema-wrap">
+    <h3>📈 Représentation graphique</h3>
+    <svg id="schema-svg" viewBox="0 0 700 140" xmlns="http://www.w3.org/2000/svg"></svg>
+  </div>
+
+  <!-- Formules détaillées -->
+  <div class="formule-box">
+    <h3>📐 Détail du calcul</h3>
+    <div style="background:#dce4ff;border-radius:9px;padding:13px 16px;margin-bottom:14px;border-left:4px solid var(--bleu)">
+      <div style="font-size:11px;font-weight:700;color:var(--bleu);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">📌 Rappel des formules (ISO 11929 / Currie 1968)</div>
+      <div class="feq">SD = B + k &times; &radic;( B &times; (1/t<sub style="font-family:inherit">B</sub> + 1/t<sub style="font-family:inherit">M</sub>) )</div>
+      <div class="feq" style="margin-bottom:8px">LD = B + 2k &times; &radic;( B &times; (1/t<sub style="font-family:inherit">B</sub> + 1/t<sub style="font-family:inherit">M</sub>) )</div>
+      <div class="fpar"><b>B</b> = bruit de fond &nbsp;|&nbsp; <b>t<sub style="font-family:inherit">B</sub></b> = durée mesure fond &nbsp;|&nbsp; <b>t<sub style="font-family:inherit">M</sub></b> = durée mesure objet &nbsp;|&nbsp; <b>k</b> = 2 (IC 95%) ou 3 (IC 99,7%)</div>
+    </div>
+    <div style="font-size:11px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Application numérique</div>
+    <div class="feq" id="detail-sd-eq">SD = B + k × √(B × (1/tB + 1/tM))</div>
+    <div class="feq" id="detail-ld-eq">LD = B + 2k × √(B × (1/tB + 1/tM))</div>
+    <div class="fpar" id="detail-params"></div>
+  </div>
+
+  <!-- Export -->
+  <button class="btn-export" id="btn-export" onclick="exporter()">📋 Copier le résumé — Main courante / RETEX</button>
+
+  <!-- Sources -->
+  <div class="sources-box">
+    <strong>Références :</strong> ISO 11929 — Détermination des limites caractéristiques (seuil de décision, limite de détection) · 
+    </strong> · Mémento IA NRBC — SDIS 76 / ENSOSP
+  </div>
+
+</div>
+
+</main>
+
+<footer>
+  Mémento Opérationnel IA NRBC — CDT Roparzh Lavanant - CNE Anthony Dubuisson — Outil d'aide au raisonnement tactique
+</footer>
+
+<script>
+// ─────────────────────────────────────────────
+// CONSTANTES
+// ─────────────────────────────────────────────
+var K_MAP = { '0.95': 2, '0.997': 3 };
+var IC_LABELS = { '0.95': '95%', '0.997': '99,7%' };
+var lastResult = null;
+
+// ─────────────────────────────────────────────
+// AIDE CONTEXTUELLE
+// ─────────────────────────────────────────────
+var AIDES = {
+  '1': {
+    objectif: 'Lever le doute sur radioactivité ambiante / objet',
+    priorite: 'Précision > Vitesse',
+    ic: '99,7% (k=3)',
+    temps: 'Temps de mesure long (~300 s) pour BdF et mesure',
+    icVal: '0.997',
+    couleur: '#7209b7'
+  },
+  '2': {
+    objectif: 'Contrôler des personnes',
+    priorite: 'Précision + Vitesse',
+    ic: '95% ou 99,7% selon contexte',
+    temps: 'BdF long (~300 s) + mesure courte (1 ou 2 s)',
+    icVal: null,
+    couleur: '#0077b6'
+  },
+  '3': {
+    objectif: 'Contrôler un grand nombre de personnes',
+    priorite: 'Vitesse > Précision',
+    ic: '95% (k=2)',
+    temps: 'Temps de mesure court (1 ou 2 s)',
+    icVal: '0.95',
+    couleur: '#e06c00'
+  }
+};
+
+function updateAide() {
+  var cas = document.getElementById('cas-select').value;
+  var el  = document.getElementById('aide-result');
+  if (!cas) { el.classList.remove('visible'); return; }
+  var a = AIDES[cas];
+  el.innerHTML =
+    '<span class="aide-tag priorite">Priorité</span> <strong>' + a.priorite + '</strong><br>' +
+    '<span class="aide-tag ic-tag">IC conseillé</span> ' + a.ic + '<br>' +
+    '<span class="aide-tag temps">Temps</span> ' + a.temps;
+  el.classList.add('visible');
+  // Appliquer l'IC conseillé si unique
+  if (a.icVal) {
+    selectIC(parseFloat(a.icVal));
+  }
+}
+
+function selectIC(val) {
+  document.getElementById('ic-val').value = val;
+  document.getElementById('pill-95').classList.toggle('selected', val === 0.95);
+  document.getElementById('pill-997').classList.toggle('selected', val === 0.997);
+  if (lastResult) calculer();
+}
+
+// ─────────────────────────────────────────────
+// CALCUL
+// ─────────────────────────────────────────────
+function onInput() {
+  // Recalcul en temps réel si résultats déjà affichés
+  if (lastResult) calculer();
+}
+
+function fmt2(v) {
+  if (v === undefined || v === null || isNaN(v)) return '—';
+  if (v >= 1000) return v.toFixed(0);
+  if (v >= 100)  return v.toFixed(1);
+  if (v >= 10)   return v.toFixed(2);
+  return v.toFixed(3);
+}
+
+function calculer() {
+  var B  = parseFloat(document.getElementById('bdf-val').value);
+  var tB = parseFloat(document.getElementById('bdf-temps').value);
+  var M  = parseFloat(document.getElementById('mes-val').value);
+  var tM = parseFloat(document.getElementById('mes-temps').value);
+  var IC = parseFloat(document.getElementById('ic-val').value);
+
+  if (isNaN(B) || isNaN(tB) || isNaN(M) || isNaN(tM) || B < 0 || tB <= 0 || M < 0 || tM <= 0) {
+    document.getElementById('results').classList.remove('visible');
+    lastResult = null;
+    return;
+  }
+
+  var k  = K_MAP[String(IC)] || 2;
+  var ic_lbl = IC_LABELS[String(IC)] || '95%';
+
+  // Terme sous racine
+  var sigma = Math.sqrt(B * (1/tB + 1/tM));
+
+  // SD et LD
+  var SD = B + k * sigma;
+  var LD = B + 2 * k * sigma;
+
+  // Conclusion
+  var verdict, verdictClass, verdictSub;
+  if (M < SD) {
+    verdict      = '✅ Absence de contamination';
+    verdictClass = 'absent';
+    verdictSub   = 'La mesure M = ' + fmt2(M) + ' est inférieure au seuil de décision SD = ' + fmt2(SD) +
+                   '. Aucune radioactivité ajoutée n\'est détectable au niveau de confiance ' + ic_lbl + '.';
+  } else if (M > LD) {
+    verdict      = '⚠️ Présence de contamination';
+    verdictClass = 'present';
+    verdictSub   = 'La mesure M = ' + fmt2(M) + ' est supérieure à la limite de détection LD = ' + fmt2(LD) +
+                   '. Une radioactivité ajoutée est détectée avec un niveau de confiance ≥ ' + ic_lbl + '.';
+  } else {
+    verdict      = '🟠 Zone indéterminée';
+    verdictClass = 'indeter';
+    verdictSub   = 'La mesure M = ' + fmt2(M) + ' est comprise entre SD (' + fmt2(SD) + ') et LD (' + fmt2(LD) +
+                   '). La présence de radioactivité ajoutée est possible mais ne peut être confirmée. Prolonger le temps de mesure ou augmenter l\'IC.';
+  }
+
+  lastResult = { B, tB, M, tM, IC, k, ic_lbl, sigma, SD, LD, verdict, verdictClass };
+
+  // Affichage
+  document.getElementById('sd-val').textContent = fmt2(SD);
+  document.getElementById('ld-val').textContent = fmt2(LD);
+  document.getElementById('cg-m').textContent   = fmt2(M);
+  document.getElementById('cg-sd').textContent  = fmt2(SD);
+  document.getElementById('cg-ld').textContent  = fmt2(LD);
+
+  var vh = document.getElementById('verdict-hero');
+  vh.className = 'verdict-hero ' + verdictClass;
+  var vt = document.getElementById('verdict-text');
+  vt.className = 'verdict-text ' + verdictClass;
+  vt.textContent = verdict;
+  document.getElementById('verdict-sub').textContent = verdictSub;
+
+  // Formules détaillées
+  var sdEq = 'SD = ' + fmt2(B) + ' + ' + k + ' × √(' + fmt2(B) + ' × (1/' + tB + ' + 1/' + tM + ')) = ' + fmt2(SD);
+  var ldEq = 'LD = ' + fmt2(B) + ' + 2×' + k + ' × √(' + fmt2(B) + ' × (1/' + tB + ' + 1/' + tM + ')) = ' + fmt2(LD);
+  document.getElementById('detail-sd-eq').textContent = sdEq;
+  document.getElementById('detail-ld-eq').textContent = ldEq;
+  document.getElementById('detail-params').innerHTML =
+    '<b>B</b> = Bruit de fond = ' + fmt2(B) + ' cps/µSv/h<br>' +
+    '<b>tB</b> = Temps mesure BdF = ' + tB + ' s<br>' +
+    '<b>M</b> = Mesure = ' + fmt2(M) + ' cps/µSv/h<br>' +
+    '<b>tM</b> = Temps mesure = ' + tM + ' s<br>' +
+    '<b>k</b> = ' + k + '  (IC = ' + ic_lbl + ')<br>' +
+    '<b>σ</b> = √(B × (1/tB + 1/tM)) = ' + sigma.toFixed(4) + '<br>' +
+    '<b>k×σ</b> = ' + (k*sigma).toFixed(4);
+
+  dessinerSchema(B, M, SD, LD, verdictClass);
+
+  document.getElementById('results').classList.add('visible');
+}
+
+// ─────────────────────────────────────────────
+// SCHÉMA SVG AXIAL
+// ─────────────────────────────────────────────
+function dessinerSchema(B, M, SD, LD, verdictClass) {
+  var svg = document.getElementById('schema-svg');
+  var W = 700, H = 140;
+  var PAD_L = 40, PAD_R = 40, AX_Y = 75;
+
+  // Déterminer la plage de l'axe
+  var allVals = [B, M, SD, LD];
+  var vMin = Math.min.apply(null, allVals);
+  var vMax = Math.max.apply(null, allVals);
+  var range = vMax - vMin;
+  if (range === 0) range = 1;
+  var margin = range * 0.25;
+  var axMin = Math.max(0, vMin - margin);
+  var axMax = vMax + margin;
+  var axRange = axMax - axMin;
+
+  function toX(v) {
+    return PAD_L + (v - axMin) / axRange * (W - PAD_L - PAD_R);
+  }
+
+  var out = '';
+
+  // Fond zones
+  var xSD = toX(SD), xLD = toX(LD), xLeft = PAD_L, xRight = W - PAD_R;
+
+  // Zone absence (gauche de SD)
+  out += '<rect x="' + xLeft + '" y="' + (AX_Y - 22) + '" width="' + Math.max(0, xSD - xLeft) + '" height="44" fill="#d4edda" opacity=".45"/>';
+  // Zone indéterminée (entre SD et LD)
+  out += '<rect x="' + xSD + '" y="' + (AX_Y - 22) + '" width="' + Math.max(0, xLD - xSD) + '" height="44" fill="#fff3cd" opacity=".6"/>';
+  // Zone présence (droite de LD)
+  out += '<rect x="' + xLD + '" y="' + (AX_Y - 22) + '" width="' + Math.max(0, xRight - xLD) + '" height="44" fill="#f8d7da" opacity=".5"/>';
+
+  // Axe principal
+  out += '<line x1="' + PAD_L + '" y1="' + AX_Y + '" x2="' + (W - PAD_R) + '" y2="' + AX_Y + '" stroke="#ccd2e3" stroke-width="2"/>';
+  // Flèche droite
+  out += '<polygon points="' + (W - PAD_R) + ',' + (AX_Y - 5) + ' ' + (W - PAD_R + 10) + ',' + AX_Y + ' ' + (W - PAD_R) + ',' + (AX_Y + 5) + '" fill="#ccd2e3"/>';
+
+  // Graduations
+  function tick(v, color, label, topLabel, isMain) {
+    var x = toX(v);
+    var sw = isMain ? 2.5 : 1.5;
+    out += '<line x1="' + x + '" y1="' + (AX_Y - 28) + '" x2="' + x + '" y2="' + (AX_Y + 28) + '" stroke="' + color + '" stroke-width="' + sw + '" stroke-dasharray="' + (isMain ? 'none' : '3,3') + '"/>';
+    if (topLabel) {
+      out += '<text x="' + x + '" y="' + (AX_Y - 34) + '" text-anchor="middle" fill="' + color + '" font-size="10" font-weight="700" font-family="IBM Plex Sans,sans-serif">' + topLabel + '</text>';
+    }
+    out += '<text x="' + x + '" y="' + (AX_Y + 42) + '" text-anchor="middle" fill="' + color + '" font-size="11" font-weight="700" font-family="IBM Plex Mono,monospace">' + fmt2(v) + '</text>';
+    if (label) {
+      out += '<text x="' + x + '" y="' + (AX_Y + 54) + '" text-anchor="middle" fill="' + color + '" font-size="9" font-family="IBM Plex Sans,sans-serif">' + label + '</text>';
+    }
+  }
+
+  // BdF
+  tick(B, '#888', 'BdF', null, false);
+
+  // SD
+  tick(SD, '#0077b6', 'SD', '▲ SD', true);
+
+  // LD
+  tick(LD, '#7209b7', 'LD', '▲ LD', true);
+
+  // Mesure M avec indicateur selon verdict
+  var mColor = verdictClass === 'absent' ? '#28a745' : verdictClass === 'present' ? '#dc3545' : '#fd7e14';
+  var xM = toX(M);
+  out += '<polygon points="' + xM + ',' + (AX_Y - 20) + ' ' + (xM - 8) + ',' + (AX_Y - 36) + ' ' + (xM + 8) + ',' + (AX_Y - 36) + '" fill="' + mColor + '"/>';
+  out += '<text x="' + xM + '" y="' + (AX_Y - 40) + '" text-anchor="middle" fill="' + mColor + '" font-size="10" font-weight="700" font-family="IBM Plex Sans,sans-serif">M</text>';
+  out += '<text x="' + xM + '" y="' + (AX_Y + 42) + '" text-anchor="middle" fill="' + mColor + '" font-size="11" font-weight="700" font-family="IBM Plex Mono,monospace">' + fmt2(M) + '</text>';
+
+  // Labels zones bas de SVG
+  var zoneY = H - 6;
+  if (xSD > PAD_L + 20) {
+    out += '<text x="' + ((PAD_L + xSD) / 2) + '" y="' + zoneY + '" text-anchor="middle" fill="#155724" font-size="9" font-weight="700" font-family="IBM Plex Sans,sans-serif">Absence</text>';
+  }
+  if (xLD > xSD + 20) {
+    out += '<text x="' + ((xSD + xLD) / 2) + '" y="' + zoneY + '" text-anchor="middle" fill="#856404" font-size="9" font-weight="700" font-family="IBM Plex Sans,sans-serif">Indéterminé</text>';
+  }
+  if (W - PAD_R > xLD + 20) {
+    out += '<text x="' + ((xLD + W - PAD_R) / 2) + '" y="' + zoneY + '" text-anchor="middle" fill="#721c24" font-size="9" font-weight="700" font-family="IBM Plex Sans,sans-serif">Présence</text>';
+  }
+
+  svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+  svg.innerHTML = out;
+}
+
+// ─────────────────────────────────────────────
+// EXPORT PRESSE-PAPIER
+// ─────────────────────────────────────────────
+function exporter() {
+  if (!lastResult) return;
+  var r = lastResult;
+  var now = new Date().toLocaleString('fr-FR');
+  var txt =
+    '=== LEVÉE DE DOUTE RADIOLOGIQUE — SD / LD ===\n' +
+    'Date/heure      : ' + now + '\n' +
+    'Méthode         : ISO 11929 / Currie 1968\n\n' +
+    'PARAMÈTRES\n' +
+    'Bruit de fond B : ' + fmt2(r.B) + ' cps ou µSv/h\n' +
+    'Temps BdF tB    : ' + r.tB + ' s\n' +
+    'Mesure M        : ' + fmt2(r.M) + ' cps ou µSv/h\n' +
+    'Temps mesure tM : ' + r.tM + ' s\n' +
+    'IC              : ' + r.ic_lbl + ' (k = ' + r.k + ')\n\n' +
+    'RÉSULTATS\n' +
+    'Seuil de Décision SD  : ' + fmt2(r.SD) + ' cps ou µSv/h\n' +
+    'Limite de Détection LD: ' + fmt2(r.LD) + ' cps ou µSv/h\n\n' +
+    'CONCLUSION\n' +
+    r.verdict + '\n' + r.verdictSub + '\n\n' +
+    'FORMULES\n' +
+    'SD = B + k × √(B×(1/tB+1/tM)) = ' + fmt2(r.B) + ' + ' + r.k + ' × ' + r.sigma.toFixed(4) + ' = ' + fmt2(r.SD) + '\n' +
+    'LD = B + 2k × √(B×(1/tB+1/tM)) = ' + fmt2(r.B) + ' + 2×' + r.k + ' × ' + r.sigma.toFixed(4) + ' = ' + fmt2(r.LD) + '\n\n' +
+    'Mémento IA NRBC — CDT Roparzh Lavanant - CNE Anthony Dubuisson — Levée de doute radiologique SD/LD';
+
+  navigator.clipboard.writeText(txt).then(function() {
+    var btn = document.getElementById('btn-export');
+    btn.textContent = '✔ Copié dans le presse-papier';
+    btn.classList.add('copied');
+    setTimeout(function() {
+      btn.textContent = '📋 Copier le résumé — Main courante / RETEX';
+      btn.classList.remove('copied');
+    }, 2500);
+  });
+}
+</script>
+</body>
+</html>

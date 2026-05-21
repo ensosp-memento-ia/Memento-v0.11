@@ -1,0 +1,2144 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <title>CALCUL EXPOSITION EXTERNE | Mémento IA ENSOSP</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=IBM+Plex+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bleu:#001F8F; --bleu2:#0033cc; --fond:#f5f7fb; --blanc:#fff;
+      --gris:#e9ecf5; --gris2:#ccd2e3; --texte:#111;
+      --vert:#155724; --vert-bg:#d4edda;
+      --orange:#856404; --orange-bg:#fff3cd;
+      --rouge:#721c24; --rouge-bg:#f8d7da;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'IBM Plex Sans',sans-serif;background:var(--fond);color:var(--texte);min-height:100vh;display:flex;flex-direction:column}
+    header{background:var(--bleu);padding:12px 20px;text-align:center;color:white;font-size:16px;font-weight:700;letter-spacing:.5px}
+    .header-sub{font-size:12px;font-weight:400;opacity:.8;margin-top:3px}
+    .tabs{display:flex;background:#e9ecf5;padding:10px;gap:10px}
+    .tab{flex:1;text-align:center;padding:10px 12px;border-radius:25px;color:var(--bleu);font-weight:600;font-size:13px;cursor:pointer;border:none;background:transparent;font-family:'IBM Plex Sans',sans-serif;text-decoration:none;display:inline-block;transition:.2s}
+    .tab.active{background:var(--bleu);color:white}
+    .tab:hover:not(.active){background:#d9dff5}
+    main{max-width:900px;margin:0 auto;padding:20px;flex:1;width:100%}
+    .warn{background:#fff3cd;border-left:4px solid #ff9f1c;padding:14px 16px;border-radius:8px;font-size:13px;color:#856404;margin-bottom:20px;line-height:1.7}
+    .warn strong{display:block;font-size:14px;margin-bottom:6px}
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+    @media(max-width:640px){.grid-2{grid-template-columns:1fr}}
+    .card{background:var(--blanc);padding:22px;border-radius:15px;margin-bottom:20px;box-shadow:0 3px 8px rgba(0,0,0,.05)}
+    .card h2{color:var(--bleu);margin:0 0 16px 0;font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px}
+    label{display:block;font-weight:600;font-size:13px;color:var(--bleu);margin-bottom:5px;margin-top:14px}
+    label:first-child{margin-top:0}
+    input[type=number],input[type=text],select{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--gris2);font-size:15px;font-family:'IBM Plex Sans',sans-serif;color:var(--texte);background:#fff;transition:border-color .2s;appearance:none}
+    input[type=number]{padding-right:72px}
+    input[type=number]:focus,input[type=text]:focus,select:focus{border-color:var(--bleu);outline:none}
+    .iw{position:relative}
+    .iu{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:12px;font-weight:600;color:var(--bleu);background:var(--gris);padding:2px 7px;border-radius:6px;pointer-events:none;white-space:nowrap}
+    .hint{font-size:11px;color:#888;margin-top:5px;line-height:1.5}
+    .src-badge{display:inline-block;font-size:10px;font-weight:600;background:#eef2ff;color:var(--bleu);padding:1px 6px;border-radius:4px;margin-left:4px;vertical-align:middle}
+    .src-badge.verified{background:#d4edda;color:#155724}
+    .src-badge.ia{background:#fff3cd;color:#856404}
+
+    /* Recherche nucléide */
+    .nuc-search{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .nuc-search input[type=text]{flex:1;min-width:160px;padding-right:12px}
+    .btn-sm{padding:10px 14px;background:var(--bleu);color:white;border:none;border-radius:10px;font-family:'IBM Plex Sans',sans-serif;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap;transition:.2s}
+    .btn-sm:hover{background:var(--bleu2)}
+    .btn-sm.secondary{background:#e9ecf5;color:var(--bleu)}
+    .btn-sm.secondary:hover{background:#d9dff5}
+    .btn-sm:disabled{background:#aab;cursor:not-allowed}
+
+    /* Autocomplete */
+    .autocomplete-wrap{position:relative}
+    .autocomplete-list{position:absolute;top:100%;left:0;right:0;background:white;border:1px solid var(--gris2);border-radius:10px;box-shadow:0 6px 16px rgba(0,0,0,.12);z-index:999;max-height:220px;overflow-y:auto;display:none}
+    .autocomplete-list.open{display:block}
+    .ac-item{padding:9px 12px;cursor:pointer;font-size:13px;border-bottom:1px solid #f0f2fa;display:flex;justify-content:space-between;align-items:center}
+    .ac-item:last-child{border-bottom:none}
+    .ac-item:hover,.ac-item.active{background:#eef2ff}
+    .ac-item .ac-name{font-weight:700;color:var(--bleu);font-family:'IBM Plex Mono',monospace}
+    .ac-item .ac-epi{font-size:11px;color:#888;font-family:'IBM Plex Mono',monospace}
+    .ac-item .ac-src{font-size:10px;padding:1px 5px;border-radius:4px;font-weight:600}
+    .ac-item .ac-src.db{background:#d4edda;color:#155724}
+    .ac-item .ac-src.ia{background:#fff3cd;color:#856404}
+
+    /* Résultat nuclide sélectionné */
+    .nuc-selected{display:none;background:#eef2ff;border-radius:12px;padding:14px 16px;margin-top:12px}
+    .nuc-selected.visible{display:block}
+    .nuc-badge{display:inline-block;background:var(--bleu);color:white;font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:15px;padding:4px 14px;border-radius:8px;margin-right:10px}
+    .nuc-epi{font-size:13px;color:var(--bleu);font-weight:600}
+    .nuc-src-lbl{font-size:11px;color:#888;margin-top:4px}
+
+    /* Tableau gammas (fallback IA) */
+    #gamma-table-wrap{display:none;margin-top:12px}
+    #gamma-table-wrap table{width:100%;border-collapse:collapse;font-size:12px;font-family:'IBM Plex Mono',monospace}
+    #gamma-table-wrap thead tr{background:#eef2ff;color:var(--bleu)}
+    #gamma-table-wrap th,#gamma-table-wrap td{padding:6px 8px;text-align:center}
+    #gamma-table-wrap td:first-child{text-align:left;font-weight:600}
+    #gamma-table-wrap .sum-row{background:#001F8F;color:white;font-weight:700}
+
+    .spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.4);border-top-color:white;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .ia-msg{border-radius:8px;padding:10px 14px;font-size:12px;margin-top:8px;display:none;line-height:1.5}
+    .ia-msg.ok{background:var(--vert-bg);color:var(--vert);display:block}
+    .ia-msg.err{background:var(--rouge-bg);color:var(--rouge);display:block}
+    .ia-msg.warn{background:var(--orange-bg);color:var(--orange);display:block}
+
+    /* Slider distance */
+    .slider-wrap{margin-top:6px}
+    input[type=range]{width:100%;accent-color:var(--bleu);cursor:pointer;padding:0;border:none;background:transparent}
+    .slider-labels{display:flex;justify-content:space-between;font-size:12px;color:#666;margin-top:4px}
+    .slider-labels .cur{font-weight:700;color:var(--bleu);font-size:14px}
+
+    /* Toggle durée */
+    .toggle-row{display:flex;align-items:center;gap:8px;padding:12px;background:#f1f3fa;border-radius:10px;cursor:pointer;margin-top:14px}
+    .toggle-row input[type=checkbox]{width:16px;height:16px;accent-color:var(--bleu);cursor:pointer;flex-shrink:0;padding:0;border:none;appearance:auto}
+    .toggle-row span{font-size:13px;font-weight:600;color:var(--bleu)}
+    .duree-inner{background:#f1f3fa;border-radius:12px;padding:16px;margin-top:12px}
+
+    /* Décroissance radioactive */
+    .decay-inner{background:#f1f3fa;border-radius:12px;padding:16px;margin-top:12px}
+    .decay-row{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap}
+    .decay-row > div{flex:1;min-width:140px}
+    .decay-res{background:white;border-radius:15px;box-shadow:0 3px 8px rgba(0,0,0,.05);padding:20px 22px;margin-bottom:20px;border-left:4px solid #5c35a0;display:none}
+    .decay-res.visible{display:block}
+    .decay-res h2{color:var(--bleu);margin:0 0 14px 0;font-size:15px}
+    .decay-metrics{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+    @media(max-width:500px){.decay-metrics{grid-template-columns:1fr 1fr}}
+
+    /* Écran atténuation */
+    .ecran-inner{background:#f1f3fa;border-radius:12px;padding:16px;margin-top:12px}
+    .ecran-row{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap}
+    .ecran-row > div{flex:1;min-width:120px}
+    .ecran-badge{display:inline-block;padding:3px 10px;border-radius:6px;font-size:11px;font-weight:700;margin-top:6px}
+    .ecran-badge.plomb{background:#3d2b1f;color:#f5c842}
+    .ecran-badge.beton{background:#888;color:#fff}
+    .ecran-badge.acier{background:#37474f;color:#cfd8dc}
+    .ecran-badge.eau{background:#0277bd;color:#e1f5fe}
+    .ecran-res{background:white;border-radius:15px;box-shadow:0 3px 8px rgba(0,0,0,.05);padding:20px 22px;margin-bottom:20px;border-left:4px solid #3d2b1f;display:none}
+    .ecran-res.visible{display:block}
+    .ecran-res h2{color:var(--bleu);margin:0 0 14px 0;font-size:15px}
+    .ecran-metrics{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+    @media(max-width:500px){.ecran-metrics{grid-template-columns:1fr 1fr}}
+
+    .btn-generate{width:100%;padding:16px;background:var(--bleu);color:white;border:none;font-size:16px;font-family:'IBM Plex Sans',sans-serif;border-radius:14px;cursor:pointer;font-weight:700;margin-top:20px;transition:all .2s;box-shadow:0 4px 12px rgba(0,31,143,.3)}
+    .btn-generate:hover{background:var(--bleu2);transform:translateY(-2px)}
+    .btn-generate:active{transform:translateY(0)}
+    .btn-generate:disabled{background:#aab;cursor:not-allowed;transform:none;box-shadow:none}
+
+    /* RÉSULTATS */
+    #results{display:none}
+    #results.visible{display:block}
+    .flux-hero{text-align:center;padding:28px 20px;border-radius:15px;background:white;box-shadow:0 3px 8px rgba(0,0,0,.05);margin-bottom:20px;border-top:5px solid var(--bleu);transition:border-color .4s}
+    .flux-lbl{font-size:13px;font-weight:600;color:#666;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+    .flux-val{font-size:clamp(3rem,10vw,4.5rem);font-weight:800;color:var(--bleu);line-height:1;font-family:'IBM Plex Mono',monospace}
+    .flux-unit{font-size:15px;color:#666;margin-top:4px}
+    .flux-verdict{display:inline-block;margin-top:14px;padding:8px 22px;border-radius:25px;font-size:14px;font-weight:700}
+    .puiss-box{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px}
+    @media(max-width:500px){.puiss-box{grid-template-columns:1fr}}
+    .pm{background:white;border-radius:14px;box-shadow:0 3px 8px rgba(0,0,0,.05);padding:16px;text-align:center}
+    .pm-lbl{font-size:10px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+    .pm-val{font-size:1.4rem;font-weight:800;color:var(--bleu);font-family:'IBM Plex Mono',monospace}
+    .pm-unit{font-size:11px;color:#666}
+    .duree-res{background:white;border-radius:15px;box-shadow:0 3px 8px rgba(0,0,0,.05);padding:20px 22px;margin-bottom:20px;border-left:4px solid #ff9f1c;display:none}
+    .duree-res.visible{display:block}
+    .duree-res h2{color:var(--bleu);margin:0 0 14px 0;font-size:15px}
+    .duree-metrics{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .dm{background:#f1f3fa;border-radius:12px;padding:14px;text-align:center}
+    .dm-lbl{font-size:10px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+    .dm-val{font-size:1.7rem;font-weight:800;color:var(--bleu);font-family:'IBM Plex Mono',monospace}
+    .dm-unit{font-size:11px;color:#666}
+    #schema-svg{width:100%;height:auto;display:block}
+    .formule-box{background:#eef2ff;border-radius:12px;padding:18px 20px;margin-bottom:20px}
+    .formule-box h3{color:var(--bleu);margin:0 0 10px 0;font-size:12px;text-transform:uppercase;letter-spacing:.5px;font-weight:700}
+    .feq{font-size:15px;color:var(--bleu);font-weight:700;margin-bottom:10px;font-family:'IBM Plex Mono',monospace}
+    .fpar{font-size:12px;color:#444;line-height:2;font-family:'IBM Plex Mono',monospace}
+    .fpar b{color:var(--bleu)}
+    .sources-box{background:#f1f3fa;border-radius:10px;padding:14px 16px;margin-bottom:20px;font-size:11px;color:#555;line-height:1.8}
+    .sources-box strong{color:var(--bleu)}
+    .btn-export{width:100%;padding:14px;background:#e9ecf5;color:var(--bleu);border:none;font-size:14px;font-family:'IBM Plex Sans',sans-serif;border-radius:14px;cursor:pointer;font-weight:700;transition:all .2s;margin-bottom:20px}
+    .btn-export:hover{background:#d9dff5}
+    .btn-export.copied{background:var(--vert-bg);color:var(--vert)}
+    footer{padding:12px;text-align:center;font-size:12px;color:#444;border-top:1px solid #e0e4f0}
+    @media(max-width:640px){.card{padding:16px}main{padding:14px}}
+
+    /* MODULE COMPARAISON ÉCHELLE DE DOSE */
+    .dose-compare{background:white;border-radius:15px;box-shadow:0 3px 8px rgba(0,0,0,.05);padding:20px 22px;margin-bottom:20px;border-left:4px solid #ff9f1c;display:none}
+    .dose-compare.visible{display:block}
+    .dose-compare h3{color:var(--bleu);margin:0 0 14px 0;font-size:15px;font-weight:700}
+    .dose-compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    @media(max-width:480px){.dose-compare-grid{grid-template-columns:1fr}}
+    .dose-compare-card{border-radius:12px;padding:14px 16px;position:relative}
+    .dose-compare-card.lower{background:#edfff1;border:1px solid #28a745}
+    .dose-compare-card.upper{background:#fff5ec;border:1px solid #e06c00}
+    .dose-compare-arrow{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-bottom:6px}
+    .dose-compare-arrow.lower{color:#155724}
+    .dose-compare-arrow.upper{color:#7a3200}
+    .dose-compare-val{font-family:'IBM Plex Mono',monospace;font-weight:800;font-size:1.3rem;margin-bottom:4px}
+    .dose-compare-val.lower{color:#28a745}
+    .dose-compare-val.upper{color:#e06c00}
+    .dose-compare-badge{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:6px;margin-bottom:6px}
+    .dose-compare-badge.lower{background:#d4edda;color:#155724}
+    .dose-compare-badge.upper{background:#ffe5cc;color:#7a3200}
+    .dose-compare-ex{font-size:12px;color:#444;line-height:1.5}
+    .dose-compare-result{background:#eef2ff;border-radius:10px;padding:10px 14px;margin-bottom:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+    .dose-compare-result-val{font-family:'IBM Plex Mono',monospace;font-weight:800;font-size:1.4rem;color:var(--bleu)}
+    .dose-compare-result-lbl{font-size:12px;color:var(--bleu);font-weight:600}
+
+    /* MODULE ZONAGE OPÉRATIONNEL */
+    .zonage-inner{background:#f1f3fa;border-radius:12px;padding:16px;margin-top:12px}
+    .zonage-row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;margin-bottom:10px}
+    .zonage-row:last-child{margin-bottom:0}
+    .zone-label{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600}
+    .zone-dot{width:14px;height:14px;border-radius:50%;flex-shrink:0;display:inline-block}
+    .zone-dot.rouge{background:#cc1a00}
+    .zone-dot.orange{background:#e06c00}
+    .zone-dot.verte{background:#28a745}
+    .zonage-res{background:white;border-radius:15px;box-shadow:0 3px 8px rgba(0,0,0,.05);padding:20px 22px;margin-bottom:20px;border-left:4px solid #001F8F;display:none}
+    .zonage-res.visible{display:block}
+    .zonage-res h2{color:var(--bleu);margin:0 0 14px 0;font-size:15px}
+    .zonage-grid{display:flex;flex-direction:column;gap:10px}
+    .zone-result-row{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-radius:12px;flex-wrap:wrap;gap:8px}
+    .zone-result-row.rouge{background:#fff0ee;border-left:5px solid #cc1a00}
+    .zone-result-row.orange{background:#fff5ec;border-left:5px solid #e06c00}
+    .zone-result-row.verte{background:#edfff1;border-left:5px solid #28a745}
+    .zone-result-label{font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px}
+    .zone-result-label.rouge{color:#721c24}
+    .zone-result-label.orange{color:#7a3200}
+    .zone-result-label.verte{color:#155724}
+    .zone-result-dist{font-family:'IBM Plex Mono',monospace;font-size:1.5rem;font-weight:800}
+    .zone-result-dist.rouge{color:#cc1a00}
+    .zone-result-dist.orange{color:#e06c00}
+    .zone-result-dist.verte{color:#28a745}
+    .zone-result-debit{font-size:11px;color:#666;margin-top:2px}
+  </style>
+</head>
+<body>
+
+<header>
+  Mémento Opérationnel IA – ENSOSP
+  <div class="header-sub">Calcul exposition externe · Source ponctuelle · Build-up inclus (majorant)</div>
+</header>
+
+<nav class="tabs">
+  <a href="index.html" class="tab">🏠 Accueil</a>
+  <a href="scan.html" class="tab">📷 Lecture QR</a>
+  <a href="create.html" class="tab">📝 Création fiche</a>
+  <a href="nrbc.html" class="tab">⚗️ Espace NRBC</a>
+</nav>
+
+<main>
+
+<div class="warn">
+  <strong>⚠️ Avertissement opérationnel — Outil d'aide au raisonnement tactique uniquement</strong>
+  Modèle <strong>Source ponctuelle</strong> en champ libre. Résultats estimatifs. Tout engagement reste sous l'autorité du COS / du conseiller technique NRBC.
+  <br><br>
+  <strong>Modèle écran :</strong> Atténuation calculée sur le photon le plus pénétrant (E<sub>max</sub>) avec <strong>facteur de build-up inclus</strong> (modèle Taylor — Shultis &amp; Faw). Le build-up majore le débit après écran pour tenir compte des photons diffusés — approche <strong>protectionniste</strong> pour les intervenants. Le résultat après écran est donc volontairement surestimé.
+  <br><br>
+</div>
+
+<div class="grid-2">
+
+  <!-- COLONNE GAUCHE -->
+  <div>
+    <div class="card">
+      <h2>☢️ Source radioactive</h2>
+
+      <label>Radionucléide</label>
+      <div class="autocomplete-wrap">
+        <div class="nuc-search">
+          <input type="text" id="nuclide-input" placeholder="Ex : Cs-137, Co-60, I-131, Ta-182…" oninput="onNuclideInput()" onkeydown="onNuclideKeydown(event)" autocomplete="off">
+          <button class="btn-sm secondary" onclick="clearNuclide()">✕</button>
+          <button class="btn-sm" id="btn-ia" onclick="rechercherIA()" style="display:none">🤖 Recherche IA</button>
+        </div>
+        <div class="autocomplete-list" id="ac-list"></div>
+      </div>
+      <div class="hint">Tapez le nom du radionucléide — les 103 nucléides courants (ICRP-107) s'affichent automatiquement. Pour un nucléide absent, cliquez sur « Recherche IA ».</div>
+
+      <!-- Nucléide sélectionné -->
+      <div class="nuc-selected" id="nuc-selected">
+        <span class="nuc-badge" id="nuc-badge">—</span>
+        <span class="nuc-epi" id="nuc-epi">Σ(Eᵢ·Pᵢ) = — MeV</span>
+        <div class="nuc-src-lbl" id="nuc-src-lbl"></div>
+      </div>
+
+      <!-- Tableau raies gamma (fallback IA) -->
+      <div id="gamma-table-wrap">
+        <table>
+          <thead><tr>
+            <th style="text-align:left">Transition</th>
+            <th>Énergie (MeV)</th>
+            <th>Prob. Pᵢ</th>
+            <th>Eᵢ×Pᵢ (MeV)</th>
+          </tr></thead>
+          <tbody id="gamma-tbody"></tbody>
+          <tfoot>
+            <tr class="sum-row">
+              <td style="text-align:left">SOMME Σ(Eᵢ·Pᵢ)</td>
+              <td colspan="2"></td>
+              <td id="somme-epi">—</td>
+            </tr>
+          </tfoot>
+        </table>
+        <div class="hint" style="margin-top:6px">⚠ Données IA — à vérifier sur ICRP-107 / LNHB avant tout engagement</div>
+      </div>
+      <div class="ia-msg" id="ia-msg"></div>
+
+      <!-- Saisie manuelle Σ(EiPi) -->
+      <label style="margin-top:16px">Σ(Eᵢ·Pᵢ) manuel <span class="src-badge">optionnel</span></label>
+      <div class="iw"><input type="number" id="epi-manuel" min="0" step="any" placeholder="Rempli automatiquement"><span class="iu">MeV</span></div>
+      <div class="hint">Saisie directe si vous connaissez la valeur (écrase la valeur trouvée)</div>
+
+      <label>Activité A</label>
+      <div style="display:flex;gap:8px;align-items:center">
+        <div class="iw" style="flex:1"><input type="number" id="activite" min="0" step="any" value="1"><span class="iu" id="unit-A-label">GBq</span></div>
+        <select id="unite-A" onchange="updateUnitA()" style="width:100px;padding:10px 6px">
+          <option value="Bq">Bq</option>
+          <option value="kBq">kBq</option>
+          <option value="MBq">MBq</option>
+          <option value="GBq" selected>GBq</option>
+          <option value="TBq">TBq</option>
+          <option value="Ci">Ci</option>
+          <option value="mCi">mCi</option>
+          <option value="µCi">µCi</option>
+        </select>
+      </div>
+      <div class="hint">1 Ci = 3,7 × 10¹⁰ Bq</div>
+    </div>
+
+    <div class="card">
+      <h2>🎯 Conditions d'exposition</h2>
+
+      <label>Distance d à la source</label>
+      <div class="slider-wrap">
+        <input type="range" id="distance" min="1" max="300" step="1" value="10" oninput="updateSlider()">
+        <div class="slider-labels">
+          <span>1 m</span>
+          <span class="cur" id="dist-label">10 m</span>
+          <span>300 m</span>
+        </div>
+      </div>
+      <label>Distance (saisie directe)</label>
+      <div class="iw"><input type="number" id="dist-input" min="0.1" max="10000" step="0.1" value="10" oninput="syncDist()"><span class="iu">m</span></div>
+    </div>
+
+    <!-- MODULE DÉBIT DE DOSE BÊTA -->
+    <div class="card" style="border-left:4px solid #e65100">
+      <h2 style="color:#e65100">⚡ Débit de dose bêta sans écran à 10 cm</h2>
+
+      <label>Σ(E<sub>β</sub>·P<sub>β</sub>) <span class="src-badge">optionnel</span></label>
+      <div class="iw"><input type="number" id="ep-beta-manuel" min="0" step="any" placeholder="Rempli automatiquement"><span class="iu">MeV</span></div>
+      <div class="hint">Rempli automatiquement à la sélection du radionucléide (base ICRP-107). Vous pouvez modifier la valeur si nécessaire. Laissez vide si le nucléide n'émet pas de rayonnement β.</div>
+    </div>
+
+  </div>
+
+  <!-- COLONNE DROITE -->
+  <div>
+    <!-- TABLEAU RÉFÉRENCE -->
+    <div class="card">
+      <h2>📋 Radionucléides courants — référence rapide</h2>
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:11px">
+          <thead>
+            <tr style="background:#eef2ff;color:var(--bleu)">
+              <th style="padding:6px 8px;text-align:left">Nucléide</th>
+              <th style="padding:6px 8px;text-align:center">T½</th>
+              <th style="padding:6px 8px;text-align:center">Σ(Eᵢ·Pᵢ) MeV</th>
+              <th style="padding:6px 8px;text-align:center">Usage type</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="background:#f9fafb"><td style="padding:5px 8px;font-weight:600;cursor:pointer;color:var(--bleu)" onclick="selectionnerRapide('Cs-137',0.5650,'30,2 a')">Cs-137 ↗</td><td style="padding:5px 8px;text-align:center">30,2 a</td><td style="padding:5px 8px;text-align:center;font-family:'IBM Plex Mono',monospace">0,5650</td><td style="padding:5px 8px;text-align:center">Industrie / médical</td></tr>
+            <tr><td style="padding:5px 8px;font-weight:600;cursor:pointer;color:var(--bleu)" onclick="selectionnerRapide('Co-60',2.5007,'5,27 a')">Co-60 ↗</td><td style="padding:5px 8px;text-align:center">5,27 a</td><td style="padding:5px 8px;text-align:center;font-family:'IBM Plex Mono',monospace">2,5007</td><td style="padding:5px 8px;text-align:center">Gammagraphie / RT</td></tr>
+            <tr style="background:#f9fafb"><td style="padding:5px 8px;font-weight:600;cursor:pointer;color:var(--bleu)" onclick="selectionnerRapide('I-131',0.3817,'8,02 j')">I-131 ↗</td><td style="padding:5px 8px;text-align:center">8,02 j</td><td style="padding:5px 8px;text-align:center;font-family:'IBM Plex Mono',monospace">0,3817</td><td style="padding:5px 8px;text-align:center">Médical / thyroïde</td></tr>
+            <tr><td style="padding:5px 8px;font-weight:600;cursor:pointer;color:var(--bleu)" onclick="selectionnerRapide('Ir-192',0.7711,'73,8 j')">Ir-192 ↗</td><td style="padding:5px 8px;text-align:center">73,8 j</td><td style="padding:5px 8px;text-align:center;font-family:'IBM Plex Mono',monospace">0,7711</td><td style="padding:5px 8px;text-align:center">Gammagraphie NDT</td></tr>
+            <tr style="background:#f9fafb"><td style="padding:5px 8px;font-weight:600;cursor:pointer;color:var(--bleu)" onclick="selectionnerRapide('Se-75',0.4013,'119,8 j')">Se-75 ↗</td><td style="padding:5px 8px;text-align:center">119,8 j</td><td style="padding:5px 8px;text-align:center;font-family:'IBM Plex Mono',monospace">0,4013</td><td style="padding:5px 8px;text-align:center">Gammagraphie NDT</td></tr>
+            <tr><td style="padding:5px 8px;font-weight:600;cursor:pointer;color:var(--bleu)" onclick="selectionnerRapide('Am-241',0.0353,'432 a')">Am-241 ↗</td><td style="padding:5px 8px;text-align:center">432 a</td><td style="padding:5px 8px;text-align:center;font-family:'IBM Plex Mono',monospace">0,0353</td><td style="padding:5px 8px;text-align:center">Détecteurs fumée</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="hint" style="margin-top:6px">Cliquer sur un nucléide ↗ pour le sélectionner directement</div>
+    </div>
+
+    <!-- MODULE DÉCROISSANCE RADIOACTIVE -->
+    <div class="card">
+      <h2>⚛️ Décroissance radioactive <span style="font-size:12px;font-weight:400;color:#888;margin-left:4px">optionnel</span></h2>
+      <label class="toggle-row" style="margin:0;cursor:pointer">
+        <input type="checkbox" id="toggle-decay" onchange="toggleDecay()">
+        <span>Prendre en compte la décroissance radioactive</span>
+      </label>
+      <div id="bloc-decay" style="display:none">
+        <div class="decay-inner">
+          <div class="decay-row">
+            <div>
+              <label style="margin-top:0">Date de l'activité initiale (A₀)</label>
+              <input type="date" id="decay-date0" style="width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--gris2);font-size:14px;font-family:'IBM Plex Sans',sans-serif;color:var(--texte)">
+            </div>
+            <div>
+              <label style="margin-top:0">Date du jour</label>
+              <input type="date" id="decay-date1" style="width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--gris2);font-size:14px;font-family:'IBM Plex Sans',sans-serif;color:var(--texte)">
+            </div>
+          </div>
+          <div style="margin-top:12px">
+            <label style="margin-top:0">Période T½ <span class="src-badge" id="decay-t-src">base de données</span></label>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <div class="iw" style="flex:1;min-width:140px"><input type="number" id="decay-t-val" min="0.000001" step="any" placeholder="Rempli auto."><span class="iu" id="decay-t-unit-lbl">j</span></div>
+              <select id="decay-t-unit" onchange="updateDecayTUnit()" style="width:90px;padding:10px 6px">
+                <option value="s">s</option>
+                <option value="min">min</option>
+                <option value="h">h</option>
+                <option value="j" selected>j</option>
+                <option value="a">a</option>
+              </select>
+            </div>
+            <div class="hint" id="decay-t-hint">La période est remplie automatiquement depuis la base ICRP-107. Pour un nucléide inconnu, saisissez-la manuellement.</div>
+          </div>
+          <div id="decay-preview" style="display:none;margin-top:12px;background:#eef2ff;border-radius:10px;padding:10px 14px;font-size:12px;color:var(--bleu);font-family:'IBM Plex Mono',monospace;line-height:1.8"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODULE DURÉE -->
+    <div class="card">
+      <h2>⏱️ Dose intégrée <span style="font-size:12px;font-weight:400;color:#888;margin-left:4px">optionnel</span></h2>
+      <label class="toggle-row" style="margin:0;cursor:pointer">
+        <input type="checkbox" id="toggle-duree" onchange="toggleDuree()">
+        <span>Calculer la dose intégrée sur une durée</span>
+      </label>
+      <div id="bloc-duree" style="display:none">
+        <div class="duree-inner">
+          <label style="margin-top:0">Durée d'exposition</label>
+          <div style="display:flex;gap:8px">
+            <div class="iw" style="flex:1"><input type="number" id="duree-val" min="0" step="any" value="60"><span class="iu" id="duree-unit-lbl">min</span></div>
+            <select id="unite-duree" onchange="updateUnitDuree()" style="width:100px;padding:10px 6px">
+              <option value="s">s</option>
+              <option value="min" selected>min</option>
+              <option value="h">h</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODULE ÉCRAN -->
+    <div class="card">
+      <h2>🛡️ Écran d'atténuation <span style="font-size:12px;font-weight:400;color:#888;margin-left:4px">optionnel</span></h2>
+      <label class="toggle-row" style="margin:0;cursor:pointer">
+        <input type="checkbox" id="toggle-ecran" onchange="toggleEcran()">
+        <span>Ajouter un écran (atténuation)</span>
+      </label>
+      <div id="bloc-ecran" style="display:none">
+        <div class="ecran-inner">
+          <div class="ecran-row">
+            <div>
+              <label style="margin-top:0">Matériau de l'écran</label>
+              <select id="ecran-materiau" onchange="updateEcranMateriau()" style="width:100%;padding:10px 8px">
+                <option value="plomb">Plomb (Pb)</option>
+                <option value="beton">Béton ordinaire</option>
+                <option value="acier">Acier (Fe)</option>
+                <option value="eau">Eau (H₂O)</option>
+              </select>
+            </div>
+            <div>
+              <label style="margin-top:0">Épaisseur</label>
+              <div class="iw"><input type="number" id="ecran-ep" min="0.1" max="500" step="0.1" value="5"><span class="iu">cm</span></div>
+            </div>
+          </div>
+          <div id="ecran-info" style="margin-top:10px"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODULE ZONAGE OPÉRATIONNEL -->
+    <div class="card">
+      <h2>🗺️ Zonage opérationnel <span style="font-size:12px;font-weight:400;color:#888;margin-left:4px">optionnel</span></h2>
+      <label class="toggle-row" style="margin:0;cursor:pointer">
+        <input type="checkbox" id="toggle-zonage" onchange="toggleZonage()">
+        <span>Calculer les distances de zonage</span>
+      </label>
+      <div id="bloc-zonage" style="display:none">
+        <div class="zonage-inner">
+          <div class="hint" style="margin-bottom:12px">Saisissez les débits de dose souhaités pour chaque zone. Les zones non renseignées ne seront pas calculées. Le calcul utilise le débit avec écran si un écran est activé.</div>
+
+          <!-- Zone d'exclusion -->
+          <div style="margin-bottom:12px">
+            <div class="zone-label" style="margin-bottom:6px">
+              <span class="zone-dot rouge"></span>
+              Zone d'exclusion
+            </div>
+            <div class="iw">
+              <input type="number" id="zone-rouge-val" min="0" step="any" placeholder="Laisser vide pour ignorer">
+              <span class="iu" id="zone-rouge-unit-lbl">mSv/h</span>
+            </div>
+            <div style="display:flex;gap:6px;margin-top:6px">
+              <select id="zone-rouge-unit" onchange="updateZoneUnitLabel('rouge')" style="width:100%;padding:8px 6px;border-radius:10px;border:1px solid var(--gris2);font-size:13px;font-family:'IBM Plex Sans',sans-serif">
+                <option value="msvh" selected>mSv/h</option>
+                <option value="svh">Sv/h</option>
+                <option value="usvh">µSv/h</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Zone contrôlée -->
+          <div style="margin-bottom:12px">
+            <div class="zone-label" style="margin-bottom:6px">
+              <span class="zone-dot orange"></span>
+              Zone contrôlée
+            </div>
+            <div class="iw">
+              <input type="number" id="zone-orange-val" min="0" step="any" placeholder="Laisser vide pour ignorer">
+              <span class="iu" id="zone-orange-unit-lbl">mSv/h</span>
+            </div>
+            <div style="display:flex;gap:6px;margin-top:6px">
+              <select id="zone-orange-unit" onchange="updateZoneUnitLabel('orange')" style="width:100%;padding:8px 6px;border-radius:10px;border:1px solid var(--gris2);font-size:13px;font-family:'IBM Plex Sans',sans-serif">
+                <option value="msvh" selected>mSv/h</option>
+                <option value="svh">Sv/h</option>
+                <option value="usvh">µSv/h</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Zone de soutien -->
+          <div>
+            <div class="zone-label" style="margin-bottom:6px">
+              <span class="zone-dot verte"></span>
+              Zone de soutien
+            </div>
+            <div class="iw">
+              <input type="number" id="zone-verte-val" min="0" step="any" placeholder="Laisser vide pour ignorer">
+              <span class="iu" id="zone-verte-unit-lbl">mSv/h</span>
+            </div>
+            <div style="display:flex;gap:6px;margin-top:6px">
+              <select id="zone-verte-unit" onchange="updateZoneUnitLabel('verte')" style="width:100%;padding:8px 6px;border-radius:10px;border:1px solid var(--gris2);font-size:13px;font-family:'IBM Plex Sans',sans-serif">
+                <option value="msvh" selected>mSv/h</option>
+                <option value="svh">Sv/h</option>
+                <option value="usvh">µSv/h</option>
+              </select>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div><!-- fin colonne droite -->
+</div><!-- fin grid-2 -->
+
+<!-- Bouton Calculer pleine largeur -->
+<div style="margin-bottom:20px">
+  <button class="btn-generate" id="btn-calc" onclick="calculer()">▶ Calculer le débit de dose</button>
+</div>
+
+<!-- ================================================================ -->
+<!-- RÉSULTATS — pleine largeur                                        -->
+<!-- ================================================================ -->
+<div id="results">
+
+  <!-- Débit de dose libre -->
+  <div class="flux-hero" id="flux-hero">
+    <div class="flux-lbl">Débit de dose <span style="text-transform:none">γ</span> <strong>sans écran</strong> à <span id="res-dist">—</span> m de la source</div>
+    <div class="flux-val" id="res-flux">—</div>
+    <div class="flux-unit" id="res-unit">mSv/h</div>
+    <div class="flux-verdict" id="res-verdict"></div>
+  </div>
+
+  <!-- Débit de dose BÊTA + TOTAL -->
+  <div id="beta-res" style="display:none;background:white;border-radius:15px;box-shadow:0 3px 8px rgba(0,0,0,.05);padding:22px;margin-bottom:20px;border-top:5px solid #e65100">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:16px">
+      <span style="font-size:13px;font-weight:700;color:#e65100;text-transform:uppercase;letter-spacing:.5px">⚡ Débit de dose <span style="text-transform:none">β</span> sans écran à 10 cm</span>
+      <span id="beta-res-src" style="font-size:10px;padding:1px 8px;border-radius:4px;font-weight:600;background:#fff3e0;color:#e65100"></span>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+      <div class="pm" style="border-top:3px solid #e65100">
+        <div class="pm-lbl"><span style="text-transform:none">Ḋ<sub>β</sub></span> sans écran à 10 cm</div>
+        <div class="pm-val" id="r-beta-dose" style="color:#e65100;font-size:1.6rem">—</div>
+        <div class="pm-unit" id="r-beta-dose-unit">mSv/h</div>
+      </div>
+      <div class="pm">
+        <div class="pm-lbl"><span style="text-transform:none">Σ(Eβ·Pβ)</span></div>
+        <div class="pm-val" id="r-beta-ep" style="font-size:1.1rem">—</div>
+        <div class="pm-unit">MeV</div>
+      </div>
+    </div>
+
+    <div id="r-beta-verdict" style="display:inline-block;margin-bottom:12px;padding:7px 18px;border-radius:25px;font-size:13px;font-weight:700"></div>
+
+
+    <div style="margin-top:10px;font-size:11px;color:#888;line-height:1.5">
+      ⚠ Modèle source planaire à 10 cm (ICRP-74 / NCRP-72). Valable source non blindée. Au-delà de 1–2 m dans l'air, le rayonnement bêta est totalement absorbé.
+    </div>
+  </div>
+
+  <!-- TOTAL γ + β -->
+  <div id="total-res" style="display:none;background:linear-gradient(135deg,#001F8F 0%,#0a2fa8 100%);border-radius:15px;box-shadow:0 4px 16px rgba(0,31,143,.25);padding:22px;margin-bottom:20px">
+    <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.8px;margin-bottom:14px">
+      ☢ Débit de dose total <span style="text-transform:none">γ + β</span> à 10 cm de la source
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px">
+      <div style="background:rgba(255,255,255,.1);border-radius:12px;padding:14px;text-align:center">
+        <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px"><span style="text-transform:none">Ḋ<sub>γ</sub></span> (10 cm)</div>
+        <div style="font-size:1.3rem;font-weight:800;color:white;font-family:'IBM Plex Mono',monospace" id="r-total-gamma">—</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.6)" id="r-total-gamma-unit">mSv/h</div>
+      </div>
+      <div style="background:rgba(255,255,255,.1);border-radius:12px;padding:14px;text-align:center">
+        <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px"><span style="text-transform:none">Ḋ<sub>β</sub></span> sans écran (10 cm)</div>
+        <div style="font-size:1.3rem;font-weight:800;color:#ffb74d;font-family:'IBM Plex Mono',monospace" id="r-total-beta">—</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.6)" id="r-total-beta-unit">mSv/h</div>
+      </div>
+      <div style="background:rgba(255,255,255,.18);border-radius:12px;padding:14px;text-align:center;border:2px solid rgba(255,255,255,.4)">
+        <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,.8);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px"><span style="text-transform:none">Ḋ<sub>total</sub> γ+β</span></div>
+        <div style="font-size:1.7rem;font-weight:800;color:white;font-family:'IBM Plex Mono',monospace" id="r-total-dose">—</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.7)" id="r-total-dose-unit">mSv/h</div>
+      </div>
+    </div>
+    <div id="r-total-verdict" style="display:inline-block;padding:7px 20px;border-radius:25px;font-size:13px;font-weight:700;margin-bottom:10px"></div>
+    <div style="font-size:11px;color:rgba(255,255,255,.55);line-height:1.6;margin-top:4px">
+      ⚠ Les deux débits de dose sont calculés à 10 cm de la source. À plus grande distance, seul le rayonnement γ subsiste (le rayonnement β est absorbé par l'air avant 1–2 m).
+    </div>
+  </div>
+
+  <!-- Résumé des paramètres -->
+  <div class="puiss-box">
+    <div class="pm"><div class="pm-lbl">Activité A</div><div class="pm-val" id="r-A">—</div><div class="pm-unit" id="r-A-unit">GBq</div></div>
+    <div class="pm"><div class="pm-lbl"><span style="text-transform:none">Σ(Eᵢ·Pᵢ)</span></div><div class="pm-val" id="r-epi">—</div><div class="pm-unit">MeV</div></div>
+    <div class="pm"><div class="pm-lbl">Distance</div><div class="pm-val" id="r-d">—</div><div class="pm-unit">m</div></div>
+  </div>
+
+  <!-- Résultat décroissance radioactive -->
+  <div class="decay-res" id="decay-res">
+    <h2>⚛️ Activité après décroissance radioactive</h2>
+    <div class="decay-metrics">
+      <div class="dm"><div class="dm-lbl">Activité initiale A₀</div><div class="dm-val" id="r-decay-A0" style="font-size:1.1rem">—</div><div class="dm-unit" id="r-decay-A0-unit">Bq</div></div>
+      <div class="dm"><div class="dm-lbl">Temps écoulé t</div><div class="dm-val" id="r-decay-t" style="font-size:1.1rem">—</div><div class="dm-unit" id="r-decay-t-unit">j</div></div>
+      <div class="dm"><div class="dm-lbl">Période T½</div><div class="dm-val" id="r-decay-T" style="font-size:1.1rem">—</div><div class="dm-unit" id="r-decay-T-unit">j</div></div>
+    </div>
+    <div class="decay-metrics" style="margin-top:12px">
+      <div class="dm" style="background:#eef2ff"><div class="dm-lbl">Facteur de décroissance</div><div class="dm-val" id="r-decay-factor" style="font-size:1.2rem;color:#5c35a0">—</div><div class="dm-unit">2<sup>−t/T½</sup></div></div>
+      <div class="dm" style="background:#eef2ff;grid-column:span 2"><div class="dm-lbl">Activité calculée A(t) utilisée pour le calcul</div><div class="dm-val" id="r-decay-At" style="font-size:1.3rem;color:#5c35a0">—</div><div class="dm-unit" id="r-decay-At-unit">Bq</div></div>
+    </div>
+    <div class="hint" style="margin-top:8px" id="r-decay-hint"></div>
+  </div>
+
+  <!-- Résultat écran (débit après écran) -->
+  <div class="ecran-res" id="ecran-res">
+    <h2>🛡️ Débit de dose après écran</h2>
+    <div class="ecran-metrics">
+      <div class="dm"><div class="dm-lbl">Écran</div><div class="dm-val" id="r-ecran-mat" style="font-size:1rem">—</div><div class="dm-unit" id="r-ecran-ep">— cm</div></div>
+      <div class="dm"><div class="dm-lbl">Facteur global B·e<sup>−μx</sup></div><div class="dm-val" id="r-ecran-fa">—</div><div class="dm-unit" id="r-ecran-fa-unit"></div></div>
+      <div class="dm"><div class="dm-lbl"><span style="text-transform:none">Ḋ</span> après écran</div><div class="dm-val" id="r-ecran-dose">—</div><div class="dm-unit" id="r-ecran-dose-unit">mSv/h</div></div>
+    </div>
+    <div class="hint" style="margin-top:8px" id="r-ecran-hint"></div>
+  </div>
+
+  <!-- Dose intégrée -->
+  <div class="duree-res" id="duree-res">
+    <h2>⏱️ Dose intégrée</h2>
+    <div style="display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:start">
+      <!-- Colonne durée -->
+      <div class="duree-metrics" style="min-width:160px">
+        <div class="dm"><div class="dm-lbl">Durée</div><div class="dm-val" id="r-duree">—</div><div class="dm-unit" id="r-duree-unit">min</div></div>
+      </div>
+      <!-- Colonnes doses -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px" id="dose-cols">
+        <div class="dm">
+          <div class="dm-lbl">Sans écran</div>
+          <div class="dm-val" id="r-dose">—</div>
+          <div class="dm-unit" id="r-dose-unit">mSv</div>
+        </div>
+        <div class="dm" id="dm-dose-ecran" style="display:none">
+          <div class="dm-lbl">Avec écran 🛡️</div>
+          <div class="dm-val" id="r-dose-ecran">—</div>
+          <div class="dm-unit" id="r-dose-ecran-unit">mSv</div>
+        </div>
+      </div>
+    </div>
+    <div class="hint" style="margin-top:8px">Hypothèse : débit constant, distance fixe, pas de décroissance radioactive sur la durée.</div>
+  </div>
+
+  <!-- Comparaison échelle de dose -->
+  <div class="dose-compare" id="dose-compare">
+    <h3>📊 Mise en perspective — Échelle de dose absorbée</h3>
+    <div class="dose-compare-result">
+      <div>
+        <div class="dose-compare-result-lbl">Dose intégrée calculée</div>
+        <div class="dose-compare-result-val" id="dc-result-val">—</div>
+      </div>
+      <div style="font-size:12px;color:#666;flex:1">↔ Comparaison avec des expositions connues pour situer l'ordre de grandeur</div>
+    </div>
+    <div class="dose-compare-grid">
+      <div class="dose-compare-card lower" id="dc-lower">
+        <div class="dose-compare-arrow lower">▼ Référence inférieure</div>
+        <div class="dose-compare-val lower" id="dc-lower-val">—</div>
+        <div class="dose-compare-badge lower" id="dc-lower-badge">—</div>
+        <div class="dose-compare-ex" id="dc-lower-ex">—</div>
+      </div>
+      <div class="dose-compare-card upper" id="dc-upper">
+        <div class="dose-compare-arrow upper">▲ Référence supérieure</div>
+        <div class="dose-compare-val upper" id="dc-upper-val">—</div>
+        <div class="dose-compare-badge upper" id="dc-upper-badge">—</div>
+        <div class="dose-compare-ex" id="dc-upper-ex">—</div>
+      </div>
+    </div>
+    <div class="hint" style="margin-top:10px">Sources : OMS · UNSCEAR · IRSN · AIEA. Doses efficaces corps entier à titre de comparaison uniquement.</div>
+  </div>
+
+  <!-- Résultat zonage opérationnel -->
+  <div class="zonage-res" id="zonage-res">
+    <h2>🗺️ Zonage opérationnel — Distances calculées</h2>
+    <div class="hint" style="margin-bottom:12px" id="zonage-res-hint"></div>
+    <div class="zonage-grid" id="zonage-grid"></div>
+  </div>
+
+  <div class="card">
+    <h2>📊 Vue schématique — Distance à la source</h2>
+    <svg id="schema-svg" viewBox="0 0 700 220" xmlns="http://www.w3.org/2000/svg"></svg>
+  </div>
+
+  <div class="formule-box">
+    <h3>Modèle Source ponctuelle — Loi en 1/r²</h3>
+    <div class="feq">Ḋ [mSv/h] = (1,3 × 10⁻¹⁰ × A [Bq] × Σ(Eᵢ·Pᵢ) [MeV]) / d² [m²]</div>
+    <div style="font-size:12px;color:var(--bleu);font-weight:600;margin-bottom:6px">
+      Résultat directement en mSv/h — la constante intègre la conversion MeV→J, densité de l'air et facteur horaire (w_R = 1 pour photons)
+    </div>
+    <div class="fpar" id="fpar">— lancer le calcul pour afficher les valeurs —</div>
+    <div class="fpar" id="fpar-beta" style="display:none;margin-top:8px;border-top:1px solid #f5cba7;padding-top:8px">— débit bêta non calculé —</div>
+    <div class="hint" style="margin-top:10px;line-height:1.7">
+      <strong style="color:var(--bleu)">Domaine de validité :</strong> source ponctuelle · milieu non atténuant · champ lointain · rayonnement γ et X<br>
+      <strong style="color:var(--bleu)">Constante :</strong> 1,3 × 10⁻¹⁰ mSv·m²·h⁻¹·Bq⁻¹·MeV⁻¹ — d'après Attix (1986)<br>
+      <strong style="color:var(--bleu)">Écran :</strong> Ḋ<sub>écran</sub> = Ḋ<sub>libre</sub> × B(μx) × e<sup>−μx</sup> — Build-up B(μx) = 1 + C·μx·e<sup>D·μx</sup> (Taylor, Shultis &amp; Faw 2000) · μ interpolé NIST XCOM · E<sub>max</sub> du nucléide · Matériaux : Plomb, Béton, Acier (Fe), Eau
+    </div>
+  </div>
+
+  <div class="sources-box">
+    <strong>Sources des données nucléaires :</strong>
+    ICRP Publication 107 — Nuclear Decay Data ·
+    LNHB — Laboratoire National Henri Becquerel ·
+    NNDC / ENSDF — National Nuclear Data Center ·
+    Browne &amp; Firestone — Table of Radioactive Isotopes ·
+    Constante d'après Attix (1986), Introduction to Radiological Physics<br>
+    <strong>Coefficients d'atténuation :</strong> NIST XCOM (Hubbell &amp; Seltzer, 1995) — interpolation log-log — Plomb, Béton (ρ=2,35 g/cm³), Acier/Fe (ρ=7,87 g/cm³), Eau (ρ=1,00 g/cm³)<br>
+    <strong>Build-up (facteur de diffusion) :</strong> Modèle Taylor — Shultis &amp; Faw, <em>Radiation Shielding</em> (2000) ; ANS-6.4.3 — approche majorante pour usage opérationnel
+  </div>
+
+  <button class="btn-export" id="btn-export" onclick="exporter()">📋 Copier le résumé — Main courante / RETEX</button>
+</div>
+
+</main>
+<footer>© ENSOSP — Mémento IA NRBC - Calcul RAD . CDT Roparzh Lavanant - CNE Anthony Dubuisson </footer>
+
+<script>
+// ================================================================
+// BASE DE DONNÉES — 103 NUCLÉIDES (ICRP-107 / LNHB / NNDC/ENSDF)
+// Σ(Eᵢ·Pᵢ) en MeV — gamma + rayons X significatifs
+// ================================================================
+var DB = {
+  // emax = énergie du photon gamma le plus énergétique (MeV) — ICRP-107/NNDC/LNHB
+  // ep   = Σ(Eβ·Pβ) énergie beta pondérée en MeV (β− + β+) — ICRP-107/NNDC/LNHB
+  //        0 = émetteur pur gamma/CE ou alpha (pas de rayonnement β mesurable à 10 cm)
+  // Emetteurs β+/PET — photon d'annihilation 511 keV dominant
+  'C-11'   :{epi:1.022, emax:0.511, ep:0.960, t:'20,4 min', src:'ICRP-107'},
+  'N-13'   :{epi:1.022, emax:0.511, ep:1.199, t:'9,97 min', src:'ICRP-107'},
+  'O-15'   :{epi:1.022, emax:0.511, ep:1.732, t:'122 s',    src:'ICRP-107'},
+  'F-18'   :{epi:0.991, emax:0.511, ep:0.596, t:'109,8 min',src:'ICRP-107'},
+  // Alkali / métaux légers
+  'Na-22'  :{epi:2.200, emax:1.275, ep:0.4914, t:'2,60 a',   src:'ICRP-107'},
+  'Na-24'  :{epi:4.123, emax:2.754, ep:1.390, t:'14,96 h',  src:'ICRP-107'},
+  'Ar-41'  :{epi:1.294, emax:1.294, ep:1.198, t:'1,83 h',   src:'ICRP-107'},
+  'K-40'   :{epi:0.161, emax:1.461, ep:1.168, t:'1,25×10⁹ a',src:'ICRP-107'},
+  'K-42'   :{epi:0.275, emax:1.525, ep:3.247, t:'12,36 h',  src:'ICRP-107'},
+  // Métaux de transition
+  'Cr-51'  :{epi:0.033, emax:0.320, ep:0.00268, t:'27,70 j',  src:'ICRP-107'},
+  'Mn-54'  :{epi:0.836, emax:0.835, ep:0.00268, t:'312,2 j',  src:'ICRP-107'},
+  'Fe-59'  :{epi:1.190, emax:1.292, ep:0.374, t:'44,50 j',  src:'ICRP-107'},
+  'Co-57'  :{epi:0.1218,emax:0.122, ep:0.017, t:'271,8 j',  src:'ICRP-107'},
+  'Co-58'  :{epi:0.7711,emax:0.811, ep:0.0713, t:'70,86 j',  src:'ICRP-107'},
+  'Co-60'  :{epi:2.5006,emax:1.333, ep:0.318, t:'5,27 a',   src:'ICRP-107'},
+  'Cu-64'  :{epi:0.2777,emax:0.511, ep:0.3314, t:'12,70 h',  src:'ICRP-107'},
+  'Zn-65'  :{epi:0.4353,emax:1.116, ep:0.0066, t:'243,9 j',  src:'ICRP-107'},
+  'Ga-67'  :{epi:0.0870,emax:0.300, ep:0.0349, t:'3,26 j',   src:'ICRP-107'},
+  'Se-75'  :{epi:0.4013,emax:0.401, ep:0.0059, t:'119,8 j',  src:'ICRP-107'},
+  // Krypton
+  'Kr-85'  :{epi:0.005, emax:0.514, ep:0.687, t:'10,7 a',   src:'ICRP-107'},
+  'Kr-85m' :{epi:0.162, emax:0.305, ep:0.6636, t:'4,48 h',   src:'ICRP-107'},
+  // Rubidium
+  'Rb-81'  :{epi:0.5266,emax:0.511, ep:0.4578, t:'4,58 h',   src:'ICRP-107'},
+  'Rb-82'  :{epi:0.7765,emax:0.776, ep:1.4105, t:'1,25 min', src:'ICRP-107'},
+  'Rb-83'  :{epi:0.5598,emax:0.520, ep:0.0000, t:'86,2 j',   src:'ICRP-107'},
+  // Strontium
+  'Sr-89'  :{epi:0.009, emax:0.909, ep:1.492, t:'50,53 j',  src:'ICRP-107'},
+  'Sr-92'  :{epi:1.3800,emax:1.384, ep:0.5010, t:'2,71 h',   src:'ICRP-107'},
+  // Yttrium
+  'Y-88'   :{epi:3.372, emax:1.836, ep:0.005, t:'106,6 j',  src:'ICRP-107'},
+  // Zirconium
+  'Zr-89'  :{epi:0.9116,emax:0.909, ep:0.5660, t:'78,4 h',   src:'ICRP-107'},
+  'Zr-95'  :{epi:0.9254,emax:0.757, ep:0.535, t:'64,0 j',   src:'ICRP-107'},
+  // Niobium
+  'Nb-94'  :{epi:1.5748,emax:0.871, ep:0.471, t:'2,03×10⁴ a',src:'ICRP-107'},
+  'Nb-95'  :{epi:0.7659,emax:0.766, ep:0.160, t:'34,99 j',  src:'ICRP-107'},
+  // Molybdène/Technétium
+  'Mo-99/TC-99m/99':{epi:0.231,emax:0.740, ep:1.078, t:'2,75 j', src:'ICRP-107'},
+  'Tc-99m' :{epi:0.127, emax:0.141, ep:0.0000, t:'6,02 h',   src:'ICRP-107'},
+  // Ruthénium
+  'Ru-103' :{epi:0.6643,emax:0.610, ep:0.275, t:'39,26 j',  src:'ICRP-107'},
+  // Palladium
+  'Pd-103' :{epi:0.0210,emax:0.357, ep:0.035, t:'16,99 j',  src:'ICRP-107'},
+  // Argent
+  'Ag-108m':{epi:1.5894,emax:0.723, ep:0.0506, t:'438 a',    src:'ICRP-107'},
+  'Ag-110m':{epi:2.8779,emax:1.505, ep:0.1647, t:'249,8 j',  src:'ICRP-107'},
+  // Cadmium
+  'Cd-109' :{epi:0.0882,emax:0.088, ep:0.072, t:'461,9 j',  src:'ICRP-107'},
+  // Indium
+  'In-111' :{epi:0.3952,emax:0.245, ep:0.027, t:'2,80 j',   src:'ICRP-107'},
+  // Antimoine
+  'Sb-122' :{epi:0.6990,emax:0.564, ep:1.501, t:'2,72 j',   src:'ICRP-107'},
+  'Sb-124' :{epi:1.6980,emax:1.691, ep:0.909, t:'60,2 j',   src:'ICRP-107'},
+  'Sb-125' :{epi:0.4268,emax:0.636, ep:0.2615, t:'2,76 a',   src:'ICRP-107'},
+  // Tellure
+  'Te-123m':{epi:0.0882,emax:0.159, ep:0.080, t:'119,7 j',  src:'ICRP-107'},
+  'Te-127' :{epi:0.0585,emax:0.360, ep:0.694, t:'9,35 h',   src:'ICRP-107'},
+  'Te-129' :{epi:0.2754,emax:0.459, ep:0.5518, t:'69,6 min', src:'ICRP-107'},
+  'Te-132' :{epi:0.2282,emax:0.228, ep:0.834, t:'3,20 j',   src:'ICRP-107'},
+  // Iode
+  'I-123'  :{epi:0.1671,emax:0.529, ep:0.021, t:'13,22 h',  src:'ICRP-107'},
+  'I-124'  :{epi:1.5434,emax:1.691, ep:0.405, t:'4,18 j',   src:'ICRP-107'},
+  'I-125'  :{epi:0.0318,emax:0.035, ep:0.011, t:'59,4 j',   src:'ICRP-107'},
+  'I-129'  :{epi:0.0418,emax:0.040, ep:0.153, t:'1,57×10⁷ a',src:'ICRP-107'},
+  'I-131'  :{epi:0.361, emax:0.637, ep:0.5803, t:'8,02 j',   src:'ICRP-107'},
+  // Xénon
+  'Xe-131m':{epi:0.0278,emax:0.164, ep:0.0000, t:'11,93 j',  src:'ICRP-107'},
+  'Xe-133' :{epi:0.0458,emax:0.081, ep:0.3735, t:'5,25 j',   src:'ICRP-107'},
+  'Xe-133m':{epi:0.0377,emax:0.233, ep:0.1733, t:'2,19 j',   src:'ICRP-107'},
+  'Xe-135' :{epi:0.2496,emax:0.250, ep:0.3068, t:'9,14 h',   src:'ICRP-107'},
+  'Xe-135m':{epi:0.5260,emax:0.526, ep:0.0000, t:'15,3 min', src:'ICRP-107'},
+  // Césium / Baryum
+  'Cs-131' :{epi:0.0302,emax:0.030, ep:0.0023, t:'9,69 j',   src:'ICRP-107'},
+  'Cs-134' :{epi:1.5672,emax:1.365, ep:0.497, t:'2,06 a',   src:'ICRP-107'},
+  'Cs-137/Ba-137m':{epi:0.5650,emax:0.662, ep:0.60153, t:'30,2 a',src:'ICRP-107'},
+  'Ba-133' :{epi:0.3227,emax:0.356, ep:0.0292, t:'10,52 a',  src:'ICRP-107'},
+  'Ba-140' :{epi:0.5330,emax:1.596, ep:1.10995, t:'12,75 j',  src:'ICRP-107'},
+  // Lanthane / Cérium / Praséodyme
+  'La-140' :{epi:2.5310,emax:2.522, ep:1.06742, t:'1,68 j',   src:'ICRP-107'},
+  'Ce-141' :{epi:0.1454,emax:0.145, ep:0.5012, t:'32,50 j',  src:'ICRP-107'},
+  'Ce-144/Pr-144m et Pr-144' :{epi:0.0217,emax:0.696, ep:3.2225, t:'284,3 j',  src:'ICRP-107'},
+  // Prométhium
+  'Pm-147' :{epi:0.0000,emax:0.121, ep:0.225, t:'2,62 a',   src:'ICRP-107'},
+  // Europium / Samarium
+  'Eu-152' :{epi:1.5996,emax:1.408, ep:0.251, t:'13,52 a',  src:'ICRP-107'},
+  'Eu-154' :{epi:1.4214,emax:1.274, ep:0.6034, t:'8,59 a',   src:'ICRP-107'},
+  'Eu-155' :{epi:0.1326,emax:0.105, ep:0.151, t:'4,75 a',   src:'ICRP-107'},
+  'Sm-153' :{epi:0.1038,emax:0.103, ep:0.701, t:'1,95 j',   src:'ICRP-107'},
+  // Terre rares
+  'Dy-165' :{epi:0.0962,emax:0.095, ep:0.4045, t:'2,33 h',   src:'ICRP-107'},
+  'Ho-166' :{epi:0.0817,emax:0.081, ep:0.6652, t:'26,8 h',   src:'ICRP-107'},
+  'Yb-169' :{epi:0.3076,emax:0.308, ep:0.0000, t:'32,0 j',   src:'ICRP-107'},
+  'Lu-177' :{epi:0.033, emax:0.208, ep:0.460, t:'6,65 j',   src:'ICRP-107'},
+  'Lu-177m/Lu-177':{epi:0.249,emax:0.419, ep:0.252, t:'160,4 j',src:'ICRP-107'},
+  // Tungstène / Rhénium
+  'Re-188' :{epi:0.1557,emax:0.155, ep:2.0155, t:'17 h',  src:'ICRP-107'},
+  // Iridium
+  'Ir-192' :{epi:0.536, emax:0.612, ep:0.558, t:'73,8 j',   src:'ICRP-107'},
+  // Thallium
+  'Tl-201' :{epi:0.1199,emax:0.167, ep:0.0000, t:'3,04 j',   src:'ICRP-107'},
+  // Plomb / Bismuth
+  'Pb-210' :{epi:0.013, emax:0.803, ep:1.205, t:'22,3 a',   src:'ICRP-107'},
+  'Bi-210':{epi:0.000, emax:0.000, ep:1.161, t:'5,01 j', src:'ICRP-107'},
+  'Bi-213' :{epi:0.157, emax:1.567, ep:1.259, t:'45,6 min', src:'ICRP-107'},
+  // Radium
+  'Ra-223' :{epi:0.109, emax:0.832, ep:2.726, t:'11,4 j',   src:'ICRP-107'},
+  'Ra-224' :{epi:1.165, emax:2.615, ep:1.868, t:'3,66 j',   src:'ICRP-107'},
+  'Ra-226' :{epi:0.569, emax:1.764, ep:0.985, t:'1600 a',   src:'ICRP-107'},
+  // Thorium
+  'Th-232' :{epi:0.00146,emax:0.012, ep:0.0000, t:'1,40×10¹⁰ a',src:'ICRP-107'},
+  // Protactinium
+  'Pa-233' :{epi:0.3936,emax:0.415, ep:0.1924, t:'26,97 j',  src:'ICRP-107'},
+  // Uranium
+  'U-235'  :{epi:0.127, emax:0.186, ep:0.282, t:'7,04×10⁸ a',src:'ICRP-107'},
+  'U-238'  :{epi:0.029, emax:1.690, ep:2.281, t:'4,47×10⁹ a',src:'ICRP-107'},
+  // Neptunium / Plutonium
+  'Np-237' :{epi:0.1934,emax:0.312, ep:0.247, t:'2,14×10⁶ a',src:'ICRP-107'},
+  'Pu-239' :{epi:0.00169,emax:0.113, ep:0.0000, t:'2,41×10⁴ a',src:'ICRP-107'},
+  // Américium / Curium
+  'Am-241' :{epi:0.0281,emax:0.060, ep:0.0202, t:'432,7 a',  src:'ICRP-107'},
+  'Cm-244' :{epi:0.0057,emax:0.057, ep:0.00632, t:'18,1 a',   src:'ICRP-107'}
+};
+
+// ================================================================
+// ÉTAT GLOBAL
+// ================================================================
+var selectedNuclide = null; // { name, epi, source:'db'|'ia', t }
+var gammaDataIA = null;
+var lastR = null;
+var acIndex = -1;
+
+// ================================================================
+// AUTOCOMPLETE
+// ================================================================
+function onNuclideInput(){
+  var q = document.getElementById('nuclide-input').value.trim().toUpperCase();
+  var list = document.getElementById('ac-list');
+  document.getElementById('btn-ia').style.display = 'none';
+  selectedNuclide = null;
+  resetResultatNuclide();
+  gammaDataIA = null;
+  document.getElementById('gamma-table-wrap').style.display = 'none';
+  document.getElementById('ia-msg').className = 'ia-msg';
+  acIndex = -1;
+
+  if(q.length < 1){ list.className='autocomplete-list'; return; }
+
+  var keys = Object.keys(DB).filter(function(k){
+    return k.toUpperCase().indexOf(q) === 0;
+  }).concat(Object.keys(DB).filter(function(k){
+    return k.toUpperCase().indexOf(q) > 0;
+  }));
+
+  // Déduplique
+  keys = keys.filter(function(v,i,a){ return a.indexOf(v)===i; }).slice(0,12);
+
+  if(!keys.length){
+    list.innerHTML = '<div class="ac-item" style="color:#888;cursor:default">Aucun résultat dans la base — <strong>utiliser la recherche IA</strong></div>';
+    list.className = 'autocomplete-list open';
+    document.getElementById('btn-ia').style.display = '';
+    return;
+  }
+
+  list.innerHTML = keys.map(function(k,i){
+    var d = DB[k];
+    return '<div class="ac-item" data-key="'+k+'" data-idx="'+i+'" onclick="selectionnerDB(\''+k+'\')">' +
+      '<span class="ac-name">'+k+'</span>' +
+      '<span style="display:flex;gap:6px;align-items:center">' +
+        '<span class="ac-epi">'+d.epi.toFixed(4)+' MeV</span>' +
+        '<span class="ac-src db">'+d.src+'</span>' +
+      '</span></div>';
+  }).join('');
+  list.className = 'autocomplete-list open';
+}
+
+function onNuclideKeydown(e){
+  var list = document.getElementById('ac-list');
+  var items = list.querySelectorAll('.ac-item[data-key]');
+  if(!items.length) return;
+  if(e.key==='ArrowDown'){ e.preventDefault(); acIndex=Math.min(acIndex+1,items.length-1); highlightAC(items); }
+  else if(e.key==='ArrowUp'){ e.preventDefault(); acIndex=Math.max(acIndex-1,0); highlightAC(items); }
+  else if(e.key==='Enter' && acIndex>=0){ e.preventDefault(); items[acIndex].click(); }
+  else if(e.key==='Escape'){ list.className='autocomplete-list'; }
+}
+
+function highlightAC(items){
+  items.forEach(function(el,i){ el.classList.toggle('active', i===acIndex); });
+  if(acIndex>=0) items[acIndex].scrollIntoView({block:'nearest'});
+}
+
+function selectionnerDB(key){
+  var d = DB[key];
+  document.getElementById('nuclide-input').value = key;
+  document.getElementById('ac-list').className = 'autocomplete-list';
+  document.getElementById('btn-ia').style.display = 'none';
+  document.getElementById('epi-manuel').value = d.epi;
+  selectedNuclide = {name:key, epi:d.epi, emax:d.emax||null, ep:d.ep||0, source:'db', t:d.t};
+  afficherNuclideSelectionne();
+  afficherEnergieBeta();
+  remplirPeriodeDepuisNuclide();
+}
+
+function selectionnerRapide(name, epi, t){
+  var d = DB[name] || {};
+  document.getElementById('nuclide-input').value = name;
+  document.getElementById('epi-manuel').value = epi;
+  document.getElementById('ac-list').className = 'autocomplete-list';
+  document.getElementById('btn-ia').style.display = 'none';
+  selectedNuclide = {name:name, epi:epi, emax:d.emax||null, ep:d.ep||0, source:'db', t:t};
+  afficherNuclideSelectionne();
+  afficherEnergieBeta();
+  remplirPeriodeDepuisNuclide();
+  gammaDataIA = null;
+  document.getElementById('gamma-table-wrap').style.display = 'none';
+}
+
+function afficherNuclideSelectionne(){
+  if(!selectedNuclide) return;
+  document.getElementById('nuc-badge').textContent = selectedNuclide.name;
+  document.getElementById('nuc-epi').textContent = 'Σ(Eᵢ·Pᵢ) = ' + selectedNuclide.epi.toFixed(4) + ' MeV';
+  var srcTxt = selectedNuclide.source === 'db'
+    ? '✅ Base opérationnelle — donnée vérifiée · T½ = ' + (selectedNuclide.t||'—')
+    : '⚠ Donnée IA — à vérifier avant tout engagement opérationnel';
+  document.getElementById('nuc-src-lbl').textContent = srcTxt;
+  document.getElementById('nuc-selected').className = 'nuc-selected visible';
+}
+
+function resetResultatNuclide(){
+  document.getElementById('nuc-selected').className = 'nuc-selected';
+  document.getElementById('epi-manuel').value = '';
+}
+
+function clearNuclide(){
+  document.getElementById('nuclide-input').value = '';
+  document.getElementById('ac-list').className = 'autocomplete-list';
+  document.getElementById('btn-ia').style.display = 'none';
+  selectedNuclide = null;
+  gammaDataIA = null;
+  resetResultatNuclide();
+  document.getElementById('gamma-table-wrap').style.display = 'none';
+  document.getElementById('ia-msg').className = 'ia-msg';
+  document.getElementById('epi-manuel').value = '';
+  afficherEnergieBeta();
+}
+
+function afficherEnergieBeta(){
+  var champ = document.getElementById('ep-beta-manuel');
+  if(!selectedNuclide){
+    // Aucun nucléide sélectionné : vider le champ
+    champ.value = '';
+    champ.style.background  = '';
+    champ.style.borderColor = '';
+    champ.placeholder = 'Rempli automatiquement';
+    return;
+  }
+  if(selectedNuclide.source === 'db'){
+    var ep = selectedNuclide.ep || 0;
+    champ.value = ep > 0 ? ep : '';
+    if(ep > 0){
+      champ.style.background  = '#fff3e0';
+      champ.style.borderColor = '#e65100';
+      champ.placeholder = 'Rempli automatiquement';
+    } else {
+      champ.value = '';
+      champ.style.background  = '';
+      champ.style.borderColor = '';
+      champ.placeholder = 'Émetteur non β — saisie si nécessaire';
+    }
+  } else {
+    // Nucléide IA : vider, laisser libre
+    champ.value = '';
+    champ.style.background  = '';
+    champ.style.borderColor = '';
+    champ.placeholder = 'Saisissez Σ(Eβ·Pβ) en MeV (ICRP-107 / NNDC)';
+  }
+}
+
+// Fermer la liste si clic ailleurs
+document.addEventListener('click', function(e){
+  if(!e.target.closest('.autocomplete-wrap')){
+    document.getElementById('ac-list').className = 'autocomplete-list';
+  }
+});
+
+// ================================================================
+// RECHERCHE IA (fallback pour nucléides hors base)
+// Ouvre ChatGPT dans un nouvel onglet avec le prompt pré-rempli
+// ================================================================
+function rechercherIA(){
+  var nuc = document.getElementById('nuclide-input').value.trim();
+  if(!nuc){ alert('Saisissez d\'abord le nom du radionucléide.'); return; }
+
+  var prompt = 'tu es expert en radioprotection, donne moi la somme de toutes les énergies des photons gamma et X émis sans exception (même X d\'annihilation et réarrangement) pour le radionucléide ' + nuc + '. Tu fera une comparaison de la valeur calculée avec la valeur officielle ICRP et LNHB. Tu cherchera aussi la valeur "emax" correspondant à la valeur maximale d\'énergie émise par le photon pour calculer le facteur d\'atténuation. Tu recherchera aussi avec les mêmes sources officielle la somme des énergies Beta (B+, B- et Auger). Enfin tu indiqueras aussi la période radioactive T ou demi-vie du radionucléide. Tu présentera le tout clairement dans un tableau.';
+
+  var url = 'https://chatgpt.com/?q=' + encodeURIComponent(prompt);
+  window.open(url, '_blank');
+
+  // Message d'instruction affiché sous le bouton
+  showIAMsg('warn',
+    '↗ ChatGPT ouvert dans un nouvel onglet pour « ' + nuc + ' ».\n' +
+    'Une fois la valeur Σ(Eᵢ·Pᵢ) obtenue, saisissez-la dans le champ « Σ(Eᵢ·Pᵢ) manuel » ci-dessous pour lancer le calcul.'
+  );
+}
+
+function showIAMsg(type, msg){
+  var el = document.getElementById('ia-msg');
+  el.textContent = msg; el.className = 'ia-msg '+type;
+}
+
+function afficherTableauGamma(){
+  if(!gammaDataIA) return;
+  var tbody = document.getElementById('gamma-tbody');
+  tbody.innerHTML = '';
+  gammaDataIA.gammas.forEach(function(g,i){
+    var tr = document.createElement('tr');
+    tr.style.background = i%2===0 ? '#f9fafb' : 'white';
+    var epi = g.E * g.P;
+    tr.innerHTML = '<td style="padding:5px 8px">'+g.label+'</td>'+
+      '<td style="padding:5px 8px;text-align:center">'+g.E.toFixed(4)+'</td>'+
+      '<td style="padding:5px 8px;text-align:center">'+g.P.toFixed(4)+'</td>'+
+      '<td style="padding:5px 8px;text-align:center;font-weight:600">'+epi.toFixed(5)+'</td>';
+    tbody.appendChild(tr);
+  });
+  document.getElementById('somme-epi').textContent = gammaDataIA.somme.toFixed(5)+' MeV';
+  document.getElementById('gamma-table-wrap').style.display = '';
+}
+
+// ================================================================
+// UTILS
+// ================================================================
+function updateSlider(){
+  var v = document.getElementById('distance').value;
+  document.getElementById('dist-label').textContent = v+' m';
+  document.getElementById('dist-input').value = v;
+}
+function syncDist(){
+  var v = parseFloat(document.getElementById('dist-input').value)||10;
+  document.getElementById('distance').value = Math.min(300,v);
+  document.getElementById('dist-label').textContent = v+' m';
+}
+function updateUnitA(){ document.getElementById('unit-A-label').textContent = document.getElementById('unite-A').value; }
+function updateUnitDuree(){ document.getElementById('duree-unit-lbl').textContent = document.getElementById('unite-duree').value; }
+function toggleDuree(){ document.getElementById('bloc-duree').style.display = document.getElementById('toggle-duree').checked ? '' : 'none'; }
+
+// ================================================================
+// DÉCROISSANCE RADIOACTIVE
+// ================================================================
+
+// Convertit la chaîne t de la base (ex: '30,2 a', '8,02 j', '6,02 h', '20,4 min', '122 s')
+// en jours (nombre flottant). Retourne null si échec.
+function parseHalfLifeToDays(tStr) {
+  if (!tStr) return null;
+  // Nettoyer : remplacer virgule décimale FR, supprimer exposants Unicode comme ×10⁹
+  var s = tStr.replace(/,/g, '.').trim();
+  // Extraire coefficient × 10^n (écriture '1,25×10⁹ a' → 1.25e9)
+  var expMatch = s.match(/^([\d.]+)\s*[×x]\s*10([⁰¹²³⁴⁵⁶⁷⁸⁹\d\+\-]+)/i);
+  var coeff = 1;
+  if (expMatch) {
+    coeff = parseFloat(expMatch[1]);
+    // Convertir exposants Unicode en chiffres ASCII
+    var expStr = expMatch[2].replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]/g, function(c){
+      return '0123456789'['⁰¹²³⁴⁵⁶⁷⁸⁹'.indexOf(c)];
+    });
+    coeff = coeff * Math.pow(10, parseInt(expStr));
+    s = s.replace(expMatch[0], String(coeff));
+  }
+  var val = parseFloat(s);
+  if (isNaN(val)) return null;
+  if (/a\b/.test(tStr))   return val * 365.25;
+  if (/j\b/.test(tStr))   return val;
+  if (/h\b/.test(tStr))   return val / 24;
+  if (/min\b/.test(tStr)) return val / 1440;
+  if (/s\b/.test(tStr))   return val / 86400;
+  return null;
+}
+
+// Convertit la période saisie dans le champ manuel en jours
+function decayTManualToDays() {
+  var val = parseFloat(document.getElementById('decay-t-val').value);
+  var unit = document.getElementById('decay-t-unit').value;
+  if (isNaN(val) || val <= 0) return null;
+  var conv = {s: 1/86400, min: 1/1440, h: 1/24, j: 1, a: 365.25};
+  return val * (conv[unit] || 1);
+}
+
+function updateDecayTUnit() {
+  document.getElementById('decay-t-unit-lbl').textContent = document.getElementById('decay-t-unit').value;
+  updateDecayPreview();
+}
+
+function toggleDecay() {
+  var on = document.getElementById('toggle-decay').checked;
+  document.getElementById('bloc-decay').style.display = on ? 'block' : 'none';
+  if (on) {
+    // Remplir la date du jour
+    var today = new Date();
+    var yyyy = today.getFullYear();
+    var mm = String(today.getMonth()+1).padStart(2,'0');
+    var dd2 = String(today.getDate()).padStart(2,'0');
+    document.getElementById('decay-date1').value = yyyy+'-'+mm+'-'+dd2;
+    // Remplir la période depuis le nucléide sélectionné
+    remplirPeriodeDepuisNuclide();
+    updateDecayPreview();
+  }
+}
+
+// Appelé aussi quand on sélectionne un nouveau nucléide
+function remplirPeriodeDepuisNuclide() {
+  if (!document.getElementById('toggle-decay').checked) return;
+  var srcBadge = document.getElementById('decay-t-src');
+  var hint = document.getElementById('decay-t-hint');
+  if (selectedNuclide && selectedNuclide.t) {
+    var T_j = parseHalfLifeToDays(selectedNuclide.t);
+    if (T_j !== null) {
+      // Choisir l'unité la plus lisible
+      var displayVal, displayUnit;
+      if (T_j >= 365.25*2)        { displayVal = (T_j/365.25); displayUnit = 'a'; }
+      else if (T_j >= 1)          { displayVal = T_j;           displayUnit = 'j'; }
+      else if (T_j >= 1/24)       { displayVal = T_j*24;        displayUnit = 'h'; }
+      else if (T_j >= 1/1440)     { displayVal = T_j*1440;      displayUnit = 'min'; }
+      else                        { displayVal = T_j*86400;     displayUnit = 's'; }
+      document.getElementById('decay-t-val').value = parseFloat(displayVal.toPrecision(5));
+      document.getElementById('decay-t-unit').value = displayUnit;
+      document.getElementById('decay-t-unit-lbl').textContent = displayUnit;
+      srcBadge.textContent = 'ICRP-107 — ' + selectedNuclide.t;
+      srcBadge.style.background = '#d4edda'; srcBadge.style.color = '#155724';
+      hint.textContent = 'Période remplie automatiquement depuis la base ICRP-107 · T½ = ' + selectedNuclide.t + '. Modifiable manuellement si besoin.';
+    }
+  } else {
+    document.getElementById('decay-t-val').value = '';
+    srcBadge.textContent = 'saisie manuelle requise';
+    srcBadge.style.background = '#fff3cd'; srcBadge.style.color = '#856404';
+    hint.textContent = 'Nucléide inconnu ou saisi manuellement — saisissez la période T½ ci-dessus.';
+  }
+  updateDecayPreview();
+}
+
+function updateDecayPreview() {
+  var prev = document.getElementById('decay-preview');
+  var d0 = document.getElementById('decay-date0').value;
+  var d1 = document.getElementById('decay-date1').value;
+  if (!d0 || !d1) { prev.style.display = 'none'; return; }
+  var t_j = (new Date(d1) - new Date(d0)) / 86400000;
+  if (isNaN(t_j)) { prev.style.display = 'none'; return; }
+  var T_j = decayTManualToDays();
+  var A0_Bq = activiteEnBq();
+  if (!T_j || T_j <= 0 || !A0_Bq) { prev.style.display = 'none'; return; }
+  var ratio = Math.pow(2, -t_j / T_j);
+  var At = A0_Bq * ratio;
+  var fd0 = formatActivite(A0_Bq);
+  var fdt = formatActivite(At);
+  var signe = t_j < 0 ? '⚠ Date antérieure — extrapolation dans le futur' : '';
+  prev.style.display = 'block';
+  prev.innerHTML =
+    't = <b>'+Math.abs(t_j).toFixed(2)+'</b> j' + (t_j < 0 ? ' (négatif — extrapolation)' : '') + ' &nbsp;·&nbsp; ' +
+    'T½ = <b>'+T_j.toFixed(4)+'</b> j<br>' +
+    'Facteur = 2<sup>−'+t_j.toFixed(2)+'/'+T_j.toFixed(4)+'</sup> = <b>'+ratio.toPrecision(4)+'</b><br>' +
+    'A(t) = <b>'+fdt.val+' '+fdt.unit+'</b> (A₀ = '+fd0.val+' '+fd0.unit+')' +
+    (signe ? '<br><span style="color:#856404">'+signe+'</span>' : '');
+}
+
+function formatActivite(Bq) {
+  var u = document.getElementById('unite-A').value;
+  var conv = {Bq:1,kBq:1e3,MBq:1e6,GBq:1e9,TBq:1e12,Ci:3.7e10,mCi:3.7e7,'µCi':3.7e4};
+  var f = Bq / (conv[u]||1);
+  // Choisir unité lisible
+  if (Math.abs(f) >= 1000 || Math.abs(f) < 0.001) {
+    // Reformatter en GBq ou TBq
+    if (Bq >= 1e12)      return {val:(Bq/1e12).toPrecision(4), unit:'TBq'};
+    if (Bq >= 1e9)       return {val:(Bq/1e9).toPrecision(4),  unit:'GBq'};
+    if (Bq >= 1e6)       return {val:(Bq/1e6).toPrecision(4),  unit:'MBq'};
+    if (Bq >= 1e3)       return {val:(Bq/1e3).toPrecision(4),  unit:'kBq'};
+    return {val:Bq.toPrecision(4), unit:'Bq'};
+  }
+  return {val:f.toPrecision(4), unit:u};
+}
+
+// Calcule la décroissance et retourne un objet résultat, ou null si désactivé
+function calculerDecroissance(A0_Bq) {
+  if (!document.getElementById('toggle-decay').checked) return null;
+  var d0 = document.getElementById('decay-date0').value;
+  var d1 = document.getElementById('decay-date1').value;
+  if (!d0 || !d1) { alert('Saisissez les deux dates pour la décroissance radioactive.'); return 'err'; }
+  var t_j = (new Date(d1) - new Date(d0)) / 86400000;
+  if (isNaN(t_j)) { alert('Dates invalides.'); return 'err'; }
+  var T_j = decayTManualToDays();
+  if (!T_j || T_j <= 0) { alert('Période T½ invalide ou manquante. Saisissez-la manuellement.'); return 'err'; }
+  var ratio = Math.pow(2, -t_j / T_j);
+  var At = A0_Bq * ratio;
+  var unit = document.getElementById('decay-t-unit').value;
+  var tVal = parseFloat(document.getElementById('decay-t-val').value);
+  return {
+    A0: A0_Bq,
+    At: At,
+    ratio: ratio,
+    t_j: t_j,
+    T_j: T_j,
+    T_val: tVal,
+    T_unit: unit,
+    date0: d0,
+    date1: d1
+  };
+}
+
+// ================================================================
+// ÉCRAN — Coefficients d'atténuation linéiques μ (cm⁻¹)
+// Données : NIST XCOM — interpolation log-log
+// ================================================================
+var MU_DATA = {
+  plomb: {
+    rho: 11.35,
+    label: 'Plomb (Pb)',
+    muRho: [
+    [0.05,8.041],[0.08,2.419],[0.10,5.549],[0.15,2.014],[0.20,0.9985],
+    [0.30,0.4031],[0.40,0.2323],[0.50,0.1614],[0.60,0.1248],[0.80,0.08870],
+    [1.00,0.07102],[1.25,0.05876],[1.50,0.05222],[2.00,0.04606],[3.00,0.04234],
+    [4.00,0.04197],[5.00,0.04272],[6.00,0.04391],[8.00,0.04675],[10.0,0.04972]
+    ]
+  },
+  beton: {
+    rho: 2.35,
+    label: 'Béton ordinaire',
+    muRho: [
+      [0.05,0.3575],[0.08,0.2389],[0.10,0.1715],[0.15,0.1234],[0.20,0.1068],
+      [0.30,0.09454],[0.40,0.08651],[0.50,0.08148],[0.60,0.07754],[0.80,0.07212],
+      [1.00,0.06795],[1.25,0.06323],[1.50,0.05942],[2.00,0.05334],[3.00,0.04541],
+      [4.00,0.04011],[5.00,0.03647],[6.00,0.03381],[8.00,0.03000],[10.0,0.02729]
+    ]
+  },
+  acier: {
+    rho: 7.87,
+    label: 'Acier (Fe)',
+    // Coefficients μ/ρ (cm²/g) — NIST XCOM — fer (Z=26) ρ = 7,87 g/cm³
+    muRho: [
+      [0.05,7.880],[0.06,4.567],[0.08,1.835],[0.10,0.9687],[0.15,0.4046],
+      [0.20,0.2723],[0.30,0.1875],[0.40,0.1551],[0.50,0.1370],[0.60,0.1245],
+      [0.80,0.1067],[1.00,0.09471],[1.25,0.08414],[1.50,0.07602],[2.00,0.06440],
+      [3.00,0.05188],[4.00,0.04484],[5.00,0.04052],[6.00,0.03762],[8.00,0.03429],
+      [10.0,0.03264]
+    ]
+  },
+  eau: {
+    rho: 1.00,
+    label: 'Eau (H₂O)',
+    // Coefficients μ/ρ (cm²/g) — NIST XCOM — eau liquide ρ = 1,00 g/cm³
+    muRho: [
+      [0.05,0.2269],[0.06,0.2058],[0.08,0.1875],[0.10,0.1707],[0.15,0.1505],
+      [0.20,0.1370],[0.30,0.1186],[0.40,0.1061],[0.50,0.09687],[0.60,0.08956],
+      [0.80,0.07865],[1.00,0.07070],[1.25,0.06323],[1.50,0.05754],[2.00,0.04942],
+      [3.00,0.03969],[4.00,0.03403],[5.00,0.03031],[6.00,0.02770],[8.00,0.02429],
+      [10.0,0.02219]
+    ]
+  }
+};
+
+function getMu(materiau, E_MeV) {
+  var d = MU_DATA[materiau];
+  var pts = d.muRho;
+  var rho = d.rho;
+  if (E_MeV <= pts[0][0]) return pts[0][1] * rho;
+  if (E_MeV >= pts[pts.length-1][0]) return pts[pts.length-1][1] * rho;
+  for (var i = 0; i < pts.length-1; i++) {
+    if (E_MeV >= pts[i][0] && E_MeV <= pts[i+1][0]) {
+      var lx  = Math.log(E_MeV), lx0 = Math.log(pts[i][0]), lx1 = Math.log(pts[i+1][0]);
+      var ly0 = Math.log(pts[i][1]), ly1 = Math.log(pts[i+1][1]);
+      var t   = (lx - lx0) / (lx1 - lx0);
+      return Math.exp(ly0 + t*(ly1-ly0)) * rho;
+    }
+  }
+  return pts[0][1] * rho;
+}
+
+function toggleEcran() {
+  document.getElementById('bloc-ecran').style.display = document.getElementById('toggle-ecran').checked ? 'block' : 'none';
+  updateEcranMateriau();
+}
+
+function updateEcranMateriau() {
+  var mat = document.getElementById('ecran-materiau') ? document.getElementById('ecran-materiau').value : 'plomb';
+  var d   = MU_DATA[mat];
+  var el  = document.getElementById('ecran-info');
+  if (!el) return;
+  var rhoNote = mat === 'eau' ? 'Écran d\'eau (piscine, réservoir) — modèle couche épaisse' :
+                mat === 'acier' ? 'Acier de construction / blindage — NIST XCOM Fe (Z=26)' :
+                mat === 'plomb' ? 'Plomb — principal matériau de blindage gamma' :
+                'Béton ordinaire — composition standard (NF EN)';
+  el.innerHTML = '<span class="ecran-badge '+mat+'">'+d.label+'</span>' +
+    ' <span style="font-size:11px;color:#666;margin-left:6px">ρ = '+d.rho+' g/cm³ — μ interpolé NIST XCOM &nbsp;·&nbsp; '+rhoNote+'</span>';
+}
+
+function calculerEcran(msvh_libre, emax) {
+  if (!document.getElementById('toggle-ecran').checked) return null;
+
+  var mat   = document.getElementById('ecran-materiau').value;
+  var ep_cm = parseFloat(document.getElementById('ecran-ep').value);
+  if (isNaN(ep_cm) || ep_cm < 0) return null;
+
+  if (ep_cm === 0) {
+    return {
+      materiau: mat,
+      label: MU_DATA[mat].label,
+      ep_cm: 0,
+      Eeff: emax,
+      mu: 0,
+      fa: 1,
+      buildup: 1,
+      msvh: msvh_libre
+    };
+  }
+
+  var Emax_calc = Math.max(0.05, Math.min(10, emax || 0.5));
+  var mu = getMu(mat, Emax_calc);
+
+  var mx = mu * ep_cm;
+
+  // ----------------------------
+  // BUILD-UP — Modèle Taylor (ANS-6.4.3 / Shultis & Faw)
+  // Formule : B(μx) = 1 + C·(μx)·exp(D·μx)
+  // Coefficients C et D interpolés sur E_MeV pour chaque matériau.
+  // Approche majorante : on utilise les coefficients les plus pénalisants
+  // de la plage d'énergie concernée (conservatisme opérationnel NRBC).
+  // Références : Shultis & Faw "Radiation Shielding" (2000) ;
+  //              Chilton, Shultis & Faw (1984) ANS-6.4.3 tables.
+  // ----------------------------
+  var C, D;
+  if (mat === 'plomb') {
+    // Plomb — coefficients Taylor (Shultis & Faw, Table A.3)
+    // Conservatif : on prend les valeurs pour E ≈ 0.5–1.5 MeV (domaine courant)
+    // C ≈ 0.40, D ≈ 0.055 (légèrement majorant sur l'ensemble de la plage)
+    if (Emax_calc <= 0.5)       { C = 0.28; D = 0.042; }
+    else if (Emax_calc <= 1.0)  { C = 0.35; D = 0.050; }
+    else if (Emax_calc <= 2.0)  { C = 0.40; D = 0.055; }
+    else                        { C = 0.45; D = 0.060; }
+  } else if (mat === 'beton') { // béton (matériau bas-Z — build-up nettement plus élevé)
+    // Béton — coefficients Taylor (Shultis & Faw, Table A.3 — eau/béton similaires)
+    // Le build-up est significativement plus fort pour les matériaux bas-Z.
+    if (Emax_calc <= 0.5)       { C = 2.50; D = 0.12; }
+    else if (Emax_calc <= 1.0)  { C = 2.20; D = 0.10; }
+    else if (Emax_calc <= 2.0)  { C = 1.80; D = 0.085; }
+    else                        { C = 1.50; D = 0.070; }
+  } else if (mat === 'acier') {
+    // Acier (fer, Z=26) — coefficients Taylor (Shultis & Faw, Table A.3 — fer)
+    // Matériau Z intermédiaire — build-up modéré, entre plomb et béton.
+    if (Emax_calc <= 0.5)       { C = 0.60; D = 0.065; }
+    else if (Emax_calc <= 1.0)  { C = 0.75; D = 0.072; }
+    else if (Emax_calc <= 2.0)  { C = 0.85; D = 0.078; }
+    else                        { C = 0.90; D = 0.082; }
+  } else { // eau (matériau bas-Z, similaire béton légèrement supérieur)
+    // Eau — coefficients Taylor (Shultis & Faw, Table A.3 — eau)
+    // Build-up très élevé pour les matériaux bas-Z — plus pénalisant que béton.
+    if (Emax_calc <= 0.5)       { C = 2.80; D = 0.130; }
+    else if (Emax_calc <= 1.0)  { C = 2.50; D = 0.110; }
+    else if (Emax_calc <= 2.0)  { C = 2.00; D = 0.090; }
+    else                        { C = 1.70; D = 0.075; }
+  }
+
+  var B = 1 + C * mx * Math.exp(D * mx);
+
+  // ----------------------------
+  // Atténuation avec build-up
+  // ----------------------------
+  var fa = B * Math.exp(-mx);
+
+  return {
+    materiau: mat,
+    label: MU_DATA[mat].label,
+    ep_cm: ep_cm,
+    Eeff: Emax_calc,
+    mu: mu,
+    mx: mx,
+    buildup: B,
+    fa: fa,
+    msvh: msvh_libre * fa
+  };
+}
+
+function activiteEnBq(){
+  var val = parseFloat(document.getElementById('activite').value)||0;
+  var u = document.getElementById('unite-A').value;
+  var conv = {Bq:1,kBq:1e3,MBq:1e6,GBq:1e9,TBq:1e12,Ci:3.7e10,mCi:3.7e7,'µCi':3.7e4};
+  return val*(conv[u]||1);
+}
+
+function formatDose(msvh){
+  if(msvh >= 1000) return {val:(msvh/1000).toPrecision(4), unit:'Sv/h'};
+  if(msvh >= 1)    return {val:msvh.toPrecision(4), unit:'mSv/h'};
+  return {val:(msvh*1000).toPrecision(4), unit:'µSv/h'};
+}
+function formatDoseInt(msv){
+  if(msv >= 1000) return {val:(msv/1000).toPrecision(4), unit:'Sv'};
+  if(msv >= 1)    return {val:msv.toPrecision(4), unit:'mSv'};
+  return {val:(msv*1000).toPrecision(4), unit:'µSv'};
+}
+
+function verdict(msvh){
+  if(msvh >= 5) return {txt:'⛔ DÉBIT TRÈS ÉLEVÉ — Zone d\'exclusion immédiate', bg:'#f8d7da', col:'#721c24', brd:'#cc1a00'};
+  if(msvh >= 1)  return {txt:'🔴 DÉBIT ÉLEVÉ — Intervention très limitée', bg:'#ffe5cc', col:'#7a3200', brd:'#e06c00'};
+  if(msvh >= 0.1)   return {txt:'🟠 DÉBIT SIGNIFICATIF — Engagement minimum, dosimétrie surveillée', bg:'#fff3cd', col:'#856404', brd:'#e6a817'};
+  return {txt:'🟢 Débit faible — Surveillance dosimétrique nécessaire', bg:'#d4edda', col:'#155724', brd:'#28a745'};
+}
+
+// ================================================================
+// ZONAGE OPÉRATIONNEL
+// ================================================================
+function toggleZonage(){
+  document.getElementById('bloc-zonage').style.display = document.getElementById('toggle-zonage').checked ? 'block' : 'none';
+}
+
+function updateZoneUnitLabel(zone){
+  var sel = document.getElementById('zone-'+zone+'-unit');
+  var lbl = document.getElementById('zone-'+zone+'-unit-lbl');
+  var labels = {msvh:'mSv/h', svh:'Sv/h', usvh:'µSv/h'};
+  lbl.textContent = labels[sel.value] || 'mSv/h';
+}
+
+// Convertit la valeur saisie + unité en mSv/h
+function zoneValToMsvh(zone){
+  var val = parseFloat(document.getElementById('zone-'+zone+'-val').value);
+  if(isNaN(val) || val <= 0) return null;
+  var unit = document.getElementById('zone-'+zone+'-unit').value;
+  if(unit === 'svh')  return val * 1000;
+  if(unit === 'usvh') return val / 1000;
+  return val; // msvh
+}
+
+function calculerZonage(msvh_libre, msvh_ecran, d_ref){
+  // msvh_libre  : débit libre à d_ref mètres
+  // msvh_ecran  : débit avec écran à d_ref mètres (null si pas d'écran)
+  // Formule : d_zone = d_ref × sqrt(msvh_ref / msvh_zone)
+  var zones = [
+    {id:'rouge', label:'Zone d\'exclusion', emoji:'⛔'},
+    {id:'orange', label:'Zone contrôlée',   emoji:'🔴'},
+    {id:'verte',  label:'Zone de soutien',  emoji:'🟢'}
+  ];
+  var resultats = [];
+  zones.forEach(function(z){
+    var msvh_zone = zoneValToMsvh(z.id);
+    if(msvh_zone === null) return; // non renseigné
+    var dist_libre = d_ref * Math.sqrt(msvh_libre / msvh_zone);
+    var dist_ecran = msvh_ecran !== null ? d_ref * Math.sqrt(msvh_ecran / msvh_zone) : null;
+    resultats.push({
+      id: z.id,
+      label: z.label,
+      emoji: z.emoji,
+      msvh_zone: msvh_zone,
+      dist_libre: dist_libre,
+      dist_ecran: dist_ecran
+    });
+  });
+  return resultats;
+}
+
+function distM(d){
+  // Arrondi au mètre entier ; km si >= 1000 m
+  var dm = Math.round(d);
+  return dm >= 1000 ? (dm/1000).toFixed(1).replace('.',',') + ' km' : dm + ' m';
+}
+
+function afficherZonage(resultats, msvh_ref_libre, msvh_ref_ecran, avecEcran){
+  var bloc = document.getElementById('zonage-res');
+  var grid = document.getElementById('zonage-grid');
+  var hint = document.getElementById('zonage-res-hint');
+
+  if(!document.getElementById('toggle-zonage').checked || resultats.length === 0){
+    bloc.classList.remove('visible');
+    return;
+  }
+
+  bloc.classList.add('visible');
+  var fdLibre = formatDose(msvh_ref_libre);
+  var hintHtml = 'Débit de référence libre : <b>' + fdLibre.val + ' ' + fdLibre.unit + '</b>';
+  if(avecEcran){
+    var fdEcran = formatDose(msvh_ref_ecran);
+    hintHtml += ' &nbsp;·&nbsp; avec écran : <b>' + fdEcran.val + ' ' + fdEcran.unit + '</b> <span style="font-size:11px;background:#eef2ff;color:var(--bleu);padding:1px 6px;border-radius:4px;font-weight:600">🛡️</span>';
+  }
+  hint.innerHTML = hintHtml;
+
+  grid.innerHTML = resultats.map(function(z){
+    var fd = formatDose(z.msvh_zone);
+    var dLibreStr = distM(z.dist_libre);
+
+    if(avecEcran && z.dist_ecran !== null){
+      var dEcranStr = distM(z.dist_ecran);
+      return '<div class="zone-result-row '+z.id+'">' +
+        // Colonne gauche : label + seuil
+        '<div style="min-width:120px">' +
+          '<div class="zone-result-label '+z.id+'">' +
+            '<span class="zone-dot '+z.id+'"></span>' +
+            z.label +
+          '</div>' +
+          '<div class="zone-result-debit">Ḋ seuil = '+fd.val+' '+fd.unit+'</div>' +
+        '</div>' +
+        // Colonne distances : libre + avec écran
+        '<div style="display:flex;gap:16px;align-items:center">' +
+          '<div style="text-align:right">' +
+            '<div style="font-size:10px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">Sans écran</div>' +
+            '<div class="zone-result-dist '+z.id+'">'+dLibreStr+'</div>' +
+          '</div>' +
+          '<div style="width:1px;height:40px;background:#e0e4f0"></div>' +
+          '<div style="text-align:right">' +
+            '<div style="font-size:10px;font-weight:700;color:var(--bleu);text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px">Avec écran 🛡️</div>' +
+            '<div class="zone-result-dist '+z.id+'">'+dEcranStr+'</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    } else {
+      return '<div class="zone-result-row '+z.id+'">' +
+        '<div>' +
+          '<div class="zone-result-label '+z.id+'">' +
+            '<span class="zone-dot '+z.id+'"></span>' +
+            z.label +
+          '</div>' +
+          '<div class="zone-result-debit">Ḋ seuil = '+fd.val+' '+fd.unit+'</div>' +
+        '</div>' +
+        '<div style="text-align:right">' +
+          '<div class="zone-result-dist '+z.id+'">'+dLibreStr+'</div>' +
+          '<div class="zone-result-debit">de la source</div>' +
+        '</div>' +
+      '</div>';
+    }
+  }).join('');
+}
+
+// ================================================================
+// ÉCHELLE DE DOSE — RÉFÉRENTIEL DE COMPARAISON
+// Sources : OMS, UNSCEAR, IRSN, AIEA
+// Doses en mSv (millisiévert), ordre croissant
+// ================================================================
+var DOSE_SCALE = [
+  { msv: 0.000001, label: 'Infime',       badge: '🍌', exemple: 'Manger une banane (potassium-40) · Dormir à côté de quelqu\'un' },
+  { msv: 0.0001,   label: 'Très faible',  badge: '🦷', exemple: 'Radiographie dentaire · Fond naturel quotidien dans une maison en brique (radon)' },
+  { msv: 0.001,    label: 'Très faible',  badge: '✈️', exemple: 'Vol court-courrier Paris–Londres · Détecteur de fumée (américium-241, usage annuel)' },
+  { msv: 0.003,    label: 'Faible',       badge: '🌍', exemple: 'Fond naturel moyen mondial (par jour) · Scanner dentaire panoramique' },
+  { msv: 0.08,     label: 'Modéré',       badge: '✈️', exemple: 'Vol long-courrier Paris–New York (aller) · Mammographie' },
+  { msv: 0.5,      label: 'Modéré',       badge: '🩻', exemple: 'Radiographie thoracique · Scanner cérébral · Fond naturel annuel moyen en France' },
+  { msv: 4.5,      label: 'Modéré',       badge: '📅', exemple: 'Dose annuelle mondiale moyenne (naturel + médical) · Scanner abdominal' },
+  { msv: 20,       label: 'Significatif', badge: '⚠️', exemple: 'Limite annuelle des travailleurs du nucléaire (AIEA) · PET-scan oncologique' },
+  { msv: 50,       label: 'Significatif', badge: '🔺', exemple: 'Limite annuelle réglementaire travailleurs (pic) · Dose à Fukushima (évacués)' },
+  { msv: 100,      label: 'Élevé',        badge: '🔴', exemple: 'Seuil OMS de risque cancérogène mesurable · Liquidateurs de Tchernobyl (minimum)' },
+  { msv: 250,      label: 'Élevé',        badge: '🚀', exemple: 'Dose maximale astronautes (mission ISS 6 mois) · Radiothérapie palliative (locale)' },
+  { msv: 500,      label: 'Très élevé',   badge: '⛔', exemple: 'Premiers signes de syndrome d\'irradiation aigu · Certains liquidateurs de Tchernobyl' },
+  { msv: 1000,     label: 'Dangereux',    badge: '☠️', exemple: 'Syndrome d\'irradiation aigu · Pompiers de Tchernobyl (premières heures d\'intervention)' },
+  { msv: 4500,     label: 'Très dangereux', badge: '💀', exemple: 'DL₅₀ — dose létale 50 % sans soins · Victime de l\'accident de Goiânia (Brésil, 1987)' }
+];
+
+function formatDoseScaleVal(msv) {
+  if (msv >= 1000) return (msv / 1000).toPrecision(3) + ' Sv';
+  if (msv >= 1)    return msv.toPrecision(3) + ' mSv';
+  if (msv >= 0.001) return (msv * 1000).toPrecision(3) + ' µSv';
+  return (msv * 1e6).toPrecision(3) + ' nSv';
+}
+
+function afficherComparaisonDose(msv_dose) {
+  var block = document.getElementById('dose-compare');
+  if (!msv_dose || msv_dose <= 0) { block.classList.remove('visible'); return; }
+
+  // Trouver les entrées encadrantes
+  var lower = null, upper = null;
+  for (var i = 0; i < DOSE_SCALE.length; i++) {
+    if (DOSE_SCALE[i].msv <= msv_dose) lower = DOSE_SCALE[i];
+    else { upper = DOSE_SCALE[i]; break; }
+  }
+  // Cas limites
+  if (!lower) lower = DOSE_SCALE[0];
+  if (!upper) upper = DOSE_SCALE[DOSE_SCALE.length - 1];
+
+  // Résultat
+  var fi = formatDoseInt(msv_dose);
+  document.getElementById('dc-result-val').textContent = fi.val + ' ' + fi.unit;
+
+  // Inférieur
+  document.getElementById('dc-lower-val').textContent = formatDoseScaleVal(lower.msv);
+  document.getElementById('dc-lower-badge').textContent = lower.badge + ' ' + lower.label;
+  document.getElementById('dc-lower-ex').textContent = lower.exemple;
+
+  // Supérieur
+  document.getElementById('dc-upper-val').textContent = formatDoseScaleVal(upper.msv);
+  document.getElementById('dc-upper-badge').textContent = upper.badge + ' ' + upper.label;
+  document.getElementById('dc-upper-ex').textContent = upper.exemple;
+
+  block.classList.add('visible');
+}
+
+// ================================================================
+// CALCUL
+// ================================================================
+function calculer(){
+  var A0_Bq = activiteEnBq();
+  var epiManuel = parseFloat(document.getElementById('epi-manuel').value);
+  var epi = (epiManuel > 0) ? epiManuel : (selectedNuclide ? selectedNuclide.epi : 0);
+
+  if(!A0_Bq || A0_Bq <= 0){ alert('Saisissez une activité valide.'); return; }
+  if(!epi || epi <= 0){
+    alert('Σ(Eᵢ·Pᵢ) manquant.\nSélectionnez un radionucléide dans la liste ou utilisez la recherche IA pour les nucléides absents.'); return;
+  }
+
+  // Décroissance radioactive — calcul A(t) si activé
+  var decayRes = calculerDecroissance(A0_Bq);
+  if (decayRes === 'err') return; // validation échouée, messages déjà affichés
+  var A_Bq = decayRes ? decayRes.At : A0_Bq; // activité effective pour le calcul
+
+  var d = parseFloat(document.getElementById('dist-input').value)||10;
+
+  // Ḋ [mSv/h] = 1,3×10⁻¹⁰ × A [Bq] × Σ(Eᵢ·Pᵢ) [MeV] / d² [m²]
+  var msvh = 1.3e-10 * A_Bq * epi / (d * d);
+
+  var doseInt = null;
+  if(document.getElementById('toggle-duree').checked){
+    var dv = parseFloat(document.getElementById('duree-val').value)||0;
+    var du = document.getElementById('unite-duree').value;
+    var dh = dv * (du==='s' ? 1/3600 : du==='min' ? 1/60 : 1);
+    doseInt = {val:dv, unit:du, msv:msvh*dh, h:dh};
+  }
+
+  var nuclideName = selectedNuclide ? selectedNuclide.name : (document.getElementById('nuclide-input').value||'?');
+  var nuclideSource = selectedNuclide ? selectedNuclide.source : 'manuel';
+  var emax = selectedNuclide && selectedNuclide.emax ? selectedNuclide.emax : null;
+
+  var ecranRes = calculerEcran(msvh, emax);
+
+  // Zonage opérationnel — on calcule les deux distances (libre + avec écran)
+  var msvh_ecran_pour_zonage = (ecranRes && ecranRes.fa) ? msvh * ecranRes.fa : null;
+  var zonageResultats = document.getElementById('toggle-zonage').checked
+    ? calculerZonage(msvh, msvh_ecran_pour_zonage, d)
+    : [];
+
+  // Calcul débit de dose BÊTA SANS ÉCRAN à 10 cm
+  // Ḋβ [mSv/h] = 9,7×10⁻⁷ × A [Bq] × Σ(Eβ·Pβ) [MeV]
+  // Priorité : nucléide base de données → ep automatique ; sinon → champ manuel
+  var epBetaAuto   = selectedNuclide && selectedNuclide.source === 'db' ? (selectedNuclide.ep || 0) : 0;
+  var epBetaManuel = parseFloat(document.getElementById('ep-beta-manuel').value) || 0;
+  var epBeta = epBetaAuto > 0 ? epBetaAuto : epBetaManuel;
+  var srcBeta = epBetaAuto > 0 ? 'db' : (epBetaManuel > 0 ? 'manuel' : 'db');
+  var betaRes = {ep:epBeta, msvh: epBeta > 0 ? 9.7e-7 * A_Bq * epBeta : 0, source:srcBeta};
+
+  lastR = {A_Bq:A_Bq, A0_Bq:A0_Bq, epi:epi, emax:emax, d:d, msvh:msvh, nuclide:nuclideName,
+           nuclideSource:nuclideSource, doseInt:doseInt, ecran:ecranRes, decay:decayRes,
+           beta:betaRes, zonage:zonageResultats,
+           uniteA:document.getElementById('unite-A').value,
+           valA:parseFloat(document.getElementById('activite').value)};
+  afficher(lastR);
+}
+
+function afficher(r){
+  document.getElementById('results').classList.add('visible');
+  var fd = formatDose(r.msvh);
+  var v = verdict(r.msvh);
+
+  document.getElementById('flux-hero').style.borderTopColor = v.brd;
+  var fv = document.getElementById('res-flux');
+  fv.textContent = fd.val; fv.style.color = v.col;
+  document.getElementById('res-unit').textContent = fd.unit;
+  document.getElementById('res-dist').textContent = r.d;
+  var ve = document.getElementById('res-verdict');
+  ve.textContent = v.txt; ve.style.background = v.bg; ve.style.color = v.col;
+
+  document.getElementById('r-A').textContent = r.valA.toPrecision(3);
+  document.getElementById('r-A-unit').textContent = r.uniteA;
+  document.getElementById('r-epi').textContent = r.epi.toPrecision(4);
+  document.getElementById('r-d').textContent = r.d;
+
+  // Bloc décroissance
+  var bdec = document.getElementById('decay-res');
+  if (r.decay) {
+    bdec.classList.add('visible');
+    var fa0 = formatActivite(r.decay.A0);
+    var fat = formatActivite(r.decay.At);
+    document.getElementById('r-decay-A0').textContent = fa0.val;
+    document.getElementById('r-decay-A0-unit').textContent = fa0.unit;
+    // Temps écoulé — afficher en unité lisible
+    var t_j = r.decay.t_j;
+    var tDisp, tUnit;
+    if (Math.abs(t_j) >= 365.25*2) { tDisp = (t_j/365.25).toFixed(2); tUnit = 'ans'; }
+    else if (Math.abs(t_j) >= 1)   { tDisp = t_j.toFixed(2);          tUnit = 'j'; }
+    else if (Math.abs(t_j) >= 1/24){ tDisp = (t_j*24).toFixed(2);     tUnit = 'h'; }
+    else                           { tDisp = (t_j*1440).toFixed(2);   tUnit = 'min'; }
+    document.getElementById('r-decay-t').textContent = tDisp;
+    document.getElementById('r-decay-t-unit').textContent = tUnit;
+    // Période
+    var T_j = r.decay.T_j;
+    var TDisp, TUnit;
+    if (T_j >= 365.25*2) { TDisp = (T_j/365.25).toPrecision(4); TUnit = 'ans'; }
+    else if (T_j >= 1)   { TDisp = T_j.toPrecision(4);          TUnit = 'j'; }
+    else if (T_j >= 1/24){ TDisp = (T_j*24).toPrecision(4);     TUnit = 'h'; }
+    else                 { TDisp = (T_j*1440).toPrecision(4);   TUnit = 'min'; }
+    document.getElementById('r-decay-T').textContent = TDisp;
+    document.getElementById('r-decay-T-unit').textContent = TUnit;
+    document.getElementById('r-decay-factor').textContent = r.decay.ratio.toPrecision(4);
+    document.getElementById('r-decay-At').textContent = fat.val;
+    document.getElementById('r-decay-At-unit').textContent = fat.unit;
+    document.getElementById('r-decay-hint').innerHTML =
+      'A(t) = A₀ / 2<sup>t/T½</sup> = ' + fa0.val + ' ' + fa0.unit +
+      ' / 2<sup>' + Math.abs(t_j).toFixed(2) + '/' + T_j.toPrecision(4) + '</sup> = <b>' + fat.val + ' ' + fat.unit + '</b>' +
+      ' &nbsp;·&nbsp; ' + (t_j < 0 ? '<span style="color:#856404">⚠ t négatif : extrapolation dans le futur</span>' :
+      'Durée écoulée : ' + Math.abs(t_j).toFixed(2) + ' j depuis le ' + r.decay.date0);
+    // Mettre à jour l'étiquette d'activité dans le résumé
+    document.getElementById('r-A').textContent = fat.val;
+    document.getElementById('r-A-unit').textContent = fat.unit + ' ⚛';
+  } else {
+    bdec.classList.remove('visible');
+  }
+
+  var bd = document.getElementById('duree-res');
+  if(r.doseInt){
+    bd.classList.add('visible');
+    var fi = formatDoseInt(r.doseInt.msv);
+    document.getElementById('r-duree').textContent = r.doseInt.val;
+    document.getElementById('r-duree-unit').textContent = r.doseInt.unit;
+    document.getElementById('r-dose').textContent = fi.val;
+    document.getElementById('r-dose-unit').textContent = fi.unit;
+    // Dose intégrée avec écran
+    var dmEcran = document.getElementById('dm-dose-ecran');
+    if(r.ecran){
+      var fiE = formatDoseInt(r.doseInt.msv * r.ecran.fa);
+      document.getElementById('r-dose-ecran').textContent = fiE.val;
+      document.getElementById('r-dose-ecran-unit').textContent = fiE.unit;
+      dmEcran.style.display = '';
+    } else {
+      dmEcran.style.display = 'none';
+    }
+    // Comparaison échelle de dose — dose sans écran en priorité, avec écran si dispo
+    var msv_compare = r.doseInt.msv;
+    afficherComparaisonDose(msv_compare);
+  } else {
+    bd.classList.remove('visible');
+    document.getElementById('dose-compare').classList.remove('visible');
+  }
+
+  // Résultat écran
+  var be = document.getElementById('ecran-res');
+  if(r.ecran){
+    be.classList.add('visible');
+    be.style.borderLeftColor = r.ecran.materiau === 'plomb' ? '#3d2b1f' : r.ecran.materiau === 'acier' ? '#37474f' : r.ecran.materiau === 'eau' ? '#0277bd' : '#666';
+    var fe = formatDose(r.ecran.msvh);
+    document.getElementById('r-ecran-mat').textContent = r.ecran.label;
+    document.getElementById('r-ecran-ep').textContent = r.ecran.ep_cm + ' cm';
+    // Afficher le facteur d'atténuation
+    var faStr;
+    if(r.ecran.fa >= 0.001) faStr = r.ecran.fa.toPrecision(3);
+    else faStr = r.ecran.fa.toExponential(2);
+    document.getElementById('r-ecran-fa').textContent = faStr;
+    document.getElementById('r-ecran-fa-unit').textContent = '';
+    document.getElementById('r-ecran-dose').textContent = fe.val;
+    document.getElementById('r-ecran-dose-unit').textContent = fe.unit;
+    document.getElementById('r-ecran-hint').innerHTML =
+      'μ(' + r.ecran.materiau + ', E<sub>max</sub> = ' + r.ecran.Eeff.toPrecision(3) + ' MeV) = ' + r.ecran.mu.toPrecision(3) + ' cm⁻¹ &nbsp;·&nbsp; ' +
+      'μx = ' + r.ecran.mx.toPrecision(3) + ' &nbsp;·&nbsp; ' +
+      'B(μx) = ' + r.ecran.buildup.toPrecision(3) + ' (build-up Taylor) &nbsp;·&nbsp; ' +
+      'e<sup>−μx</sup> = e<sup>−' + r.ecran.mu.toPrecision(3) + '×' + r.ecran.ep_cm + '</sup> &nbsp;·&nbsp; ' +
+      'Facteur global = B·e<sup>−μx</sup> = <b>' + faStr + '</b><br>' +
+      '⚠ Build-up inclus (modèle Taylor — approche majorante) : le débit après écran est <b>surestimé</b> par rapport à l\'atténuation pure — résultat protectionniste pour les intervenants.';
+  } else { be.classList.remove('visible'); }
+
+  document.getElementById('fpar').innerHTML =
+    '<b>Nucléide</b> : '+r.nuclide+
+    (r.nuclideSource==='db' ? ' <span style="font-size:10px;background:#d4edda;color:#155724;padding:1px 5px;border-radius:3px">ICRP-107</span>' :
+     r.nuclideSource==='ia' ? ' <span style="font-size:10px;background:#fff3cd;color:#856404;padding:1px 5px;border-radius:3px">IA — à vérifier</span>' : '')+
+    ' &nbsp;·&nbsp; <b>A₀</b> = '+r.A0_Bq.toExponential(3)+' Bq'+
+    (r.decay ? ' &nbsp;·&nbsp; <b>A(t)</b> = '+r.A_Bq.toExponential(3)+' Bq <span style="font-size:10px;background:#ede7f6;color:#5c35a0;padding:1px 5px;border-radius:3px">après décroissance</span>' : '')+
+    '<br>'+
+    '<b>Σ(Eᵢ·Pᵢ)</b> = '+r.epi.toPrecision(4)+' MeV &nbsp;·&nbsp; <b>d</b> = '+r.d+' m<br>'+
+    (r.decay ?
+      '<b>Décroissance</b> : A(t) = A₀/2<sup>t/T½</sup> = '+r.A0_Bq.toExponential(3)+'/2<sup>'+r.decay.t_j.toFixed(2)+'/'+r.decay.T_j.toPrecision(4)+'</sup> = <b>'+r.A_Bq.toExponential(3)+' Bq</b><br>' : '')+
+    '<b>Ḋ libre</b> = 1,3×10⁻¹⁰ × '+r.A_Bq.toExponential(3)+' × '+r.epi.toPrecision(4)+' / '+r.d+'² = <b>'+fd.val+' '+fd.unit+'</b>'+
+    (r.ecran ?
+      '<br><b>Écran</b> : '+r.ecran.label+' '+r.ecran.ep_cm+' cm &nbsp;·&nbsp; E<sub>max</sub> = '+r.ecran.Eeff.toPrecision(3)+' MeV &nbsp;·&nbsp; μ = '+r.ecran.mu.toPrecision(3)+' cm⁻¹ &nbsp;·&nbsp; μx = '+r.ecran.mx.toPrecision(3)+
+      '<br><b>Build-up B(μx)</b> = '+r.ecran.buildup.toPrecision(3)+' &nbsp;·&nbsp; Facteur global B·e<sup>−μx</sup> = '+(r.ecran.fa>=0.001?r.ecran.fa.toPrecision(3):r.ecran.fa.toExponential(2))+
+      '<br><b>Ḋ après écran</b> = Ḋ libre × B·e<sup>−μx</sup> = <b>'+formatDose(r.ecran.msvh).val+' '+formatDose(r.ecran.msvh).unit+'</b> (majorant — build-up Taylor inclus)' : '');
+
+  // Résultat BÊTA
+  var bbeta = document.getElementById('beta-res');
+  var btotal = document.getElementById('total-res');
+  if(r.beta){
+    bbeta.style.display = '';
+    var fbeta = formatDose(r.beta.msvh);
+    document.getElementById('r-beta-dose').textContent = fbeta.val;
+    document.getElementById('r-beta-dose-unit').textContent = fbeta.unit;
+    document.getElementById('r-beta-ep').textContent = r.beta.ep > 0 ? r.beta.ep.toPrecision(4) : '0';
+    document.getElementById('beta-res-src').textContent = r.beta.source === 'db' ? 'ICRP-107' : r.beta.source === 'manuel' ? 'Saisie manuelle' : 'IA';
+    // Verdict bêta
+    var vbeta;
+    if(r.beta.msvh <= 0){
+      vbeta = {txt:'ℹ Pas d\'émission bêta significative pour ce nucléide', bg:'#f1f3fa', col:'#555'};
+    } else if(r.beta.msvh >= 500){
+      vbeta = {txt:'⛔ DÉBIT BÊTA SANS ÉCRAN TRÈS ÉLEVÉ — Risque cutané sévère', bg:'#f8d7da', col:'#721c24'};
+    } else if(r.beta.msvh >= 50){
+      vbeta = {txt:'🔴 DÉBIT BÊTA SANS ÉCRAN ÉLEVÉ — Protection cutanée impérative', bg:'#ffe5cc', col:'#7a3200'};
+    } else if(r.beta.msvh >= 5){
+      vbeta = {txt:'🟠 DÉBIT BÊTA SANS ÉCRAN SIGNIFICATIF — Limiter le temps d\'exposition', bg:'#fff3cd', col:'#856404'};
+    } else {
+      vbeta = {txt:'🟢 Débit bêta sans écran faible — Surveillance dosimétrique', bg:'#d4edda', col:'#155724'};
+    }
+    var vb_el = document.getElementById('r-beta-verdict');
+    vb_el.textContent = vbeta.txt;
+    vb_el.style.background = vbeta.bg;
+    vb_el.style.color = vbeta.col;
+    // Détail calcul bêta → démonstration en bas de page (fpar-beta)
+    var fparBeta = document.getElementById('fpar-beta');
+    if(r.beta.msvh > 0){
+      fparBeta.style.display = '';
+      fparBeta.innerHTML =
+        '<b>Débit de dose β sans écran à 10 cm</b><br>' +
+        '<b>Σ(Eβ·Pβ)</b> = ' + r.beta.ep.toPrecision(4) + ' MeV' +
+        (r.beta.source === 'db' ? ' <span style="font-size:10px;background:#fff3e0;color:#e65100;padding:1px 5px;border-radius:3px">ICRP-107</span>' :
+         r.beta.source === 'manuel' ? ' <span style="font-size:10px;background:#ede7f6;color:#5c35a0;padding:1px 5px;border-radius:3px">Saisie manuelle</span>' : '') +
+        '<br><b>Ḋ<sub>β</sub></b> = 9,7×10⁻⁷ × ' + r.A_Bq.toExponential(3) + ' Bq × ' + r.beta.ep.toPrecision(4) + ' MeV' +
+        ' = <b>' + fbeta.val + ' ' + fbeta.unit + '</b>' +
+        '<br><span style="font-size:11px;color:#888">Modèle source planaire à 10 cm — ICRP-74 / NCRP-72. Formule : Ḋ<sub>β</sub> [mSv/h] = 9,7×10⁻⁷ × A [Bq] × Σ(Eβ·Pβ) [MeV]</span>';
+    } else {
+      fparBeta.style.display = 'none';
+    }
+
+    // TOTAL γ + β (uniquement si émetteur β)
+    if(r.beta.msvh > 0){
+      btotal.style.display = '';
+      // Ḋγ recalculé à 10 cm (0,1 m) pour être cohérent avec Ḋβ à 10 cm
+      var msvhGamma10 = 1.3e-10 * r.A_Bq * r.epi / (0.1 * 0.1);
+      var msvhTotal   = msvhGamma10 + r.beta.msvh;
+      var ftotal      = formatDose(msvhTotal);
+      var fgamma10    = formatDose(msvhGamma10);
+      document.getElementById('r-total-gamma').textContent = fgamma10.val;
+      document.getElementById('r-total-gamma-unit').textContent = fgamma10.unit;
+      document.getElementById('r-total-beta').textContent = fbeta.val;
+      document.getElementById('r-total-beta-unit').textContent = fbeta.unit;
+      document.getElementById('r-total-dose').textContent = ftotal.val;
+      document.getElementById('r-total-dose-unit').textContent = ftotal.unit;
+      var vtotal = verdict(msvhTotal);
+      var vt_el = document.getElementById('r-total-verdict');
+      vt_el.textContent = vtotal.txt;
+      vt_el.style.background = vtotal.bg;
+      vt_el.style.color = vtotal.col;
+    } else {
+      btotal.style.display = 'none';
+    }
+  } else {
+    bbeta.style.display = 'none';
+    btotal.style.display = 'none';
+  }
+
+  // Zonage opérationnel
+  var msvh_ecran_ref = (r.ecran && r.ecran.fa) ? r.msvh * r.ecran.fa : null;
+  afficherZonage(r.zonage || [], r.msvh, msvh_ecran_ref, !!(r.ecran));
+
+  schema(r);
+  document.getElementById('results').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function schema(r){
+  var svg = document.getElementById('schema-svg');
+  var zoneColors     = {rouge:'#cc1a00', orange:'#e06c00', verte:'#28a745'};
+  var zoneFullLabels = {rouge:'Zone excl.', orange:'Zone ctrl.', verte:'Zone sout.'};
+
+  // ── Constantes de mise en page ────────────────────────────────────────
+  var W = 700, srcX = 52, srcW = 44;
+  var xStart = srcX + srcW + 10;
+  var xEnd   = W - 22;
+  var usable = xEnd - xStart;
+
+  // ── 1. Liste ordonnée des éléments à représenter ─────────────────────
+  // Zones triées par distance croissante
+  var zones = (r.zonage || []).slice().sort(function(a,b){ return a.dist_libre - b.dist_libre; });
+
+  // Construire les items zone
+  var zoneItems = zones.map(function(z){
+    return {
+      type: 'zone',
+      dist: z.dist_libre,
+      distEcran: z.dist_ecran,
+      label: zoneFullLabels[z.id] || z.id,
+      col: zoneColors[z.id] || '#999',
+      dose: z.msvh_zone,
+      id: z.id
+    };
+  });
+
+  // Trouver dans quelle "tranche" se trouve le personnage :
+  //   - avant la 1re zone  → slot 0  (dans la zone la plus chaude)
+  //   - entre zone i et zone i+1 → slot après i
+  //   - après toutes les zones → dernier slot
+  // On insère le personnage dans la liste à la bonne position ordinale.
+  var personDist = r.d;
+  var insertIdx = zoneItems.length; // par défaut : après toutes les zones
+  for(var zi = 0; zi < zoneItems.length; zi++){
+    if(personDist < zoneItems[zi].dist){
+      insertIdx = zi;
+      break;
+    }
+  }
+
+  // Liste finale (zones + personnage intercalé)
+  var items = zoneItems.slice(0, insertIdx)
+    .concat([{type:'person', dist:personDist, dose:r.msvh, doseEcran: r.ecran ? r.ecran.msvh : null}])
+    .concat(zoneItems.slice(insertIdx));
+
+  // ── 2. Attribution des slots X ────────────────────────────────────────
+  // n slots équirépartis sur [xStart, xEnd]
+  var n = items.length;
+  items.forEach(function(p, i){
+    p.x = xStart + (i + 1) / (n + 1) * usable;
+  });
+
+  // ── 3. Calcul dynamique de la hauteur ─────────────────────────────────
+  // ryZ (rayon vertical) de la zone la plus grande = f(x la plus grande)
+  // Le point le plus bas = cy + ryZ_max + labels sous la ligne (≈ 40px)
+  // Le point le plus haut = cy - ryZ_max - label au-dessus (≈ 26px)
+  // On cherche le ryZ max parmi toutes les zones
+  var ryZmax = 0;
+  items.forEach(function(p){
+    if(p.type !== 'zone') return;
+    var rxZ = p.x - (srcX + srcW/2);
+    var ryZ = rxZ * 0.30;
+    if(ryZ > ryZmax) ryZmax = ryZ;
+  });
+  // cy doit laisser de la place au-dessus (ryZmax + 28 min) et en dessous (ryZmax + 55 min pour étiquettes)
+  var marginTop    = Math.max(ryZmax + 30, 50);
+  var marginBottom = Math.max(ryZmax + 58, 75); // place pour 2-3 lignes d'étiquettes basses
+  var cy = marginTop;
+  var H  = cy + marginBottom;
+
+  var v  = verdict(r.msvh);
+  var fd = formatDose(r.msvh);
+  var out = '';
+
+  // ── 4. Fonds colorés des zones (du plus grand au plus petit) ──────────
+  // Dessinés en premier pour être sous tout le reste
+  var zonesSorted = items.filter(function(p){ return p.type === 'zone'; })
+                         .slice().sort(function(a,b){ return b.x - a.x; });
+  zonesSorted.forEach(function(p){
+    var rxZ = p.x - (srcX + srcW/2);
+    var ryZ = rxZ * 0.30;
+    out += '<ellipse cx="'+(srcX+srcW/2)+'" cy="'+cy+'" rx="'+rxZ.toFixed(1)+'" ry="'+ryZ.toFixed(1)+'" fill="'+p.col+'" fill-opacity=".06" stroke="none"/>';
+  });
+
+  // ── 5. Anneaux décoratifs (taille fixe, non liés à l'échelle) ─────────
+  [50, 95, 145].forEach(function(rx, i){
+    var ry = rx * 0.30;
+    out += '<ellipse cx="'+(srcX+srcW/2)+'" cy="'+cy+'" rx="'+rx+'" ry="'+ry+'" fill="none" stroke="#001F8F" stroke-width="1" opacity="'+(0.09+i*0.05).toFixed(2)+'" stroke-dasharray="5,3"/>';
+  });
+
+  // ── 6. Ligne de base (axe) ────────────────────────────────────────────
+  out += '<line x1="'+(srcX+srcW)+'" y1="'+cy+'" x2="'+(xEnd+10)+'" y2="'+cy+'" stroke="#dde2f0" stroke-width="1.5"/>';
+
+  // ── 7. Zones : arc + ligne + étiquettes ──────────────────────────────
+  items.forEach(function(p){
+    if(p.type !== 'zone') return;
+    var x   = p.x;
+    var col = p.col;
+    var rxZ = x - (srcX + srcW/2);
+    var ryZ = rxZ * 0.30;
+
+    // Arc coloré (contour de la zone)
+    out += '<ellipse cx="'+(srcX+srcW/2)+'" cy="'+cy+'" rx="'+rxZ.toFixed(1)+'" ry="'+ryZ.toFixed(1)+'" fill="none" stroke="'+col+'" stroke-width="2" opacity=".75" stroke-dasharray="7,4"/>';
+
+    // Ligne verticale de délimitation
+    out += '<line x1="'+x.toFixed(1)+'" y1="'+(cy-ryZ-4).toFixed(1)+'" x2="'+x.toFixed(1)+'" y2="'+(cy+ryZ+4).toFixed(1)+'" stroke="'+col+'" stroke-width="2" opacity=".9"/>';
+
+    // Nom de la zone (au-dessus de l'arc)
+    out += '<text x="'+x.toFixed(1)+'" y="'+(cy-ryZ-9).toFixed(1)+'" text-anchor="middle" fill="'+col+'" font-size="9.5" font-family="IBM Plex Sans,sans-serif" font-weight="700">'+p.label+'</text>';
+
+    // Étiquettes basses : débit seuil / distance libre / distance écran
+    var fdZ  = formatDose(p.dose);
+    var yLbl = cy + ryZ + 13;
+    out += '<text x="'+x.toFixed(1)+'" y="'+yLbl.toFixed(1)+'" text-anchor="middle" fill="'+col+'" font-size="8.5" font-family="IBM Plex Mono,monospace" opacity=".85">'+fdZ.val+' '+fdZ.unit+'</text>';
+    out += '<text x="'+x.toFixed(1)+'" y="'+(yLbl+12).toFixed(1)+'" text-anchor="middle" fill="'+col+'" font-size="9" font-family="IBM Plex Mono,monospace" font-weight="700">'+distM(p.dist)+'</text>';
+    if(p.distEcran !== null && p.distEcran !== undefined){
+      out += '<text x="'+x.toFixed(1)+'" y="'+(yLbl+24).toFixed(1)+'" text-anchor="middle" fill="'+col+'" font-size="8" font-family="IBM Plex Mono,monospace" opacity=".8">🛡 '+distM(p.distEcran)+'</text>';
+    }
+  });
+
+  // ── 8. Écran ──────────────────────────────────────────────────────────
+  if(r.ecran){
+    var xPers  = items.filter(function(p){ return p.type === 'person'; })[0].x;
+    var ex     = (srcX + srcW + xPers) / 2;
+    var ecCol  = {plomb:'#3d2b1f', acier:'#37474f', eau:'#0277bd'}[r.ecran.materiau] || '#888';
+    var feE    = formatDose(r.ecran.msvh);
+    var vE     = verdict(r.ecran.msvh);
+    out += '<rect x="'+(ex-5)+'" y="'+(cy-28)+'" width="10" height="56" rx="4" fill="'+ecCol+'" opacity=".9"/>';
+    out += '<text x="'+ex.toFixed(1)+'" y="'+(cy+38)+'" text-anchor="middle" fill="'+ecCol+'" font-size="8.5" font-family="IBM Plex Sans,sans-serif" font-weight="700">Écran</text>';
+    out += '<text x="'+ex.toFixed(1)+'" y="'+(cy+48)+'" text-anchor="middle" fill="'+ecCol+'" font-size="8" font-family="IBM Plex Mono,monospace">'+r.ecran.ep_cm+' cm</text>';
+    out += '<text x="'+ex.toFixed(1)+'" y="'+(cy-32)+'" text-anchor="middle" fill="'+vE.col+'" font-size="9" font-family="IBM Plex Mono,monospace" font-weight="700">🛡 '+feE.val+' '+feE.unit+'</text>';
+  }
+
+  // ── 9. Source ─────────────────────────────────────────────────────────
+  out += '<rect x="'+srcX+'" y="'+(cy-22)+'" width="'+srcW+'" height="44" rx="9" fill="#001F8F" opacity=".95"/>';
+  out += '<text x="'+(srcX+srcW/2)+'" y="'+(cy+6)+'" text-anchor="middle" fill="white" font-size="18" font-family="IBM Plex Mono,monospace">☢</text>';
+  out += '<text x="'+(srcX+srcW/2)+'" y="'+(cy+34)+'" text-anchor="middle" fill="#001F8F" font-size="10" font-family="IBM Plex Sans,sans-serif" font-weight="700">'+r.nuclide+'</text>';
+
+  // ── 10. Personnage ────────────────────────────────────────────────────
+  var persItem = items.filter(function(p){ return p.type === 'person'; })[0];
+  var xPers    = persItem.x;
+  out += '<circle cx="'+xPers.toFixed(1)+'" cy="'+cy+'" r="12" fill="'+v.brd+'" opacity=".92"/>';
+  out += '<text x="'+xPers.toFixed(1)+'" y="'+(cy+5)+'" text-anchor="middle" fill="white" font-size="13">👤</text>';
+  // Débit au-dessus
+  out += '<text x="'+xPers.toFixed(1)+'" y="'+(cy-18)+'" text-anchor="middle" fill="'+v.col+'" font-size="11" font-family="IBM Plex Mono,monospace" font-weight="700">'+fd.val+' '+fd.unit+'</text>';
+  // Distance + débit écran sous le personnage
+  var yPersLbl = cy + 26;
+  out += '<text x="'+xPers.toFixed(1)+'" y="'+yPersLbl+'" text-anchor="middle" fill="#444" font-size="9.5" font-family="IBM Plex Sans,sans-serif">d = '+r.d+' m</text>';
+  if(r.ecran){
+    var feP = formatDose(r.ecran.msvh);
+    out += '<text x="'+xPers.toFixed(1)+'" y="'+(yPersLbl+12)+'" text-anchor="middle" fill="'+verdict(r.ecran.msvh).col+'" font-size="9" font-family="IBM Plex Mono,monospace">🛡 '+feP.val+' '+feP.unit+'</text>';
+  }
+
+  // ── 11. Note non à l'échelle ──────────────────────────────────────────
+  out += '<text x="'+(W-6)+'" y="'+(H-5)+'" text-anchor="end" fill="#ccc" font-size="8.5" font-family="IBM Plex Sans,sans-serif">Schéma non à l\'échelle — vue de dessus</text>';
+
+  svg.setAttribute('viewBox', '0 0 '+W+' '+H);
+  svg.style.height = 'auto';
+  svg.innerHTML = out;
+}
+
+// ================================================================
+// EXPORT
+// ================================================================
+function exporter(){
+  if(!lastR) return;
+  var r = lastR;
+  var fd = formatDose(r.msvh);
+  var now = new Date().toLocaleString('fr-FR');
+  var srcNote = r.nuclideSource==='db' ? 'ICRP-107 (base vérifiée)' : r.nuclideSource==='ia' ? 'Recherche IA — à vérifier ICRP-107/LNHB' : 'Saisie manuelle';
+  var ddec='';
+  if(r.decay){
+    var fa0e=formatActivite(r.decay.A0), fate=formatActivite(r.decay.At);
+    var T_je=r.decay.T_j;
+    var TDispE = T_je>=365.25*2 ? (T_je/365.25).toPrecision(4)+' ans' : T_je>=1 ? T_je.toPrecision(4)+' j' : T_je>=1/24 ? (T_je*24).toPrecision(4)+' h' : (T_je*1440).toPrecision(4)+' min';
+    ddec='\nDÉCROISSANCE RADIOACTIVE\n'+
+         'Date activité initiale : '+r.decay.date0+'\n'+
+         'Date du jour           : '+r.decay.date1+'\n'+
+         'Temps écoulé t         : '+r.decay.t_j.toFixed(2)+' j\n'+
+         'Période T½             : '+TDispE+'\n'+
+         'Facteur 2^(−t/T½)      : '+r.decay.ratio.toPrecision(4)+'\n'+
+         'Activité initiale A₀   : '+fa0e.val+' '+fa0e.unit+'\n'+
+         'Activité calculée A(t) : '+fate.val+' '+fate.unit+'\n'+
+         '→ Calcul du débit réalisé avec A(t)';
+  }
+  var dd='';
+  if(r.doseInt){
+    var fi=formatDoseInt(r.doseInt.msv);
+    dd='\nDOSE INTÉGRÉE\n'+'Durée         : '+r.doseInt.val+' '+r.doseInt.unit+'\n'+'Dose intégrée : '+fi.val+' '+fi.unit+'\n(Hypothèse : débit constant, distance fixe, pas de décroissance)';
+  }
+  var de='';
+  if(r.ecran){
+    var fe=formatDose(r.ecran.msvh);
+    var faStr2 = r.ecran.fa >= 0.001 ? r.ecran.fa.toPrecision(3) : r.ecran.fa.toExponential(2);
+    de='\nÉCRAN D\'ATTÉNUATION\n'+
+       'Matériau      : '+r.ecran.label+'\n'+
+       'Épaisseur     : '+r.ecran.ep_cm+' cm\n'+
+       'Énergie eff.  : '+r.ecran.Eeff.toPrecision(3)+' MeV\n'+
+       'μ linéique    : '+r.ecran.mu.toPrecision(3)+' cm⁻¹ (NIST XCOM)\n'+
+       'μx            : '+r.ecran.mx.toPrecision(3)+'\n'+
+       'Build-up B(μx): '+r.ecran.buildup.toPrecision(3)+' (modèle Taylor — Shultis & Faw)\n'+
+       'Facteur global: B·e^(−μx) = '+faStr2+'\n'+
+       'Ḋ après écran : '+fe.val+' '+fe.unit+'\n'+
+       '⚠ Résultat MAJORANT — build-up inclus (photons diffusés pris en compte).\n'+
+       'Approche protectionniste pour les intervenants NRBC.';
+  }
+  var dbeta='';
+  if(r.beta && r.beta.msvh > 0){
+    var fb=formatDose(r.beta.msvh);
+    var msvhG10 = 1.3e-10 * r.A_Bq * r.epi / (0.1 * 0.1);
+    var ftot=formatDose(msvhG10 + r.beta.msvh);
+    dbeta='\n--- DÉBIT DE DOSE β SANS ÉCRAN À 10 cm ---\n'+
+         'Σ(Eβ·Pβ)      : '+r.beta.ep.toPrecision(4)+' MeV'+(r.beta.source==='db'?' [ICRP-107]':r.beta.source==='manuel'?' [Saisie manuelle]':'')+' \n'+
+         'Détail        : Ḋβ = 9,7×10⁻⁷ × '+r.A_Bq.toExponential(3)+' Bq × '+r.beta.ep.toPrecision(4)+' MeV\n'+
+         'Ḋβ à 10 cm    : '+fb.val+' '+fb.unit+'\n'+
+         '⚠ Modèle source planaire (ICRP-74/NCRP-72) — valable source non blindée à 10 cm\n'+
+         '--- TOTAL γ + β À 10 cm ---\n'+
+         'Ḋγ à 10 cm    : '+formatDose(msvhG10).val+' '+formatDose(msvhG10).unit+'\n'+
+         'Ḋβ à 10 cm    : '+fb.val+' '+fb.unit+'\n'+
+         'Ḋtotal 10 cm  : '+ftot.val+' '+ftot.unit;
+  } else if(r.beta){
+    dbeta='\nDÉBIT DE DOSE β : pas d\'émission β significative pour ce nucléide.';
+  }
+  var txt=
+    '=== DÉBIT DE DOSE γ — SOURCE PONCTUELLE ===\n'+
+    'Date/heure    : '+now+'\n'+
+    'Modèle        : Source ponctuelle (Attix 1986)\n'+
+    'Formule       : Ḋ [mSv/h] = 1,3×10⁻¹⁰ × A [Bq] × Σ(Eᵢ·Pᵢ) [MeV] / d² [m²]\n\n'+
+    'PARAMÈTRES\n'+
+    'Nucléide      : '+r.nuclide+'\n'+
+    'Source données : '+srcNote+'\n'+
+    'Activité A    : '+r.valA+' '+r.uniteA+' ('+r.A_Bq.toExponential(3)+' Bq)\n'+
+    'Σ(Eᵢ·Pᵢ)     : '+r.epi.toPrecision(4)+' MeV\n'+
+    'Distance d    : '+r.d+' m\n\n'+
+    'RÉSULTAT\n'+
+    'Débit de dose : '+fd.val+' '+fd.unit+'\n'+
+    verdict(r.msvh).txt+'\n'+ddec+dd+de+dbeta+'\n\n'+
+    '⚠ Débit libre : modèle source ponctuelle en champ libre (Attix 1986).\n'+
+    'Débit après écran : build-up Taylor inclus — résultat volontairement majorant.\n'+
+    'Mémento IA NRBC — SDIS 76 / ENSOSP — Calcul débit de dose γ';
+
+  navigator.clipboard.writeText(txt).then(function(){
+    var btn=document.getElementById('btn-export');
+    btn.textContent='✔ Copié dans le presse-papier';
+    btn.classList.add('copied');
+    setTimeout(function(){ btn.textContent='📋 Copier le résumé — Main courante / RETEX'; btn.classList.remove('copied'); },2500);
+  });
+}
+</script>
+</body>
+</html>
