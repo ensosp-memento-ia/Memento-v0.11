@@ -236,11 +236,12 @@
         });
       }
 
-      fetch('changelog.json')
+            fetch('changelog.json?v=' + Date.now())
         .then(function(r) {
           if (!r.ok) throw new Error('HTTP ' + r.status);
           return r.json();
         })
+
         .then(function(data) {
           data.sort(function(a, b) { return new Date(b.date) - new Date(a.date); });
           renderTicker(data);
