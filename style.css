@@ -33,15 +33,27 @@ header {
   font-weight: 700;
   letter-spacing: 0.5px;
   display: block;
+  position: relative;
 }
 
 .header-visits {
-  margin-top: 6px;
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 .header-visits img {
   height: 20px;
   vertical-align: middle;
+}
+
+@media (max-width: 768px) {
+  .header-visits {
+    position: static;
+    transform: none;
+    margin-top: 6px;
+  }
 }
 
 .header-sub {
