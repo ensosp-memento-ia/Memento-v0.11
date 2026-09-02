@@ -56,20 +56,6 @@ header {
   }
 }
 
-.header-sub {
-  font-size: 12px;
-  font-weight: 400;
-  opacity: 0.8;
-  margin-top: 3px;
-}
-@media (max-width: 768px) {
-  .header-visits {
-    position: static;
-    transform: none;
-    margin-top: 6px;
-  }
-}
-
 .header-logos {
   position: absolute;
   left: 20px;
