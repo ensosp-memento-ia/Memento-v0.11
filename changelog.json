@@ -1,32 +1,38 @@
 [
   {
-    "date": "2025-05-17",
+    "date": "2026-05-17",
     "titre": "Conversions d'unités",
     "lien": "/Memento-v0.11/Calculateur/conversions.html",
     "type": "nouveau"
   },
   {
-    "date": "2025-05-18",
+    "date": "2026-05-18",
     "titre": "Mise à jour mémento IA RCH",
     "lien": "/Memento-v0.11/index.html",
     "type": "amelioration"
   },
   {
-    "date": "2025-05-21",
+    "date": "2026-05-21",
     "titre": "RAD Levée de doute SD-LD",
     "lien": "/Memento-v0.11/Calculateur/V2 levee_de_doute_SD_LD.html",
     "type": "nouveau"
   },
   {
-    "date": "2025-05-21",
+    "date": "2026-05-21",
     "titre": "RAD Mise à jour Calcul d'exposition interne",
     "lien": "/Memento-v0.11/Calculateur/V17_Page_calcul_exposition_externe.html",
     "type": "amelioration"
   },
   {
-    "date": "2025-05-22",
+    "date": "2026-05-22",
     "titre": "Ajout Cartographie Expert",
     "lien": "/Memento-v0.11/Calculateur/expert.html",
     "type": "amelioration"
   }
+    {
+    "date": "2026-06-24",
+    "titre": "Mémento OP IA RAD4",
+    "lien": "https://sdis76-my.sharepoint.com/:f:/g/personal/anne_tirelle_sdis76_fr/IgBMN_Ng429YRqwq0tPmPs2XAXwV8MXJFYjQnvp7jmM_M8g?e=mZgrwl",
+    "type": "nouveau"
+  },
   ]
