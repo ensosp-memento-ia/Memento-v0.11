@@ -443,6 +443,31 @@ footer {
   font-size: 13px;
   color: #444;
 }
+.footer-logos {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.footer-logo {
+  width: auto;
+}
+
+.footer-logo--sdis {
+  height: 34px;   /* bandeau large : suffisant pour rester lisible */
+}
+
+.footer-logo--riisc {
+  height: 52px;   /* écusson compact : plus de hauteur pour garder les détails nets */
+}
+
+@media (max-width: 768px) {
+  .footer-logo--sdis  { height: 26px; }
+  .footer-logo--riisc { height: 40px; }
+}
 
 /* ============================================================
    RESPONSIVE
