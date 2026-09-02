@@ -35,6 +35,15 @@ header {
   display: block;
 }
 
+.header-visits {
+  margin-top: 6px;
+}
+
+.header-visits img {
+  height: 20px;
+  vertical-align: middle;
+}
+
 .header-sub {
   font-size: 12px;
   font-weight: 400;
