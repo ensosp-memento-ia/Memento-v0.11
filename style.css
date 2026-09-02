@@ -457,16 +457,16 @@ footer {
 }
 
 .footer-logo--sdis {
-  height: 34px;   /* bandeau large : suffisant pour rester lisible */
+  height: 24px;   /* bandeau large : suffisant pour rester lisible */
 }
 
 .footer-logo--riisc {
-  height: 52px;   /* écusson compact : plus de hauteur pour garder les détails nets */
+  height: 42px;   /* écusson compact : plus de hauteur pour garder les détails nets */
 }
 
 @media (max-width: 768px) {
-  .footer-logo--sdis  { height: 26px; }
-  .footer-logo--riisc { height: 40px; }
+  .footer-logo--sdis  { height: 20px; }
+  .footer-logo--riisc { height: 30px; }
 }
 
 /* ============================================================
