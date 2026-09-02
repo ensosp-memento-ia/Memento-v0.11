@@ -62,6 +62,44 @@ header {
   opacity: 0.8;
   margin-top: 3px;
 }
+@media (max-width: 768px) {
+  .header-visits {
+    position: static;
+    transform: none;
+    margin-top: 6px;
+  }
+}
+
+.header-logos {
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.header-logo--sdis {
+  height: 26px;
+  width: auto;
+}
+
+.header-logo--riisc {
+  height: 34px;
+  width: auto;
+}
+
+@media (max-width: 768px) {
+  .header-logos {
+    position: static;
+    transform: none;
+    margin-bottom: 6px;
+    justify-content: center;
+  }
+  .header-logo--sdis  { height: 20px; }
+  .header-logo--riisc { height: 26px; }
+}
 
 /* ============================================================
    ONGLETS
