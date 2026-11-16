@@ -79,7 +79,7 @@ def jours_depuis_reponse(rep):
 def recuperer(base, token, debut, fin):
     """Essaie d'abord une requête groupée ; sinon un appel par jour."""
     rep = appel_api(base, token, "/stats/total",
-                    start=rfc3339(debut), end=rfc3339(fin, True), daily="true")
+                                        start=rfc3339(debut), end=rfc3339(fin, True))
     jours = jours_depuis_reponse(rep)
     if jours:
         return jours
