@@ -25,6 +25,7 @@
         <button type="button" class="stats-tab" data-mode="jour" aria-pressed="true">Jour</button>
         <button type="button" class="stats-tab" data-mode="semaine" aria-pressed="false">Semaine</button>
         <button type="button" class="stats-tab" data-mode="mois" aria-pressed="false">Mois</button>
+        <button type="button" class="stats-tab" data-mode="cumul" aria-pressed="false" id="tab-cumul" hidden>Cumul</button>
       </div>
       <div id="stats-chart"></div>
       <details class="stats-details">
@@ -35,6 +36,10 @@
         Mesure : pages vues (chaque page ouverte compte une fois), sans cookie ni donnée personnelle.
         Les ouvertures depuis le poste de développement ne sont pas comptées.
         Les jours sans visite apparaissent à zéro.
+      </p>
+      <p class="stats-note" id="stats-note-cumul" hidden>
+        Cumul : les relevés manuels du compteur historique (visiteurs) précèdent la mise en service de GoatCounter (pages vues).
+        Les deux mesures ne sont pas strictement identiques ; la courbe les enchaîne à partir de la date de bascule, sans correction.
       </p>
     </section>
   </main>
@@ -53,10 +58,11 @@
   "use strict";
 
   var FICHIER = "stats/frequentation.json";
+  var FICHIER_HIST = "stats/historique.json";
   var MOIS = ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."];
   var NB_MAX = { jour: 60, semaine: 26, mois: 24 };   // barres affichées
   var DAY = 86400000;
-  var etat = { jours: {}, mode: "jour" };
+  var etat = { jours: {}, mode: "jour", hist: null, debutGC: null };
 
   // ---- Dates (tout en UTC sur des chaînes AAAA-MM-JJ, sans décalage horaire)
   function parse(s) { var p = s.split("-"); return Date.UTC(+p[0], +p[1] - 1, +p[2]); }
@@ -65,6 +71,7 @@
   function pad(n) { return n < 10 ? "0" + n : "" + n; }
   function lundi(t) { var wd = (new Date(t).getUTCDay() + 6) % 7; return t - wd * DAY; }
   function nombre(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, " "); }
+  function aujourdhui() { var n = new Date(); return n.getFullYear() + "-" + pad(n.getMonth() + 1) + "-" + pad(n.getDate()); }
 
   // ---- Série continue jour par jour (zéros inclus) jusqu'au dernier jour connu
   function serieJours() {
@@ -99,19 +106,34 @@
     return libelle(p, mode);
   }
 
+  // ---- Cumul : relevés historiques (visiteurs) puis GoatCounter (pages vues) à partir de la bascule
+  function cumul() {
+    var h = etat.hist;
+    if (!h || !h.releves || !h.releves.length) return null;
+    var rel = h.releves.slice().sort(function (a, b) { return a.date < b.date ? -1 : 1; });
+    var pts = rel.map(function (r) { return { t: parse(r.date), v: r.cumul, ref: true, note: r.note || "" }; });
+    var base = pts[pts.length - 1].v, run = base, nGC = 0;
+    serieJours().forEach(function (j) {
+      if (j.t < parse(h.goatcounter_depuis || rel[rel.length - 1].date)) return;
+      run += j.v; nGC++;
+      pts.push({ t: j.t, v: run, ref: false, note: "" });
+    });
+    return { pts: pts, base: base, total: run, depuisGC: run - base, nGC: nGC };
+  }
+
   // ---- Indicateurs
   function somme(jours, a, b) { var s = 0; for (var i = a; i < b; i++) s += jours[i] ? jours[i].v : 0; return s; }
 
   function kpis() {
-    var jours = serieJours(), n = jours.length;
-    var total = somme(jours, 0, n);
+    var jours = serieJours(), n = jours.length, c = cumul();
+    var total = c ? c.total : somme(jours, 0, n);
     var s7 = somme(jours, Math.max(0, n - 7), n);
     var p7 = n > 7 ? somme(jours, Math.max(0, n - 14), n - 7) : null;
     var dernier = n ? new Date(jours[n - 1].t) : null;
-    var mois = 0;
+    var mois = 0, debutMois = null;
     if (dernier) jours.forEach(function (j) {
       var d = new Date(j.t);
-      if (d.getUTCFullYear() === dernier.getUTCFullYear() && d.getUTCMonth() === dernier.getUTCMonth()) mois += j.v;
+      if (d.getUTCFullYear() === dernier.getUTCFullYear() && d.getUTCMonth() === dernier.getUTCMonth()) { mois += j.v; if (debutMois === null) debutMois = j.t; }
     });
     var n30 = Math.min(30, n), moy = n30 ? Math.round(somme(jours, n - n30, n) / n30 * 10) / 10 : 0;
 
@@ -122,10 +144,13 @@
       cls = pct > 0 ? "is-up" : pct < 0 ? "is-down" : "";
     } else if (p7 !== null) { delta = "7 jours précédents : 0"; }
 
+    var moisSub = dernier ? MOIS[dernier.getUTCMonth()] + " " + dernier.getUTCFullYear() : "";
+    if (dernier && debutMois !== null && new Date(debutMois).getUTCDate() > 1) moisSub += " (depuis le " + jj_mm(debutMois) + ")";
+
     var cartes = [
-      ["Total depuis le début", nombre(total), "", ""],
+      [c ? "Total cumulé" : "Total depuis le début", nombre(total), c ? "compteur historique + GoatCounter" : "", ""],
       ["7 derniers jours", nombre(s7), delta, cls],
-      ["Mois en cours", nombre(mois), dernier ? MOIS[dernier.getUTCMonth()] + " " + dernier.getUTCFullYear() : "", ""],
+      ["Mois en cours", nombre(mois), moisSub, ""],
       ["Moyenne / jour (30 j)", String(moy).replace(".", ","), "", ""]
     ];
     document.getElementById("stats-kpis").innerHTML = cartes.map(function (c) {
@@ -134,9 +159,19 @@
     }).join("");
   }
 
-  // ---- Graphique SVG (aucune dépendance externe)
+  function pasLisible(max) {
+    var base = [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000, 100000, 200000, 500000];
+    for (var i = 0; i < base.length; i++) if (max / base[i] <= 4) return base[i];
+    return 1000000;
+  }
+
+  // ---- Graphiques SVG (aucune dépendance externe)
   function graphique() {
-    var mode = etat.mode, pts = agreger(mode), zone = document.getElementById("stats-chart");
+    var mode = etat.mode, zone = document.getElementById("stats-chart");
+    document.getElementById("stats-note-cumul").hidden = (mode !== "cumul");
+    if (mode === "cumul") { return graphiqueCumul(zone); }
+
+    var pts = agreger(mode);
     if (!pts.length) { zone.innerHTML = '<p class="stats-msg">Aucune donnée pour l\'instant. La collecte démarre dès l\'activation du compteur ; les premiers chiffres apparaissent le lendemain.</p>'; tableau([], mode); return; }
 
     var W = 720, H = 270, mg = { g: 44, d: 10, h: 12, b: 34 };
@@ -161,10 +196,35 @@
     tableau(pts, mode);
   }
 
-  function pasLisible(max) {
-    var base = [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000];
-    for (var i = 0; i < base.length; i++) if (max / base[i] <= 4) return base[i];
-    return 100000;
+  function graphiqueCumul(zone) {
+    var c = cumul();
+    if (!c) { zone.innerHTML = '<p class="stats-msg">Aucun relevé historique disponible.</p>'; return; }
+    var pts = c.pts, W = 720, H = 270, mg = { g: 50, d: 16, h: 14, b: 34 };
+    var tmin = pts[0].t, tmax = pts[pts.length - 1].t; if (tmax === tmin) tmax = tmin + DAY;
+    var max = Math.max.apply(null, pts.map(function (p) { return p.v; })), pas = pasLisible(max);
+    var top = Math.max(pas, Math.ceil(max / pas) * pas);
+    var iw = W - mg.g - mg.d, ih = H - mg.h - mg.b;
+    var x = function (t) { return mg.g + (t - tmin) / (tmax - tmin) * iw; };
+    var y = function (v) { return mg.h + ih - (v / top) * ih; };
+
+    var s = '<svg class="stats-chart" viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="Évolution du cumul de visites">';
+    for (var g = 0; g <= top; g += pas) {
+      s += '<line class="grid" x1="' + mg.g + '" x2="' + (W - mg.d) + '" y1="' + y(g) + '" y2="' + y(g) + '"/>';
+      s += '<text x="' + (mg.g - 6) + '" y="' + (y(g) + 4) + '" text-anchor="end">' + nombre(g) + "</text>";
+    }
+    var span = Math.round((tmax - tmin) / DAY), step = Math.max(1, Math.ceil(span / 6));
+    for (var k = 0; k <= span; k += step) {
+      s += '<text x="' + x(tmin + k * DAY).toFixed(1) + '" y="' + (H - 12) + '" text-anchor="middle">' + jj_mm(tmin + k * DAY) + "</text>";
+    }
+    s += '<polyline fill="none" stroke="#001F8F" stroke-width="2" stroke-linejoin="round" points="' +
+         pts.map(function (p) { return x(p.t).toFixed(1) + "," + y(p.v).toFixed(1); }).join(" ") + '"/>';
+    pts.forEach(function (p) {
+      var titre = jj_mm(p.t) + "/" + new Date(p.t).getUTCFullYear() + " : " + nombre(p.v) + (p.ref ? " (relevé compteur historique)" : " (cumul avec GoatCounter)") + (p.note ? " — " + p.note : "");
+      if (p.ref) s += '<circle cx="' + x(p.t).toFixed(1) + '" cy="' + y(p.v).toFixed(1) + '" r="4.5" fill="#fff" stroke="#001F8F" stroke-width="2"><title>' + titre + "</title></circle>";
+      else if (pts.length < 80) s += '<circle cx="' + x(p.t).toFixed(1) + '" cy="' + y(p.v).toFixed(1) + '" r="2.5" fill="#001F8F"><title>' + titre + "</title></circle>";
+    });
+    zone.innerHTML = s + "</svg>";
+    tableauCumul(c);
   }
 
   function tableau(pts, mode) {
@@ -173,6 +233,22 @@
     t.innerHTML = tete + "<tbody>" + pts.slice().reverse().map(function (p) {
       return "<tr><td>" + libelleLong(p, mode) + "</td><td>" + nombre(p.v) + "</td></tr>";
     }).join("") + "</tbody>";
+  }
+
+  function tableauCumul(c) {
+    var lignes = [], pts = c.pts, prev = null;
+    var refs = pts.filter(function (p) { return p.ref; });
+    var lignesSrc = refs.slice();
+    if (c.nGC > 0) lignesSrc.push(pts[pts.length - 1]);   // dernier jour GoatCounter
+    lignesSrc.forEach(function (p, i) {
+      var ecart = i ? p.v - lignesSrc[i - 1].v : null;
+      var jours = i ? Math.max(1, Math.round((p.t - lignesSrc[i - 1].t) / DAY)) : null;
+      lignes.push("<tr><td>" + jj_mm(p.t) + "/" + new Date(p.t).getUTCFullYear() + (p.note ? " <small>(" + p.note + ")</small>" : (p.ref ? "" : " <small>(GoatCounter)</small>")) +
+        "</td><td>" + nombre(p.v) + "</td><td>" + (ecart === null ? "—" : "+" + nombre(ecart)) + "</td><td>" +
+        (jours === null ? "—" : String(Math.round(ecart / jours * 10) / 10).replace(".", ",")) + "</td></tr>");
+    });
+    document.getElementById("stats-table").innerHTML =
+      "<thead><tr><th>Date</th><th>Cumul</th><th>Écart</th><th>Moy./jour</th></tr></thead><tbody>" + lignes.reverse().join("") + "</tbody>";
   }
 
   // ---- Démarrage
@@ -186,10 +262,14 @@
     });
   });
 
-  fetch(FICHIER + "?v=" + Date.now())
-    .then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
-    .then(function (d) {
-      etat.jours = d.jours || {};
+  function charger(url) { return fetch(url + "?v=" + Date.now()).then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); }); }
+
+  Promise.all([charger(FICHIER), charger(FICHIER_HIST).catch(function () { return null; })])
+    .then(function (res) {
+      var d = res[0]; etat.hist = res[1];
+      var debut = etat.hist && etat.hist.goatcounter_depuis ? etat.hist.goatcounter_depuis : "0000-00-00", auj = aujourdhui();
+      Object.keys(d.jours || {}).forEach(function (k) { if (k >= debut && k <= auj) etat.jours[k] = d.jours[k]; });
+      if (etat.hist && etat.hist.releves && etat.hist.releves.length) document.getElementById("tab-cumul").hidden = false;
       var maj = d.maj ? new Date(d.maj) : null;
       document.getElementById("stats-maj").textContent = maj
         ? "Mise à jour le " + maj.toLocaleDateString("fr-FR") + " à " + maj.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })
