@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Statistiques de fréquentation – Mémento IA ENSOSP</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex" />
+  <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header>
+    Mémento Opérationnel IA – ENSOSP
+  </header>
+
+  <main class="stats-main">
+    <h1 class="page-title">Fréquentation du site</h1>
+    <p class="stats-sub" id="stats-maj">Chargement…</p>
+
+    <section class="stats-kpis" id="stats-kpis" aria-label="Indicateurs clés"></section>
+
+    <section class="stats-panel">
+      <div class="stats-tabs" role="group" aria-label="Période d'agrégation">
+        <button type="button" class="stats-tab" data-mode="jour" aria-pressed="true">Jour</button>
+        <button type="button" class="stats-tab" data-mode="semaine" aria-pressed="false">Semaine</button>
+        <button type="button" class="stats-tab" data-mode="mois" aria-pressed="false">Mois</button>
+      </div>
+      <div id="stats-chart"></div>
+      <details class="stats-details">
+        <summary>Voir les données en tableau</summary>
+        <table class="stats-table" id="stats-table"></table>
+      </details>
+      <p class="stats-note">
+        Mesure : pages vues (chaque page ouverte compte une fois), sans cookie ni donnée personnelle.
+        Les ouvertures depuis le poste de développement ne sont pas comptées.
+        Les jours sans visite apparaissent à zéro.
+      </p>
+    </section>
+  </main>
+
+  <footer>
+    © ENSOSP — Cne Eddy Fischer – Cdt Anne Tirelle
+    <br>
+    <div class="footer-logos">
+      <img src="Image/logo sdis76.svg" alt="SDIS 76" class="footer-logo footer-logo--sdis">
+      <img src="Image/Insigne_UIISC_7.png" alt="7e RIISC" class="footer-logo footer-logo--riisc">
+    </div>
+  </footer>
+
+<script>
+(function () {
+  "use strict";
+
+  var FICHIER = "stats/frequentation.json";
+  var MOIS = ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."];
+  var NB_MAX = { jour: 60, semaine: 26, mois: 24 };   // barres affichées
+  var DAY = 86400000;
+  var etat = { jours: {}, mode: "jour" };
+
+  // ---- Dates (tout en UTC sur des chaînes AAAA-MM-JJ, sans décalage horaire)
+  function parse(s) { var p = s.split("-"); return Date.UTC(+p[0], +p[1] - 1, +p[2]); }
+  function iso(t) { return new Date(t).toISOString().slice(0, 10); }
+  function jj_mm(t) { var d = new Date(t); return pad(d.getUTCDate()) + "/" + pad(d.getUTCMonth() + 1); }
+  function pad(n) { return n < 10 ? "0" + n : "" + n; }
+  function lundi(t) { var wd = (new Date(t).getUTCDay() + 6) % 7; return t - wd * DAY; }
+  function nombre(n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, " "); }
+
+  // ---- Série continue jour par jour (zéros inclus) jusqu'au dernier jour connu
+  function serieJours() {
+    var cles = Object.keys(etat.jours).sort();
+    if (!cles.length) return [];
+    var out = [], t = parse(cles[0]), fin = parse(cles[cles.length - 1]);
+    for (; t <= fin; t += DAY) out.push({ t: t, v: etat.jours[iso(t)] || 0 });
+    return out;
+  }
+
+  function agreger(mode) {
+    var jours = serieJours(), map = {}, ordre = [];
+    jours.forEach(function (j) {
+      var cle, t0;
+      if (mode === "jour") { t0 = j.t; cle = j.t; }
+      else if (mode === "semaine") { t0 = lundi(j.t); cle = t0; }
+      else { var d = new Date(j.t); t0 = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1); cle = t0; }
+      if (!(cle in map)) { map[cle] = { t: t0, v: 0 }; ordre.push(cle); }
+      map[cle].v += j.v;
+    });
+    return ordre.map(function (c) { return map[c]; }).slice(-NB_MAX[mode]);
+  }
+
+  function libelle(p, mode) {
+    if (mode === "jour") return jj_mm(p.t);
+    if (mode === "semaine") return "sem. " + jj_mm(p.t);
+    var d = new Date(p.t); return MOIS[d.getUTCMonth()] + " " + d.getUTCFullYear();
+  }
+  function libelleLong(p, mode) {
+    if (mode === "jour") return jj_mm(p.t) + "/" + new Date(p.t).getUTCFullYear();
+    if (mode === "semaine") return "semaine du " + jj_mm(p.t) + "/" + new Date(p.t).getUTCFullYear();
+    return libelle(p, mode);
+  }
+
+  // ---- Indicateurs
+  function somme(jours, a, b) { var s = 0; for (var i = a; i < b; i++) s += jours[i] ? jours[i].v : 0; return s; }
+
+  function kpis() {
+    var jours = serieJours(), n = jours.length;
+    var total = somme(jours, 0, n);
+    var s7 = somme(jours, Math.max(0, n - 7), n);
+    var p7 = n > 7 ? somme(jours, Math.max(0, n - 14), n - 7) : null;
+    var dernier = n ? new Date(jours[n - 1].t) : null;
+    var mois = 0;
+    if (dernier) jours.forEach(function (j) {
+      var d = new Date(j.t);
+      if (d.getUTCFullYear() === dernier.getUTCFullYear() && d.getUTCMonth() === dernier.getUTCMonth()) mois += j.v;
+    });
+    var n30 = Math.min(30, n), moy = n30 ? Math.round(somme(jours, n - n30, n) / n30 * 10) / 10 : 0;
+
+    var delta = "—", cls = "";
+    if (p7 !== null && p7 > 0) {
+      var pct = Math.round((s7 - p7) / p7 * 100);
+      delta = (pct > 0 ? "+" : "") + pct + " % vs 7 jours précédents";
+      cls = pct > 0 ? "is-up" : pct < 0 ? "is-down" : "";
+    } else if (p7 !== null) { delta = "7 jours précédents : 0"; }
+
+    var cartes = [
+      ["Total depuis le début", nombre(total), "", ""],
+      ["7 derniers jours", nombre(s7), delta, cls],
+      ["Mois en cours", nombre(mois), dernier ? MOIS[dernier.getUTCMonth()] + " " + dernier.getUTCFullYear() : "", ""],
+      ["Moyenne / jour (30 j)", String(moy).replace(".", ","), "", ""]
+    ];
+    document.getElementById("stats-kpis").innerHTML = cartes.map(function (c) {
+      return '<div class="stats-kpi"><p class="stats-kpi-label">' + c[0] + '</p><p class="stats-kpi-value">' + c[1] +
+             '</p><p class="stats-kpi-delta ' + c[3] + '">' + c[2] + '</p></div>';
+    }).join("");
+  }
+
+  // ---- Graphique SVG (aucune dépendance externe)
+  function graphique() {
+    var mode = etat.mode, pts = agreger(mode), zone = document.getElementById("stats-chart");
+    if (!pts.length) { zone.innerHTML = '<p class="stats-msg">Aucune donnée pour l\'instant. La collecte démarre dès l\'activation du compteur ; les premiers chiffres apparaissent le lendemain.</p>'; tableau([], mode); return; }
+
+    var W = 720, H = 270, mg = { g: 44, d: 10, h: 12, b: 34 };
+    var max = Math.max.apply(null, pts.map(function (p) { return p.v; })), pas = pasLisible(max);
+    var top = Math.max(pas, Math.ceil(max / pas) * pas);
+    var iw = W - mg.g - mg.d, ih = H - mg.h - mg.b, bw = iw / pts.length;
+    var y = function (v) { return mg.h + ih - (v / top) * ih; };
+
+    var s = '<svg class="stats-chart" viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="Évolution des pages vues par ' + mode + '">';
+    for (var g = 0; g <= top; g += pas) {
+      s += '<line class="grid" x1="' + mg.g + '" x2="' + (W - mg.d) + '" y1="' + y(g) + '" y2="' + y(g) + '"/>';
+      s += '<text x="' + (mg.g - 6) + '" y="' + (y(g) + 4) + '" text-anchor="end">' + nombre(g) + "</text>";
+    }
+    var every = Math.ceil(pts.length / 12);
+    pts.forEach(function (p, i) {
+      var h = (p.v / top) * ih, x = mg.g + i * bw + bw * 0.12, w = Math.max(1, bw * 0.76);
+      s += '<rect class="bar" x="' + x.toFixed(1) + '" y="' + y(p.v).toFixed(1) + '" width="' + w.toFixed(1) + '" height="' + h.toFixed(1) + '" rx="2">' +
+           "<title>" + libelleLong(p, mode) + " : " + nombre(p.v) + " page" + (p.v > 1 ? "s" : "") + " vue" + (p.v > 1 ? "s" : "") + "</title></rect>";
+      if (i % every === 0) s += '<text x="' + (mg.g + i * bw + bw / 2).toFixed(1) + '" y="' + (H - 12) + '" text-anchor="middle">' + libelle(p, mode) + "</text>";
+    });
+    zone.innerHTML = s + "</svg>";
+    tableau(pts, mode);
+  }
+
+  function pasLisible(max) {
+    var base = [1, 2, 5, 10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000];
+    for (var i = 0; i < base.length; i++) if (max / base[i] <= 4) return base[i];
+    return 100000;
+  }
+
+  function tableau(pts, mode) {
+    var t = document.getElementById("stats-table");
+    var tete = "<thead><tr><th>" + (mode === "jour" ? "Jour" : mode === "semaine" ? "Semaine" : "Mois") + "</th><th>Pages vues</th></tr></thead>";
+    t.innerHTML = tete + "<tbody>" + pts.slice().reverse().map(function (p) {
+      return "<tr><td>" + libelleLong(p, mode) + "</td><td>" + nombre(p.v) + "</td></tr>";
+    }).join("") + "</tbody>";
+  }
+
+  // ---- Démarrage
+  Array.prototype.forEach.call(document.querySelectorAll(".stats-tab"), function (b) {
+    b.addEventListener("click", function () {
+      etat.mode = b.getAttribute("data-mode");
+      Array.prototype.forEach.call(document.querySelectorAll(".stats-tab"), function (x) {
+        x.setAttribute("aria-pressed", x === b ? "true" : "false");
+      });
+      graphique();
+    });
+  });
+
+  fetch(FICHIER + "?v=" + Date.now())
+    .then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+    .then(function (d) {
+      etat.jours = d.jours || {};
+      var maj = d.maj ? new Date(d.maj) : null;
+      document.getElementById("stats-maj").textContent = maj
+        ? "Mise à jour le " + maj.toLocaleDateString("fr-FR") + " à " + maj.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })
+        : "Données en attente de la première collecte";
+      kpis(); graphique();
+    })
+    .catch(function () {
+      document.getElementById("stats-maj").textContent = "";
+      document.getElementById("stats-chart").innerHTML = '<p class="stats-msg">Données indisponibles (fichier ' + FICHIER + ' introuvable). Ouvrir cette page depuis le site publié, pas depuis un fichier local.</p>';
+    });
+})();
+</script>
+</body>
+</html>
