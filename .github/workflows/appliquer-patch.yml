@@ -1,0 +1,31 @@
+name: Appliquer le patch statistiques
+
+# À lancer UNE FOIS à la main (Actions → Appliquer le patch statistiques → Run workflow).
+# Exécute scripts/patch_stats.py puis commite le résultat. Sans danger si relancé (idempotent).
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Appliquer le patch
+        run: python3 scripts/patch_stats.py
+
+      - name: Commiter si modifié
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            git config user.name  "stats-bot"
+            git config user.email "stats-bot@users.noreply.github.com"
+            git add -A
+            git commit -m "Statistiques : balise de comptage, lien du logo SDIS et styles [journal-auto]"
+            git pull --rebase
+            git push
+          else
+            echo "Rien à modifier : patch déjà appliqué"
+          fi
