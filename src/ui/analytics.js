@@ -12,7 +12,7 @@
 (function () {
   "use strict";
 
-  var GOATCOUNTER_CODE = "REMPLACER-PAR-VOTRE-CODE"; // ex. "memento-ensosp" → memento-ensosp.goatcounter.com
+var GOATCOUNTER_CODE = "memento-ensosp";
 
   // Non configuré : aucune requête
   if (GOATCOUNTER_CODE.indexOf("REMPLACER") === 0) { return; }
