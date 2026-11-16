@@ -252,14 +252,15 @@
   }
 
   // ---- Démarrage
-  Array.prototype.forEach.call(document.querySelectorAll(".stats-tab"), function (b) {
-    b.addEventListener("click", function () {
-      etat.mode = b.getAttribute("data-mode");
-      Array.prototype.forEach.call(document.querySelectorAll(".stats-tab"), function (x) {
-        x.setAttribute("aria-pressed", x === b ? "true" : "false");
-      });
-      graphique();
+  function activer(mode) {
+    etat.mode = mode;
+    Array.prototype.forEach.call(document.querySelectorAll(".stats-tab"), function (x) {
+      x.setAttribute("aria-pressed", x.getAttribute("data-mode") === mode ? "true" : "false");
     });
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll(".stats-tab"), function (b) {
+    b.addEventListener("click", function () { activer(b.getAttribute("data-mode")); graphique(); });
   });
 
   function charger(url) { return fetch(url + "?v=" + Date.now()).then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); }); }
@@ -269,7 +270,7 @@
       var d = res[0]; etat.hist = res[1];
       var debut = etat.hist && etat.hist.goatcounter_depuis ? etat.hist.goatcounter_depuis : "0000-00-00", auj = aujourdhui();
       Object.keys(d.jours || {}).forEach(function (k) { if (k >= debut && k <= auj) etat.jours[k] = d.jours[k]; });
-      if (etat.hist && etat.hist.releves && etat.hist.releves.length) document.getElementById("tab-cumul").hidden = false;
+      if (etat.hist && etat.hist.releves && etat.hist.releves.length) { document.getElementById("tab-cumul").hidden = false; activer("cumul"); }   // vue par défaut
       var maj = d.maj ? new Date(d.maj) : null;
       document.getElementById("stats-maj").textContent = maj
         ? "Mise à jour le " + maj.toLocaleDateString("fr-FR") + " à " + maj.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })
