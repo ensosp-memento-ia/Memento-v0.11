@@ -15,6 +15,7 @@
   </header>
 
   <main class="stats-main">
+    <button type="button" id="btn-accueil" class="btn-action btn-reset">← Retour à l'accueil</button>
     <h1 class="page-title">Fréquentation du site</h1>
     <p class="stats-sub" id="stats-maj">Chargement…</p>
 
@@ -252,6 +253,8 @@
   }
 
   // ---- Démarrage
+  document.getElementById("btn-accueil").addEventListener("click", function () { window.location.href = "index.html"; });
+
   function activer(mode) {
     etat.mode = mode;
     Array.prototype.forEach.call(document.querySelectorAll(".stats-tab"), function (x) {
