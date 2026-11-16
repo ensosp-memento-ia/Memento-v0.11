@@ -1,0 +1,13 @@
+{
+ "source": "Compteur visitorbadge (relevés manuels)",
+ "unite": "visiteurs cumulés",
+ "goatcounter_depuis": "2026-11-16",
+ "releves": [
+  { "date": "2026-10-01", "cumul": 496 },
+  { "date": "2026-10-03", "cumul": 557 },
+  { "date": "2026-10-05", "cumul": 591 },
+  { "date": "2026-10-06", "cumul": 640 },
+  { "date": "2026-10-13", "cumul": 789 },
+  { "date": "2026-11-16", "cumul": 1757, "note": "avant mise en service GoatCounter" }
+ ]
+}
