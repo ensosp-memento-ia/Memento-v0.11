@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -10,21 +11,22 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
-
+ 
   <header>
     Mémento Opérationnel IA – ENSOSP
     <div class="header-sub">Création de fiche opérationnelle IA</div>
   </header>
-
+ 
   <nav class="tabs">
     <a href="index.html" class="tab">🏠 Accueil</a>
     <a href="scan.html" class="tab">📷 Lecture QR</a>
     <a class="tab active">📝 Création fiche</a>
     <a href="nrbc.html" class="tab">⚗️ Espace NRBC</a>
   </nav>
-
+ 
+  <div class="create-layout">
   <main>
-
+ 
     <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
       <button id="btnLoadFiche" class="btn-action btn-reset">
         📥 Charger une fiche depuis URL
@@ -36,7 +38,7 @@
         📝 Partager un prompt
       </button>
     </div>
-
+ 
     <section class="card">
       <h2>1. Métadonnées de la fiche</h2>
       <label>Catégorie
@@ -58,7 +60,7 @@
         <input id="meta_date" type="date">
       </label>
     </section>
-
+ 
     <section class="card">
       <h2>2. Indices de confiance IA</h2>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
@@ -100,7 +102,7 @@
         </div>
       </div>
     </section>
-
+ 
     <section class="card">
       <h2>3. Variables utilisables dans le prompt (maximum 10)</h2>
       <p class="helper">
@@ -109,20 +111,23 @@
       <div id="variablesContainer"></div>
       <button id="btnAddVariable" class="btn-add-var">➕ Ajouter une variable</button>
     </section>
-
+ 
     <section class="card">
-      <h2>4. Rédaction du prompt</h2>
+      <div class="card-head">
+        <h2>4. Rédaction du prompt</h2>
+        <button type="button" class="btn-action btn-reset btn-aide" data-aide-toggle aria-expanded="false" aria-controls="aidePanel">💡 Aide : techniques de prompt</button>
+      </div>
       <p class="helper">Utilisez les variables avec <code>{{identifiant}}</code>.</p>
       <textarea id="prompt_input" rows="10" placeholder="Rédigez le prompt ici…"></textarea>
       <div id="prompt_count" class="counter">0 caractère</div>
     </section>
-
+ 
     <section class="card">
       <h2>5. Génération du QR Code et de l'URL</h2>
       <button id="btnGenerate" class="btn-generate">🚀 Générer</button>
-
+ 
       <div id="qrContainer" class="qr-box"></div>
-
+ 
       <div id="urlContainer" style="display:none;margin-top:20px;">
         <h3 style="color:#001F8F;margin-bottom:10px;">🔗 URL cliquable générée</h3>
         <div style="background:#eef2ff;padding:15px;border-radius:10px;margin-bottom:15px;">
@@ -148,13 +153,36 @@
         </div>
       </div>
     </section>
-
+ 
   </main>
-
+ 
+  <!-- Aide : techniques de prompt (volet droit, fermé par défaut) -->
+  <aside id="aidePanel" class="aide-panel" aria-label="Aide au choix des techniques de prompt">
+    <div class="aide-head">
+      <div>
+        <h3>💡 Techniques de prompt</h3>
+        <small>Sources : Fiche 1.3 « Ingénierie de prompt » et article Schulhoff et al., <i>The Prompt Report: A Systematic Survey of Prompt Engineering Techniques</i>, arXiv:2406.06608 (v6, février 2025) — <a href="https://arxiv.org/abs/2406.06608" target="_blank" rel="noopener">arxiv.org/abs/2406.06608</a></small>
+      </div>
+      <button type="button" class="aide-close" id="aideClose" aria-label="Fermer l'aide">×</button>
+    </div>
+    <div class="aide-min"><b>Minimum à définir dans tout prompt :</b> Rôle / contexte · Tâche · Format</div>
+    <div class="aide-tabs" role="tablist">
+      <button type="button" role="tab" data-tab="conseiller" aria-selected="true">🧭 Conseiller</button>
+      <button type="button" role="tab" data-tab="catalogue" aria-selected="false">📚 Catalogue</button>
+    </div>
+    <div class="aide-body">
+      <div id="tabConseiller"></div>
+      <div id="tabCatalogue" hidden></div>
+    </div>
+  </aside>
+  </div>
+ 
   <script type="module" src="./src/ui/createFiche.js"></script>
-
+  <script type="module" src="./src/ui/uiTechniques.js"></script>
+ 
   <img src="https://api.visitorbadge.io/api/visitors?path=ensosp-memento-ia&label=Visiteurs&countColor=%23001F8F" alt="" style="display:none;" width="1" height="1">
-
+ 
 <script src="./src/ui/analytics.js" defer></script>
 </body>
 </html>
+ 
