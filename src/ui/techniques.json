@@ -1,0 +1,209 @@
+{
+  "_lisezmoi": "Source unique du volet Aide techniques de prompt (create.html). Textes issus de la fiche 1.3 et du poster. ordre = ordre d'assemblage dans le prompt. combo = identifiants de techniques. bloc = texte inséré dans le prompt, [crochets] = à compléter. Ne pas supprimer les guillemets ni les virgules.",
+  "groupes": [
+    {
+      "id": "base",
+      "libelle": "Techniques de base — socle de tout prompt"
+    },
+    {
+      "id": "avancee",
+      "libelle": "Techniques avancées — organisent le raisonnement"
+    }
+  ],
+  "ordre": [
+    "role",
+    "fewshot",
+    "selfask",
+    "more",
+    "cot",
+    "pot",
+    "selfcal"
+  ],
+  "techniques": {
+    "role": {
+      "nom": "Rôle / Persona",
+      "acro": "",
+      "groupe": "base",
+      "couleur": "#001F8F",
+      "benefice": "Cohérence lexicale — Posture technique adaptée au domaine RCH",
+      "quand": "Tout prompt — définit le registre et la posture de l'IA",
+      "principe": "Assigner un rôle conditionne l'ensemble de la réponse : registre lexical, niveau de précision, posture face à l'incertitude. C'est le point d'entrée de tout prompt. Sans rôle explicite, l'IA adopte un registre généraliste inadapté au contexte opérationnel.",
+      "attendu": "L'IA adopte le registre RCH : elle utilise les acronymes métier (SEI, SELS, IDLH, VLEP), cite les références réglementaires françaises et signale ses limites. Même question sans rôle = réponse générique peu exploitable sur le terrain.",
+      "exemple": "Tu es un conseiller technique RCH4, spécialiste en risques chimiques industriels et transport de matières dangereuses (TMD).\nTu réponds avec le vocabulaire et les références règlementaires des sapeurs-pompiers français (NRBC, ADR, FDS, ORSEC). Si une information est incertaine, tu le signales explicitement.\nQuestion : [ta question ici]",
+      "bloc": "Tu es [rôle], spécialiste en [domaine].\nTu réponds avec le vocabulaire et les références règlementaires des sapeurs-pompiers français (NRBC, ADR, FDS, ORSEC). Si une information est incertaine, tu le signales explicitement."
+    },
+    "fewshot": {
+      "nom": "Few-Shot Prompting",
+      "acro": "",
+      "groupe": "base",
+      "couleur": "#1e7a4a",
+      "benefice": "Standardisation des réponses — Format opérationnel reproductible",
+      "quand": "Comptes rendus, fiches réflexes — standardiser le format de sortie",
+      "principe": "Fournir un ou plusieurs exemples du format de réponse attendu. L'IA reproduit la structure de l'exemple. Indispensable pour obtenir des comptes rendus, des fiches réflexes ou des tableaux dans un gabarit identique à chaque utilisation.",
+      "attendu": "L'IA produit une fiche méthanol strictement identique en structure. Le CT obtient un document directement exploitable en intervention, sans mise en forme supplémentaire. Le gabarit est réutilisable pour tous les produits du RETEX.",
+      "exemple": "Tu es un CT RCH. Rédige une fiche réflexe produit sur le modèle suivant :\n=== MODÈLE (exemple : acide chlorhydrique) ===\nPRODUIT : Acide chlorhydrique (HCl)\nDANGER PRINCIPAL : Corrosif, vapeurs toxiques (VLEP : 1 ppm)\nEPI MINIMUM : ARI + combinaison étanche Niv. 2\nPÉRIMÈTRE RÉFLEXE : 50 m (fuite), 300 m (incendie)\nACTION PRIORITAIRE : Évacuation sous le vent, confinement amont\n=== FIN MODÈLE ===\nApplique ce modèle au produit suivant : [MÉTHANOL]",
+      "bloc": "Rédige [type de document] sur le modèle suivant :\n=== MODÈLE (exemple : [cas de référence]) ===\n[Colle ici ton exemple, avec la structure exacte attendue]\n=== FIN MODÈLE ===\nApplique ce modèle à : [cas à traiter]",
+      "conseils": [
+        {
+          "classe": "p1",
+          "niveau": "1. Critique",
+          "critere": "Ordre des exemples",
+          "pratique": "Exemple le plus complexe ou plus similaire en dernier pour bénéficier de l'effet de récence."
+        },
+        {
+          "classe": "p2",
+          "niveau": "2. Haute",
+          "critere": "Format des exemples",
+          "pratique": "Utiliser une structure répétitive et claire pour aider l'IA à reconnaître le motif."
+        },
+        {
+          "classe": "p2",
+          "niveau": "2. Haute",
+          "critere": "Distribution des labels",
+          "pratique": "Équilibrer les exemples pour éviter que l'IA ne choisisse une réponse par automatisme statistique."
+        },
+        {
+          "classe": "p3",
+          "niveau": "3. Moyenne",
+          "critere": "Similarité des exemples",
+          "pratique": "Choisir des cas proches du domaine pour limiter les erreurs de transfert."
+        },
+        {
+          "classe": "p3",
+          "niveau": "3. Moyenne",
+          "critere": "Quantité d'exemples",
+          "pratique": "Utiliser entre 5 et 10 exemples. Au-delà de 20, le gain de précision s'effondre (saturation)."
+        },
+        {
+          "classe": "p4",
+          "niveau": "4. Faible",
+          "critere": "Qualité des étiquettes",
+          "pratique": "Bien que l'IA tolère quelques erreurs, restez 100 % précis."
+        }
+      ]
+    },
+    "selfask": {
+      "nom": "Self-Ask",
+      "acro": "",
+      "groupe": "base",
+      "couleur": "#7b3fa0",
+      "benefice": "Décomposition du problème — Identification des informations manquantes",
+      "quand": "Situation incomplète ou ambiguë — décomposer avant de conclure",
+      "principe": "Forcer l'IA à identifier et formuler les sous-questions nécessaires avant de répondre. Efficace sur les situations complexes où l'information est incomplète. L'IA construit sa réponse progressivement en comblant chaque lacune. Le CT voit ainsi quelles informations sont requises pour une analyse fiable.",
+      "attendu": "L'IA demande en premier : Quelle est la matière transportée ? — Y a-t-il risque BLEVE ? (citerne métallique + feu direct : oui) — Périmètre applicable ? (300 m minimum inconnu). Elle formule ensuite : « Périmètre 300 m, évacuation immédiate, attente spécialiste RCH, ne pas approcher avant identification. »",
+      "exemple": "Tu es un CT RCH. Avant de répondre à la question ci-dessous, identifie les sous-questions que tu dois résoudre. Pour chaque sous-question, réponds, puis formule ta conclusion.\nSituation : Un feu de véhicule implique un camion-citerne. Le conducteur est inconscient. Signalement ADR non visible.\nQuestion : Quelles actions engager en premier ?",
+      "bloc": "Avant de répondre à la question ci-dessous, identifie les sous-questions que tu dois résoudre. Pour chaque sous-question, réponds, puis formule ta conclusion.\nSituation : [décris la situation]\nQuestion : [ta question]"
+    },
+    "more": {
+      "nom": "Mixture of Reasoning Experts",
+      "acro": "MoRE",
+      "groupe": "avancee",
+      "couleur": "#6a3fa0",
+      "benefice": "Profondeur d'analyse — Confrontation de points de vue",
+      "quand": "Crise multi-acteurs — analyse pluridisciplinaire structurée",
+      "principe": "Simuler une cellule de crise pluridisciplinaire en assignant à l'IA plusieurs rôles d'experts distincts qui répondent successivement. Chaque expert apporte un regard différent sur la même situation. Le CT dispose ainsi d'une analyse multi-angle sans avoir à orchestrer une réunion. Particulièrement efficace pour les situations à enjeux multiples (sanitaire, juridique, tactique, communication).",
+      "attendu": "Chaque expert produit son analyse dans son registre métier. La synthèse finale identifie la tension principale : l'expert SP recommande l'évacuation immédiate, le maire signale l'absence de plan d'évacuation préétabli pour ce secteur — point critique à traiter en priorité.",
+      "exemple": "Situation : Déraillement d'un train transportant 40 tonnes de méthanol. Fuite active en zone périurbaine. 3 000 habitants dans un rayon de 500 m.\nAnalyse cette situation selon 4 experts successifs :\n[EXPERT 1 — Sapeur-Pompier CT RCH] Périmètre de sécurité, ressources, risques BLEVE/UVCE, EPI requis.\n[EXPERT 2 — Médecin urgentiste SAMU] Symptomatologie, prise en charge victimes, postes médicaux avancés.\n[EXPERT 3 — Responsable industriel / Fabricant] Caractéristiques produit, consignes FDS, risques spécifiques du méthanol.\n[EXPERT 4 — Maire / Préfet] Décision d'évacuation, communication population, plan communal de sauvegarde.\nPuis : synthèse des points de convergence et de divergence entre experts.",
+      "bloc": "Situation : [décris la situation]\nAnalyse cette situation selon 4 experts successifs :\n[EXPERT 1 — Sapeur-Pompier CT RCH] Périmètre de sécurité, ressources, risques BLEVE/UVCE, EPI requis.\n[EXPERT 2 — Médecin urgentiste SAMU] Symptomatologie, prise en charge victimes, postes médicaux avancés.\n[EXPERT 3 — Responsable industriel / Fabricant] Caractéristiques produit, consignes FDS, risques spécifiques du [produit].\n[EXPERT 4 — Maire / Préfet] Décision d'évacuation, communication population, plan communal de sauvegarde.\nPuis : synthèse des points de convergence et de divergence entre experts."
+    },
+    "cot": {
+      "nom": "Chain-of-Thought",
+      "acro": "CoT",
+      "groupe": "avancee",
+      "couleur": "#1c3d6e",
+      "benefice": "Traçabilité du raisonnement — Aide à la décision",
+      "quand": "Raisonnement complexe — rendre le cheminement lisible et contrôlable",
+      "principe": "Exiger que l'IA articule explicitement chaque étape de son raisonnement avant de formuler une conclusion. Le CoT transforme la réponse en raisonnement argumenté visible. Le CT peut ainsi contrôler le cheminement, identifier une étape logique incorrecte et corriger en amont. On élimine l'effet boîte noire.",
+      "attendu": "L'IA déroule les 4 étapes visiblement, avant de conclure : « Seuil IDLH proche (80 %), évacuation de la zone recommandée, périmètre de sécurité de 50 m, détection continue jusqu'à retour sous VLEP. » Le CT lit et valide chaque étape.",
+      "exemple": "Tu es un conseiller technique RCH4\nSituation : Fuite de chlore (Cl2) dans un entrepôt fermé de 500 m3.\nConcentration détectée : 8 ppm. VLEP = 0,5 ppm. IDLH = 10 ppm.\nRaisonne étape par étape avant de conclure sur les dangers et actions à réaliser\nRéponse : Étape 1 — Qualification du danger : compare les valeurs mesurées aux seuils. Étape 2 — Évaluation des risques : populations exposées, zones à délimiter. Étape 3 — Mesures réflexes : actions immédiates à engager. Étape 4 — Conclusion opérationnelle : synthèse et niveau d'alerte.",
+      "bloc": "Raisonne étape par étape avant de conclure sur [objectif : ex. les dangers et actions à réaliser].\nRéponse :\nÉtape 1 — Qualification du danger : compare les valeurs mesurées aux seuils.\nÉtape 2 — Évaluation des risques : populations exposées, zones à délimiter.\nÉtape 3 — Mesures réflexes : actions immédiates à engager.\nÉtape 4 — Conclusion opérationnelle : synthèse et niveau d'alerte."
+    },
+    "pot": {
+      "nom": "Program-of-Thought",
+      "acro": "PoT",
+      "groupe": "avancee",
+      "couleur": "#1e7a4a",
+      "benefice": "Fiabilité arithmétique — Élimination des erreurs de calcul",
+      "quand": "Calcul BLEVE/UVCE/zones d'effets — fiabilité numérique obligatoire",
+      "principe": "Déléguer les étapes calculatoires à un code Python que l'IA génère et exécute. Le raisonnement en langage naturel introduit des arrondis et des erreurs arithmétiques. Le PoT externalise le calcul vers un interpréteur déterministe : le résultat est reproductible, vérifiable, et numériquement exact. Indispensable pour les dimensionnements BLEVE, UVCE, zones d'effets.",
+      "attendu": "L'IA produit le code Python (calcul TNT équivalent), exécute chaque ligne. Chaque valeur intermédiaire est visible et vérifiable.",
+      "exemple": "Tu es un expert RCH4. Calcule la zone SELS pour une fuite de propane liquide : Masse impliquée : 2 000 kg ; Rendement d'explosion TNT équivalent : 5 % ; Méthode : TNT équivalent (seuil surpression 20 mbar).\nINSTRUCTIONS :\n1. Rédige le code Python correspondant\n2. Exécute-le en affichant chaque résultat intermédiaire\n3. Indique le rayon SELS en mètres avec la formule utilisée\n4. Ne jamais inventer ou approximer un résultat numérique",
+      "bloc": "Données : [grandeurs, valeurs et unités] ; Méthode : [méthode de calcul]\nINSTRUCTIONS :\n1. Rédige le code Python correspondant\n2. Exécute-le en affichant chaque résultat intermédiaire\n3. Indique [le résultat attendu, avec son unité] avec la formule utilisée\n4. Ne jamais inventer ou approximer un résultat numérique"
+    },
+    "selfcal": {
+      "nom": "Self-Calibration",
+      "acro": "",
+      "groupe": "avancee",
+      "couleur": "#b3202a",
+      "benefice": "Détection des hallucinations — Analyse critique du CT",
+      "quand": "Requête à enjeu opérationnel — exiger indice de confiance et limites",
+      "principe": "Forcer l'IA à indiquer un indice de confiance pour chaque réponse, en identifiant les zones d'incertitude et les hypothèses. Cette technique transforme l'IA en partenaire autocritique : elle signale ce qu'elle ne sait pas ou ce qu'elle suppose. C'est la première protection contre les hallucinations.",
+      "attendu": "L'IA fournit une estimation chiffrée, puis déclare : Confiance [Moyenne]. Hypothèses : débit calculé avec formule TNO, température ambiante 20 °C, absence de ventilation forcée. À vérifier : conditions météorologiques réelles, FDS fabricant.",
+      "exemple": "Tu es un expert en risques chimiques (RCH4).\nQuestion : Quelle est la zone de danger immédiat pour la vie (IDLH) de l'ammoniac en cas de rupture de tuyauterie sous 10 bar ?\nINSTRUCTIONS : Réponds avec ta meilleure estimation technique.\n- Indique ton niveau de confiance : [Élevé / Moyen / Faible]\n- Liste explicitement :\n  * Les hypothèses que tu as posées\n  * Les informations manquantes qui limiteraient ta réponse\n  * Les points que le CT devra impérativement vérifier",
+      "bloc": "INSTRUCTIONS : Réponds avec ta meilleure estimation technique.\n- Indique ton niveau de confiance : [Élevé / Moyen / Faible]\n- Liste explicitement :\n  * Les hypothèses que tu as posées\n  * Les informations manquantes qui limiteraient ta réponse\n  * Les points que le CT devra impérativement vérifier"
+    }
+  },
+  "situations": [
+    {
+      "id": "produit",
+      "label": "Analyse ou identification",
+      "combo": [
+        "role",
+        "selfcal",
+        "cot"
+      ],
+      "formule": "Rôle + Self-Calibration + CoT"
+    },
+    {
+      "id": "calcul",
+      "label": "Calcul ou dimensionnement",
+      "combo": [
+        "role",
+        "selfcal",
+        "pot"
+      ],
+      "formule": "Rôle + Self-Calibration + PoT"
+    },
+    {
+      "id": "crise",
+      "label": "Analyse pluridisciplinaire (plusieurs acteurs ou points de vue)",
+      "combo": [
+        "role",
+        "more",
+        "selfcal"
+      ],
+      "formule": "Rôle + MoRE + Self-Calibration"
+    },
+    {
+      "id": "incomplet",
+      "label": "Informations incomplètes ou ambiguës",
+      "combo": [
+        "role",
+        "selfask",
+        "cot"
+      ],
+      "formule": "Rôle + Self-Ask + CoT"
+    },
+    {
+      "id": "fiches",
+      "label": "Production de documents standardisés",
+      "combo": [
+        "role",
+        "fewshot"
+      ],
+      "formule": "Rôle + Few-Shot",
+      "enjeu": "selfcal",
+      "enjeuLabel": "Enjeu critique (ajoute Self-Calibration)"
+    },
+    {
+      "id": "autre",
+      "label": "Autre situation",
+      "combo": [
+        "role"
+      ],
+      "formule": "Rôle",
+      "enjeu": "selfcal",
+      "enjeuLabel": "Requête à enjeu opérationnel (ajoute Self-Calibration)"
+    }
+  ]
+}
