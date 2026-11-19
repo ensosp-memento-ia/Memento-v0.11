@@ -1,9 +1,9 @@
 [
     {
     "date": "2026-11-19",
-    "titre": "Création de fiche : aide aux techniques de prompt",
+    "titre": "Ajout d'une aide à la création de prompt",
     "lien": "/Memento-v0.11/create.html",
-    "type": "nouveau"
+    "type": "amelioration"
   },
   {
     "date": "2026-11-17",
