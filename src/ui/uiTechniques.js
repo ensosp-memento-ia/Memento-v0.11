@@ -2,7 +2,7 @@
 // uiTechniques.js — Aide au choix des techniques de prompt (create.html)
 // Volet droit, fermé par défaut, ouvert/fermé en un clic.
 //   - Onglet « Conseiller » : situation → combinaison recommandée
-//   - Onglet « Catalogue »  : les techniques de la fiche 1.3
+//   - Onglet « Catalogue »  : les techniques de la fiche 1.3, avec recherche par mot-clé
 // Données : ./techniques.json (source unique — modifier les textes là-bas).
 // Le module n'écrit que dans #prompt_input (insertion de blocs) et déclenche
 // l'événement "input" : le compteur reste géré par uiPrompt.js.
@@ -16,6 +16,7 @@ let situation = null;
 let enjeu = false;
 const ouvertes = new Set();
 const inseres  = new Set();
+let recherche = "";
 
 // ----------------------------------------------------------------------
 // Utilitaires
@@ -38,6 +39,9 @@ function el(tag, attrs = {}, ...kids) {
 
 // Acronyme + nom complet (ex. « CoT — Chain-of-Thought »)
 const titre = (t) => (t.acro ? `${t.acro} — ${t.nom}` : t.nom);
+
+// Minuscules et sans accents : « Élevé » est trouvé par « eleve »
+const norm = (s) => String(s).normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
 function toast(msg) {
   const t = $("aideToast");
@@ -194,20 +198,67 @@ function renderConseiller() {
 // Onglet « Catalogue »
 // ----------------------------------------------------------------------
 function ouvrir(id) {
+  effacerRecherche();
   ouvertes.add(id);
   renderCatalogue();
   setTimeout(() => $("tech-" + id)?.scrollIntoView({ behavior: "smooth", block: "nearest" }), 30);
 }
 
+// Champs interrogés par la recherche (clé du JSON, libellé affiché)
+const CHAMPS = [
+  ["nom", "nom"], ["benefice", "bénéfice"], ["quand", "situation"],
+  ["principe", "principe"], ["attendu", "résultat attendu"],
+  ["exemple", "exemple"], ["bloc", "bloc inséré"], ["conseils", "optimisation des exemples"]
+];
+// Champs déjà visibles dans l'en-tête de la carte (inutile de les signaler)
+const CHAMPS_VISIBLES = ["nom", "bénéfice", "situation"];
+
+function texteChamp(t, cle) {
+  if (cle === "nom") return `${t.acro || ""} ${t.nom}`;
+  if (cle === "conseils") return (t.conseils || []).map((r) => `${r.niveau} ${r.critere} ${r.pratique}`).join(" ");
+  return t[cle] || "";
+}
+
+const motsRecherche = () => norm(recherche).split(/\s+/).filter(Boolean);
+
+// Tous les mots doivent figurer quelque part dans la technique.
+// Retourne les libellés des champs touchés, ou null si la technique ne correspond pas.
+function resultatRecherche(t, mots) {
+  const champs = CHAMPS.map(([cle, lib]) => [lib, norm(texteChamp(t, cle))]);
+  const touches = new Set();
+  for (const m of mots) {
+    const trouve = champs.filter(([, txt]) => txt.includes(m));
+    if (!trouve.length) return null;
+    trouve.forEach(([lib]) => touches.add(lib));
+  }
+  return [...touches];
+}
+
+function effacerRecherche() {
+  recherche = "";
+  const champ = $("catRecherche");
+  if (champ) champ.value = "";
+  const x = $("catEffacer");
+  if (x) x.hidden = true;
+}
+
 function renderCatalogue() {
-  const c = $("tabCatalogue");
+  const c = $("catListe");
   c.replaceChildren();
 
+  const mots = motsRecherche();
+  let total = 0;
+
   DATA.groupes.forEach((g) => {
-    c.append(el("div", { class: "groupe" }, g.libelle));
+    const cartes = [];
 
     DATA.ordre.filter((id) => DATA.techniques[id].groupe === g.id).forEach((id) => {
       const t = DATA.techniques[id];
+      const touches = mots.length ? resultatRecherche(t, mots) : [];
+      if (touches === null) return;
+      total++;
+
+      const cachees = touches.filter((lib) => !CHAMPS_VISIBLES.includes(lib));
 
       const head = el("button", {
         class: "tech-h", type: "button",
@@ -220,7 +271,8 @@ function renderCatalogue() {
         el("span", { class: "chev" }, "▸"),
         el("b", {}, titre(t), el("span", { class: "ok", "data-ok": id, hidden: "" }, "✓ inséré")),
         el("span", { class: "ben" }, t.benefice),
-        el("span", { class: "quand" }, "Utiliser quand : " + t.quand)
+        el("span", { class: "quand" }, "Utiliser quand : " + t.quand),
+        cachees.length ? el("span", { class: "trouve" }, "Aussi trouvé dans : " + cachees.join(", ")) : null
       );
 
       const detail = el("div", { class: "tech-d" },
@@ -251,11 +303,58 @@ function renderCatalogue() {
 
       const carte = el("div", { class: "tech" + (ouvertes.has(id) ? " open" : ""), id: "tech-" + id }, head, detail);
       carte.style.setProperty("--c", t.couleur);
-      c.append(carte);
+      cartes.push(carte);
     });
+
+    if (cartes.length) c.append(el("div", { class: "groupe" }, g.libelle), ...cartes);
   });
 
+  const compte = $("catCompte");
+  if (compte) {
+    compte.textContent = mots.length && total
+      ? `${total} technique${total > 1 ? "s" : ""} sur ${DATA.ordre.length}`
+      : "";
+  }
+  if (mots.length && !total) {
+    c.append(el("p", { class: "cat-vide" },
+      `Aucune technique ne correspond à « ${recherche.trim()} ». Essayez un mot plus court (ex. calcul, hallucination, format).`));
+  }
+
   majBadges();
+}
+
+// Champ de recherche (créé une seule fois pour ne pas perdre le focus à la frappe)
+function initRecherche() {
+  const champ = el("input", {
+    type: "text", id: "catRecherche", autocomplete: "off",
+    placeholder: "Rechercher un mot-clé (ex. calcul, hallucination, format…)",
+    "aria-label": "Rechercher une technique par mot-clé"
+  });
+  const effacer = el("button", {
+    type: "button", id: "catEffacer", class: "cat-effacer", hidden: "",
+    "aria-label": "Effacer la recherche",
+    onclick: () => { effacerRecherche(); renderCatalogue(); champ.focus(); }
+  }, "×");
+
+  champ.addEventListener("input", () => {
+    recherche = champ.value;
+    effacer.hidden = !recherche;
+    renderCatalogue();
+  });
+  // Échap : efface d'abord la recherche (sans fermer le volet)
+  champ.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && champ.value) {
+      e.stopPropagation();
+      effacerRecherche();
+      renderCatalogue();
+    }
+  });
+
+  $("tabCatalogue").replaceChildren(
+    el("div", { class: "cat-recherche" }, champ, effacer),
+    el("div", { class: "cat-compte", id: "catCompte", "aria-live": "polite" }),
+    el("div", { id: "catListe" })
+  );
 }
 
 // ----------------------------------------------------------------------
@@ -300,6 +399,7 @@ async function init() {
   }
 
   renderConseiller();
+  initRecherche();
   renderCatalogue();
   showTab("conseiller");
   console.log("✅ Aide techniques de prompt initialisée");
