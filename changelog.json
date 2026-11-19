@@ -1,4 +1,10 @@
 [
+    {
+    "date": "2026-11-19",
+    "titre": "Création de fiche : aide aux techniques de prompt",
+    "lien": "/Memento-v0.11/create.html",
+    "type": "nouveau"
+  },
   {
     "date": "2026-11-17",
     "titre": "Ajout Mémoire RCH4 et présentations",
