@@ -674,3 +674,15 @@ textarea.flash{box-shadow:0 0 0 3px rgba(0,31,143,.35);transition:box-shadow .3s
   .aide-panel{position:fixed;inset:0;width:auto;max-height:none;margin:0;border-radius:0;z-index:50;flex:none}
   .aide-head{border-radius:0}
 }
+/* ------------------------------------------------------------
+   AIDE TECHNIQUES — recherche par mot-clé (onglet Catalogue)
+------------------------------------------------------------ */
+.cat-recherche{position:relative;margin-bottom:6px}
+.cat-recherche input{margin-top:0;padding:10px 34px 10px 12px;font-size:14px}
+.cat-effacer{position:absolute;right:6px;top:50%;transform:translateY(-50%);border:none;background:transparent;
+  font-size:20px;line-height:1;color:#555;cursor:pointer;padding:2px 8px}
+.cat-effacer:hover{color:#001F8F}
+.cat-effacer[hidden]{display:none}
+.cat-compte{font-size:12px;color:#555;min-height:16px;margin-bottom:2px}
+.tech-h .trouve{display:block;font-size:11.5px;color:#856404;margin-top:3px}
+.cat-vide{background:#fff3cd;border-left:4px solid #ff9f1c;color:#856404;border-radius:6px;padding:10px 12px;font-size:13px;margin:10px 0}
