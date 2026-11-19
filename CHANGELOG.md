@@ -5,6 +5,88 @@ Toutes les modifications notables de ce projet seront documentées dans ce fichi
 Le format est basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.0.0/),
 et ce projet adhère au [Semantic Versioning](https://semver.org/lang/fr/).
 
+## [V0.11.27] - 2026-11-19
+
+### 🆕 Ajouté
+- **Aide « Techniques de prompt » sur `create.html`** (section 4, Rédaction du prompt) :
+  - Volet dans la colonne de droite, **fermé par défaut**, ouvert ou fermé en un clic (languette bleue au bord droit, bouton « 💡 Aide » de la section 4, croix, touche Échap)
+  - Sources affichées en en-tête : Fiche 1.3 « Ingénierie de prompt » et article Schulhoff et al., *The Prompt Report: A Systematic Survey of Prompt Engineering Techniques*, arXiv:2406.06608 (v6, février 2025)
+  - Rappel du minimum à définir dans tout prompt : Rôle / contexte, Tâche, Format
+- **Onglet « Conseiller »** : on choisit une situation, l'aide propose la combinaison recommandée par la fiche 1.3
+  - Analyse ou identification : Rôle + Self-Calibration + CoT
+  - Calcul ou dimensionnement : Rôle + Self-Calibration + PoT
+  - Analyse pluridisciplinaire (plusieurs acteurs ou points de vue) : Rôle + MoRE + Self-Calibration
+  - Informations incomplètes ou ambiguës : Rôle + Self-Ask + CoT
+  - Production de documents standardisés : Rôle + Few-Shot (+ Self-Calibration si enjeu critique)
+  - Autre situation : Rôle (+ Self-Calibration si requête à enjeu opérationnel)
+- **Onglet « Catalogue »** : les 7 techniques de la fiche 1.3 (Rôle / Persona, Few-Shot Prompting, Self-Ask, Self-Calibration, CoT — Chain-of-Thought, PoT — Program-of-Thought, MoRE — Mixture of Reasoning Experts)
+  - Pour chacune : bénéfice, « Utiliser quand », principe, résultat attendu, bloc inséré, exemple de prompt RCH
+  - Conseils d'optimisation des exemples few-shot (poster : ordre, format, distribution des labels, similarité, quantité, qualité des étiquettes)
+  - **Recherche par mot-clé** : insensible aux majuscules et aux accents, mots cumulés, mention « Aussi trouvé dans : … », compteur de résultats, croix ou Échap pour effacer
+- **Insertion dans le prompt** : un bloc ou toute la combinaison, à la position du curseur, dans l'ordre logique d'un prompt ; `[crochets]` à compléter ; badge « ✓ inséré » ; bouton « Copier l'exemple RCH » ; le compteur de caractères existant se met à jour
+- Nouveaux fichiers : `src/ui/techniques.json` (source unique des contenus), `src/ui/uiTechniques.js`
+- Entrée « Création de fiche : aide aux techniques de prompt » dans `changelog.json` (bandeau des nouveautés)
+
+### 🔧 Modifié
+- `create.html` : 4 ajouts (conteneur `create-layout`, bouton dans le titre de la section 4, volet `<aside id="aidePanel">`, chargement de `uiTechniques.js`)
+- `style.css` : blocs « AIDE — TECHNIQUES DE PROMPT » et « recherche par mot-clé » ajoutés en fin de fichier
+- `index.html` : numéro de version du pied de page V0.11.26 → V0.11.27
+- `createFiche.js` : **non modifié** (le nouveau module se charge de lui-même)
+
+### 📝 Décisions
+- Volet dans la colonne de droite de `create.html`, fermé par défaut
+- Conseil **et** insertion automatique de blocs
+- Phase 1 : uniquement les 7 techniques de la fiche 1.3 ; extension aux techniques du poster à décider plus tard
+- MoRE rattaché aux analyses pluridisciplinaires (confrontation de points de vue)
+- Pas de mention de compatibilité par IA
+- Acronyme **et** nom complet affichés, sans infobulle de lexique
+- Intitulés de situations génériques (non spécifiques RCH) ; « Autre situation » conservée sans sous-titre
+- Blocs insérés génériques repris des consignes des exemples de la fiche 1.3, avec `[crochets]` ; l'exemple RCH complet reste consultable et copiable
+- Pas de budget de caractères en direct : la limite dépend de l'URL compressée et reste vérifiée à la génération (section 5)
+- Phrase du poster complétée par Anne : « Exemple le plus complexe ou plus similaire en dernier pour bénéficier de l'effet de récence »
+
+### ℹ️ À savoir
+- L'article source a changé de titre : « …Survey of Prompting Techniques » (v1 à v5), « …Survey of Prompt Engineering Techniques » (v6, février 2025). Le poster cite encore l'ancien titre.
+- Les mentions « Utiliser quand » du catalogue reprennent la formulation de la fiche 1.3 (BLEVE, UVCE, zones d'effets)
+
+---
+
+## Historique reconstitué des conversations (avril – novembre 2026)
+
+> Ces évolutions n'ont pas reçu de numéro de version dans les conversations. Elles sont classées par date de conversation, de la plus récente à la plus ancienne. Dates et regroupements à confirmer.
+
+### 2026-11-17 — Bandeau des nouveautés
+- Question : augmenter le nombre de nouveautés affichées → réglage `MAX_ENTRIES` dans `index.html` (valeur 4). Aucune modification du dépôt.
+
+### 2026-11-16 — Journal des évolutions et fréquentation
+- **Journal des évolutions** `JOURNAL.md` généré automatiquement depuis l'historique Git (`scripts/generate_journal.py`, GitHub Action), guide `JOURNAL-LISEZMOI.md`. Il ne remplace ni `CHANGELOG.md` ni `changelog.json`.
+- **Mesure de fréquentation GoatCounter** : `src/ui/analytics.js`, `scripts/fetch_stats.py`, `scripts/patch_stats.py`, relevé quotidien dans `stats/frequentation.json`, guide `STATISTIQUES-LISEZMOI.md`
+- **Page `statistiques.html`** : vues par jour, semaine ou mois, onglet Cumul ouvert par défaut, bouton « ← Retour à l'accueil »
+- Accès discret à `statistiques.html` par un clic sur le logo SDIS 76 du pied de page (`index.html`, `nrbc.html`)
+- Historique visitorbadge d'octobre–novembre 2026 intégré dans `stats/historique.json`
+- Constat : écart temporaire entre GoatCounter (direct) et la page du site (mise à jour nocturne) ; libellé « pages vues » jugé imprécis, « visites » proposé
+
+### 2026-05-21 — Conversions d'unités et bandeau des nouveautés
+- **Calculateur « Conversions d'unités »** (`Calculateur/conversions.html`) : 9 familles (pressions, températures, débits, concentrations, dimensions, temps, vitesse avec manche à air et Beaufort, masse molaire, GPS, irradiation), widgets de type Google, boutons de préfixes SI (pressions, irradiation), facteur Q pour les doses
+- **Bandeau défilant des nouveautés** sur `index.html`, alimenté par `changelog.json` (`MAX_ENTRIES = 4`, contournement du cache, types « nouveau », « amélioration », « correctif »)
+- `nrbc.html` : bouton « Conversions d'unités » dans les outils transversaux NRBC
+
+### 2026-05-13 — Partage de prompt et centralisation du style
+- **Bouton « Partager un prompt »** sur `create.html` vers le formulaire beta-testeur ; lien unique `BETA_FORM_URL` dans `src/ui/config.js`, importé par `uiScan.js` et `createFiche.js`
+- Classe de base `.btn-action` (`.btn-reset`, `.btn-beta-test`) : boutons uniformes sur tout le site
+- Styles `header` et `.header-sub` centralisés dans `style.css` ; script `patch_calculateurs.py` appliqué aux calculateurs ; exception documentée : `debitdedose.html` garde les polices IBM Plex pour l'affichage numérique
+
+### 2026-04-25 — Débit de fuite et cartographie NRBC
+- **Calculateur « Débit de fuite »** (`Calculateur/debitdefuite.html`) : quatre régimes (R1 liquide, R2 cryogénique, R3 gaz sous pression, R4 gaz liquéfié avec L < 3D / L > 3D), bascule Pa / bar, ΔP par défaut (PVS − pression atmosphérique) en R4, calcul surface / rayon de flaque dans les deux sens, schéma de dispersion, tableau des coefficients de décharge, produit personnalisé, température en K, alerte en R3 si ΔP ≥ PVS
+- Corrections scientifiques : masse volumique du propane (493 kg/m³), du CO₂ (1,83 kg/m³), exposant de la formule d'évaporation
+- Reconstruction complète du fichier après une corruption (reste de code SVG dans le JavaScript, erreur de syntaxe confirmée par Node.js)
+- **Fiche 4.8 (débit de fuite)** : blocs de données d'entrée physico-chimiques et météorologiques (vent, température ; classe de Pasquill retirée, état physique retiré), conditions normales de stockage ajoutées, sources élargies (FDS fabricant, QuickFDS) ; indice de confiance IA en attente de test terrain
+- `nrbc.html` : bouton vers le calculateur de débit de fuite
+- Diagnostic d'un défaut d'affichage de `qevap` au passage du régime R1 au régime R2 (correction à vérifier)
+- Cartographie des experts NRBC rendue autonome (sans dépendance à `style.css`, liens de navigation en chemins absolus `/Memento-v0.11/`)
+
+---
+
 ## [V0.11.5] - 2024-12-09
 
 ### 🆕 Ajouté
