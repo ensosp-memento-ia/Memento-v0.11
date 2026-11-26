@@ -61,7 +61,7 @@
         <p class="col-desc">Ressources transversales et cartographie des experts du réseau national NRBC.</p>
         <a href="Calculateur/expert.html" class="btn-tool">
           Cartographie experts NRBC
-          <span class="btn-tool-sub">Réseau national — 41 experts référencés</span>
+          <span class="btn-tool-sub">Réseau national — <span id="nb-experts"></span> experts référencés</span>
         </a>
         <a href="Calculateur/conversions.html" class="btn-tool">
           Conversions d'unités
@@ -138,6 +138,13 @@
 
 </footer>
 <img src="https://api.visitorbadge.io/api/visitors?path=ensosp-memento-ia&label=Visiteurs&countColor=%23001F8F" alt="" style="display:none;" width="1" height="1">
+<!-- Compteur experts : calculé depuis la source unique -->
+<script src="Calculateur/experts-data.js"></script>
+<script>
+  if (typeof experts !== 'undefined') {
+    document.getElementById('nb-experts').textContent = experts.length;
+  }
+</script>
 <script src="./src/ui/analytics.js" defer></script>
 </body>
 </html>
