@@ -37,11 +37,8 @@ const experts = [
       { nom:"NaTran territoire Seine", num:"08.00.00.11.12", info:"N° Vert · Appel gratuit depuis un poste fixe", horaires:"24h/24", url:"https://www.natrangroupe.com/nous-contacter" },
       { nom:"NaTran territoire Méditerranée", num:"08.00.24.61.02", info:"N° Vert · Appel gratuit depuis un poste fixe", horaires:"24h/24", url:"https://www.natrangroupe.com/nous-contacter" }
     ] },
-  { acronym:"GRDF", name:"GRDF — Urgence Sécurité Gaz", domain:["C"], specialty:"DISTRIBUTION locale, moyenne et basse pression → foyers et petites entreprises — fuite de gaz, odeur de gaz, incident réseau", contact:null, via:null, h24:true, tags:[], section:"chimique",
-    keywords:"grdf gaz naturel urgence securite sécurité fuite odeur numero vert numéro vert",
-    contacts:[
-      { nom:"GRDF Urgence Sécurité Gaz", num:"08.00.47.33.33", info:"Appel et service gratuits", url:"https://www.grdf.fr/particuliers/urgence-gaz" }
-    ] },
+  { acronym:"GRDF", name:"GRDF — Urgence Sécurité Gaz", domain:["C"], specialty:"DISTRIBUTION locale, moyenne et basse pression → foyers et petites entreprises — fuite de gaz, odeur de gaz, incident réseau", contact:"08.00.47.33.33", via:"N° Vert", h24:true, formulaire:"https://www.grdf.fr/particuliers/urgence-gaz", tags:[], section:"chimique",
+    keywords:"grdf gaz naturel urgence securite sécurité fuite odeur numero vert numéro vert 08 00 47 33 33" },
   { acronym:"Démineurs", name:"Démineurs — COGIC (plis/colis suspects)", domain:["C","M"], specialty:"Colis suspects, engins improvisés, appui sur matières chimiques/biologiques non identifiées", contact:"01.56.04.74.74", via:"COZ - COGIC", h24:true, formulaire:"https://www.securite-civile.interieur.gouv.fr/nous-connaitre/notre-organisation/acteurs-de-securite-civile/demineurs", tags:["id"], section:"chimique" },
   { acronym:"Traitement de déchets", name:"Traitement de Déchets spécifiques - Séché Environnement / Triadis / Veolia / Bachelet Bonnefond", domain:["C"], specialty:"Collecte et traitement déchets dangereux, eaux d'extinction, résidus d'intervention", contact:null, via:"à vérifier", h24:false, tags:["env","prive"], section:"chimique" },
   { acronym:"Cimentiers", name:"Cimentiers locaux : VICAT, Lafarge, Holcim, Heidelberg...", domain:["C"], specialty:"Feux de métaux — extinction par enfouissement dans ciment ou sable sec, mise à disposition de moyens lourds pour extinction feux de métaux alcalins et alcalino-terreux. Conventions ou contact via Syndicat Français de l'Industrie Cimentière", contact:"01 72 60 54 30", via:"SFIC", h24:false, tags:["id","prive"], section:"chimique" },
