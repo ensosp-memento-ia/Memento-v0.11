@@ -1,4 +1,10 @@
 [
+   {
+    "date": "2026-11-26",
+    "titre": "Ajout Cartographie Expert",
+    "lien": "/Memento-v0.11/Calculateur/expert.html",
+    "type": "amelioration"
+  },
     {
     "date": "2026-11-25",
     "titre": "Mise à jour Séquence pédagogique",
