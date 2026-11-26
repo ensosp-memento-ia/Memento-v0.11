@@ -18,7 +18,7 @@ header{background:#001F8F;padding:16px 20px;text-align:center;color:white;letter
 
 /* ── NAV TABS ── */
 .tabs{display:flex;background:#e9ecf5;padding:10px;gap:10px;flex-wrap:wrap}
-.tab{flex:1;text-align:center;padding:10px 12px;border-radius:25px;color:#001F8F;font-weight:600;font-size:13px;cursor:pointer;border:none;background:transparent;font-family:“Inter”,sans-serif;text-decoration:none;display:inline-block;transition:all .2s;white-space:nowrap}
+.tab{flex:1;text-align:center;padding:10px 12px;border-radius:25px;color:#001F8F;font-weight:600;font-size:13px;cursor:pointer;border:none;background:transparent;font-family:"Inter",sans-serif;text-decoration:none;display:inline-block;transition:all .2s;white-space:nowrap}
 .tab.active{background:#001F8F;color:white}
 .tab:hover:not(.active){background:#d9dff5}
 
@@ -40,7 +40,7 @@ header{background:#001F8F;padding:16px 20px;text-align:center;color:white;letter
 .search-bar{display:flex;align-items:center;gap:10px;margin-bottom:16px;padding:10px 16px;background:white;border:1px solid #ccd2e3;border-radius:12px;box-shadow:0 3px 8px rgba(0,0,0,.06);transition:border-color .2s,box-shadow .2s}
 .search-bar:focus-within{border-color:#001F8F;box-shadow:0 0 0 3px rgba(0,31,143,.08)}
 .search-icon{color:#001F8F;font-size:15px;flex-shrink:0}
-.search-input{flex:1;background:transparent;border:none;outline:none;font-family:“Inter”,sans-serif;font-size:14px;color:#111}
+.search-input{flex:1;background:transparent;border:none;outline:none;font-family:"Inter",sans-serif;font-size:14px;color:#111}
 .search-input::placeholder{color:#aab}
 .search-clear{background:transparent;border:none;color:#555;cursor:pointer;font-size:14px;padding:0 4px;display:none;line-height:1;border-radius:50%}
 .search-clear:hover{color:#001F8F;background:#e7ecff}
@@ -50,7 +50,7 @@ header{background:#001F8F;padding:16px 20px;text-align:center;color:white;letter
 .filters{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;align-items:center}
 .filters-domain{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:28px;align-items:center}
 .filter-label{font-size:11px;color:#555;font-weight:600;text-transform:uppercase;letter-spacing:.8px;margin-right:4px}
-.filter-btn{font-family:“Inter”,sans-serif;font-size:12px;font-weight:500;padding:6px 14px;border:1px solid #ccd2e3;border-radius:20px;background:white;color:#555;cursor:pointer;transition:all .18s}
+.filter-btn{font-family:"Inter",sans-serif;font-size:12px;font-weight:500;padding:6px 14px;border:1px solid #ccd2e3;border-radius:20px;background:white;color:#555;cursor:pointer;transition:all .18s}
 .filter-btn:hover{border-color:#001F8F;color:#001F8F;background:#e7ecff}
 .filter-btn.active{background:#001F8F;color:white;border-color:#001F8F;font-weight:600}
 
@@ -95,7 +95,7 @@ header{background:#001F8F;padding:16px 20px;text-align:center;color:white;letter
 
 /* ── CARTES ── */
 .card{background:white;border:1px solid #e9ecf5;border-radius:14px;padding:16px 18px;position:relative;transition:box-shadow .2s,transform .2s;overflow:hidden;box-shadow:0 3px 8px rgba(0,0,0,.06)}
-.card::before{content:’’;position:absolute;top:0;left:0;right:0;height:4px;border-radius:14px 14px 0 0}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;border-radius:14px 14px 0 0}
 .card:hover{box-shadow:0 6px 18px rgba(0,31,143,.12);transform:translateY(-2px)}
 .card.hidden{display:none}
 .card.chim::before{background:#b45309}
@@ -124,6 +124,11 @@ header{background:#001F8F;padding:16px 20px;text-align:center;color:white;letter
 .conv-badge{font-size:10px;font-weight:600;padding:3px 8px;border-radius:6px;background:#fef3c7;color:#b45309;border:1px solid #fde68a}
 .nrbce-badge{font-size:10px;font-weight:600;padding:3px 8px;border-radius:6px;background:#ede9fe;color:#6d28d9;border:1px solid #ddd6fe}
 .prive-badge{font-size:10px;font-weight:600;padding:3px 8px;border-radius:6px;background:#f0fdf4;color:#166534;border:1px solid #bbf7d0}
+.card-contact.multi-contact{flex-direction:column;align-items:stretch;gap:0}
+.contact-row{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:2px 8px;padding:5px 0}
+.contact-row+.contact-row{border-top:1px solid #d0d8f5}
+.contact-name{color:#001F8F;font-weight:600}
+.contact-info{flex-basis:100%;font-size:10px;color:#555}
 
 /* ── HIGHLIGHT ── */
 .highlight{background:#fef08a;color:#713f12;border-radius:2px;padding:0 1px}
@@ -145,7 +150,7 @@ header{background:#001F8F;padding:16px 20px;text-align:center;color:white;letter
 
 <header>
   <div class="header-title">Mémento Opérationnel IA – ENSOSP</div>
-  <div class="header-sub">🗺️ Cartographie Experts NRBC — mise à jour : 25/10/2026 &nbsp;·&nbsp; En cas d'erreur ou de proposition d'ajout : utiliser le bouton Donner mon avis</div>
+  <div class="header-sub">🗺️ Cartographie Experts NRBC — mise à jour : 26/11/2026 &nbsp;·&nbsp; En cas d'erreur ou de proposition d'ajout : utiliser le bouton Donner mon avis</div>
 </header>
 
 <nav class="tabs">
@@ -222,6 +227,15 @@ const experts = [
   { acronym:"GESIP", name:"Groupe d'Étude de Sécurité des Industries Pétrolières et Chimiques", domain:["C"], specialty:"Liquides inflammables hydrocarbures UNIQUEMENT — expertise sécurité industrielle pétrolière", contact:"01.44.82.72.74", via:null, h24:false, formulaire:"https://gesip.com/?cmplz-force-reload=1774450486101#", tags:["tmd"], section:"chimique" },
   { acronym:"Total", name:"TotalEnergies — Appui urgence", domain:["C"], specialty:"Liquides inflammables hydrocarbures UNIQUEMENT — appui technique produits pétroliers", contact:"02.35.13.21.21", via:null, h24:true, tags:["tmd"], section:"chimique" },
   { acronym:"CFBP", name:"Comité Français Butane Propane (France Gaz Liquides)", domain:["C"], specialty:"GPL (butane/propane) UNIQUEMENT — comportement gaz inflammables, sécurité stockages — convention d'assistance formalisée avec formulaire de sollicitation disponible sur site", contact:"01.41.97.09.92", via:"Mdp : SDISGPL", h24:false, formulaire:"https://www.francegazliquides.fr/accedez-a-espace-pro/securite-pompier/", tags:["conv","tmd"], section:"chimique" },
+  { acronym:"Urgence gaz — Bouteille & citerne GPL", name:"Numéro d'urgence sécurité gaz — Antargaz · Primagaz · Butagaz · Vitogaz", domain:["C"], specialty:"Fuite de gaz, odeur de gaz ou incident sur bouteille de gaz (bonbonne) ou citerne de propane / butane (GPL) — numéros d'urgence des prestataires privés", contact:null, via:null, h24:true, tags:["prive"], section:"chimique",
+    keywords:"bouteilles de gaz bonbonnes citernes numero d'urgence numéro d’urgence recuperation récupération",
+    contacts:[
+      { nom:"Antargaz",           num:"08.00.08.24.24", info:"Appel et service gratuits", url:"https://www.antargaz.fr/questions-reponses?question=faire-cas-odeur-gaz" },
+      { nom:"Primagaz",           num:"08.00.11.44.77", info:"Numéro vert",               url:"https://www.primagaz.fr/aide-conseils/la-citerne" },
+      { nom:"Butagaz",            num:"09.69.32.05.51", info:"Appel non surtaxé",         url:"https://www.butagaz.fr/notre-politique-de-securite" },
+      { nom:"Vitogaz (citerne)",  num:"09.77.40.11.01", info:"Prix d'un appel local",     url:"https://www.vitogaz.com/particuliers/faq/" },
+      { nom:"Vitogaz (bouteilles)", num:"09.77.40.11.07", info:"Prix d'un appel local", horaires:"horaires non précisés", url:"https://www.vitogaz.com/urgence/" }
+    ] },
   { acronym:"Air Liquide", name:"Air Liquide Assistance", domain:["C"], specialty:"Gaz industriels (O₂, N₂, Cl₂, NH₃…) — expertise comportement, neutralisation, stockage", contact:"0.825.887.913", via:null, h24:true, formulaire:"https://fr.airliquide.com/a-propos/nous-contacter/urgence-securite-et-assistance-technique", tags:["tox","id"], section:"chimique" },
   { acronym:"TRANSAID", name:"TRANSAID — Appui TMD Route", domain:["C"], specialty:"TMD route — transfert produits dangereux, colmatage fuites, spécialistes produits — protocole formalisé : formulaire de recueil + localisation centres d'appui par zone de défense disponibles sur transaid.fr", contact:null, via:"voir formulaire", h24:true, formulaire:"https://www.transaid.fr", tags:["tmd","id","conv"], section:"chimique" },
   { acronym:"CEDRE", name:"Centre de Documentation, de Recherche et d'Expérimentations sur les Pollutions Accidentelles des Eaux", domain:["C","M"], specialty:"Données risques littoraux et maritimes, plans de prévention des risques naturels et technologiques côtiers, coordination avec DREAL pour sites ICPE en zone côtière", contact:"02.98.33.10.10", via:null, h24:true, formulaire:"https://cedre.fr/", tags:["env","conv"], section:"chimique" },
@@ -319,7 +333,7 @@ function buildCard(e, idx) {
   card.dataset.tags      = e.tags.join(',');
   card.dataset.h24       = e.h24;
   card.dataset.section   = e.section;
-  card.dataset.search    = [e.acronym,e.name,e.specialty,e.contact||'',e.via||'',e.tags.join(' ')].join(' ').toLowerCase();
+  card.dataset.search    = [e.acronym,e.name,e.specialty,e.contact||'',e.via||'',e.tags.join(' '),(e.contacts||[]).map(c => c.nom+' '+c.num+' '+c.num.replace(/\./g,' ')).join(' '),e.keywords||''].join(' ').toLowerCase();
   card.dataset.expertIdx = idx;
 
   const domTags = e.domain.map(d => {
@@ -340,6 +354,16 @@ function buildCard(e, idx) {
     ? '<a href="'+e.formulaire+'" target="_blank" style="color:#001F8F;font-size:11px;margin-left:auto;font-weight:600;text-decoration:none;">📋 Formulaire /Lien</a>'
     : '';
 
+  // Carte à plusieurs numéros (champ optionnel "contacts")
+  const multiHtml = (e.contacts||[]).map(c => {
+    const num = isMobile
+      ? '<a href="tel:'+c.num.replace(/\./g,'')+'" class="contact-val" style="text-decoration:none;">'+c.num+'</a>'
+      : '<span class="contact-val">'+c.num+'</span>';
+    return '<div class="contact-row">'+
+      '<a href="'+c.url+'" target="_blank" rel="noopener noreferrer" class="contact-name">'+c.nom+'</a>'+num+
+      '<span class="contact-info">'+c.info+' · '+(c.horaires||'24h/24, 7j/7')+'</span></div>';
+  }).join('');
+
   card.innerHTML =
     '<div class="card-header">'+
       '<div class="card-acronym">'+e.acronym+'</div>'+
@@ -347,7 +371,9 @@ function buildCard(e, idx) {
     '</div>'+
     '<div class="card-name">'+e.name+'</div>'+
     '<div class="card-specialty">'+e.specialty+'</div>'+
-    '<div class="card-contact"><span class="contact-icon">📞</span>'+contactHtml+siteHtml+'</div>';
+    (e.contacts
+      ? '<div class="card-contact multi-contact">'+multiHtml+'</div>'
+      : '<div class="card-contact"><span class="contact-icon">📞</span>'+contactHtml+siteHtml+'</div>');
 
   const hasConv=e.tags.includes('conv'), hasNrbce=e.tags.includes('nrbce'), hasPrive=e.tags.includes('prive');
   if (hasConv||hasNrbce||hasPrive) {
